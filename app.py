@@ -43,20 +43,7 @@ def render_svg(svg_file):
 
 # No navbar - completely removing the black header bar
 
-# Custom footer
-footer_html = """
-<div class="footer">
-    <div class="footer-content">
-        <div class="footer-left">
-            Contact: 240-285-7119 | gkraem@vt.edu
-        </div>
-        <div class="footer-right">
-            © 2025 Ticker AI. All rights reserved.
-        </div>
-    </div>
-</div>
-"""
-st.markdown(footer_html, unsafe_allow_html=True)
+# Remove footer for better mobile experience
 
 # Initialize view mode state if not exists
 if "view_mode" not in st.session_state:
@@ -384,20 +371,33 @@ Technical analysis reveals bearish patterns with deteriorating price action and 
                                 )
                             )
                             
-                            # Add buttons for different time ranges
+                            # Add buttons for different time ranges with mobile-friendly layout
                             fig.update_layout(
                                 title=f"{ticker} Price History",
+                                title_font_size=16,
                                 yaxis_title="Price (USD)",
                                 xaxis_title="Date",
                                 hovermode="x unified",
-                                legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
+                                legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="center", x=0.5),
                                 yaxis2=dict(
                                     title="Volume",
+                                    titlefont=dict(size=12),
+                                    tickfont=dict(size=10),
                                     overlaying="y",
                                     side="right",
                                     showgrid=False
                                 ),
-                                height=500
+                                xaxis=dict(
+                                    titlefont=dict(size=12),
+                                    tickfont=dict(size=10)
+                                ),
+                                yaxis=dict(
+                                    titlefont=dict(size=12),
+                                    tickfont=dict(size=10)
+                                ),
+                                height=400,  # Reduced height for better mobile view
+                                autosize=True,
+                                margin=dict(l=10, r=10, t=40, b=20)
                             )
                             
                             st.plotly_chart(fig, use_container_width=True)

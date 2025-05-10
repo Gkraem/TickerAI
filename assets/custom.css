@@ -53,39 +53,12 @@ header[data-testid="stHeader"] {
     border-bottom: 1px solid rgba(59, 130, 246, 0.3);
 }
 
-/* Footer */
-.footer {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    background-color: #000000;
-    color: #CCCCCC;
-    text-align: center;
-    padding: 10px 0;
-    border-top: 1px solid #333;
-    z-index: 999999; /* Extremely high z-index to ensure footer is above EVERYTHING */
-}
+/* No footer for better mobile experience */
 
-/* Override sidebar to ensure it doesn't appear over footer */
-section[data-testid="stSidebar"] {
-    z-index: 99999 !important; /* Lower than footer's z-index */
-}
-
-.footer-content {
-    display: flex;
-    justify-content: space-between;
-    padding: 0 20px;
-}
-
-.footer-left, .footer-right {
-    font-size: 14px;
-}
-
-/* Main content with no top margin since navbar removed */
+/* Main content with no top or bottom margin */
 .main-content {
-    margin-top: 20px; /* Reduced since we removed the navbar */
-    margin-bottom: 50px; /* Space for footer */
+    margin-top: 20px;
+    margin-bottom: 20px; /* Reduced since we removed the footer */
     padding: 20px 0;
     display: flex;
     flex-direction: column;
@@ -94,9 +67,37 @@ section[data-testid="stSidebar"] {
 
 /* Override Streamlit default container */
 .block-container {
-    max-width: 90% !important; /* Limit width for better spacing */
+    max-width: 95% !important; /* Increase width for better mobile display */
     padding: 0 !important;
     margin: 0 auto !important;
+}
+
+/* Improve table responsiveness on mobile */
+.stDataFrame {
+    overflow-x: auto !important;
+    max-width: 100% !important;
+    white-space: nowrap !important;
+}
+
+/* Make sure tables don't get squeezed too much */
+div[data-testid="stTable"], div[data-testid="stDataFrame"] {
+    min-width: 100% !important;
+    width: 100% !important;
+    display: block !important;
+    overflow-x: auto !important;
+}
+
+/* Ensure plots maintain minimum size and are scrollable */
+.stPlotlyChart {
+    min-width: 300px !important;
+    width: 100% !important; 
+    overflow-x: auto !important;
+}
+
+/* Ensure images/SVGs maintain aspect ratio */
+.stImage img, image {
+    max-width: 100% !important;
+    height: auto !important;
 }
 
 /* Apply padding to streamlit elements with more buffer */
@@ -106,8 +107,22 @@ div[data-testid="stVerticalBlock"] {
 
 /* Fix streamlit columns to prevent overflow and add spacing */
 div[data-testid="column"] {
-    padding: 0 15px !important;
+    padding: 0 10px !important;
     box-sizing: border-box !important;
+    min-width: 250px !important; /* Set minimum width for columns on mobile */
+}
+
+/* Responsive columns for mobile */
+@media (max-width: 768px) {
+    div[data-testid="column"] {
+        flex: 0 0 100% !important; /* Make columns full width on mobile */
+        margin-bottom: 15px !important;
+    }
+    
+    /* Ensure better spacing on mobile */
+    div[data-testid="stHorizontalBlock"] {
+        flex-wrap: wrap !important;
+    }
 }
 
 /* Add spacing between stMetric elements */
