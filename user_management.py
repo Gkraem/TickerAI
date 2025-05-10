@@ -91,3 +91,16 @@ def logout_user():
     """Log out the current user"""
     if "user" in st.session_state:
         del st.session_state["user"]
+        
+        
+def get_total_user_count():
+    """
+    Returns the total number of registered users in the system
+    
+    Returns:
+    --------
+    int
+        The total count of registered users
+    """
+    users_data = load_users()
+    return len(users_data["users"])

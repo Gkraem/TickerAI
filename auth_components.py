@@ -1,6 +1,6 @@
 import streamlit as st
 import base64
-from user_management import register_user, authenticate_user, logout_user
+from user_management import register_user, authenticate_user, logout_user, get_total_user_count
 
 def render_svg(svg_file):
     with open(svg_file, "r") as f:
@@ -119,6 +119,15 @@ def auth_page():
         login_form()
     else:
         register_form()
+        
+    # Display total user count
+    from user_management import get_total_user_count
+    user_count = get_total_user_count()
+    st.markdown(f"""
+    <div style="position: fixed; bottom: 20px; width: 100%; text-align: center; color: #a5b4fc; font-size: 12px;">
+        <p>Total registered users: <span style="font-weight: bold;">{user_count}</span></p>
+    </div>
+    """, unsafe_allow_html=True)
 
 def logout_button():
     """Display a logout button in the sidebar"""
