@@ -69,32 +69,9 @@ def auth_page():
     # Add padding for vertical centering
     st.markdown("<div style='padding-top: 20vh;'></div>", unsafe_allow_html=True)
     
-    # Better approach to center logo
-    st.markdown(f"""
-    <style>
-    /* Fix logo position */
-    .centered-logo {{
-        position: relative;
-        width: 100%;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        flex-direction: column;
-        margin-bottom: 20px;
-    }}
-    .logo-container {{
-        width: 60px;
-        height: 60px;
-    }}
-    </style>
-    
-    <div class="centered-logo">
-        <div class="logo-container">
-            {render_svg("assets/logo.svg")}
-        </div>
-        <p style="color: #a5b4fc; font-size: 16px; margin-top: 10px;">Stock Market Analyzer</p>
-    </div>
-    """, unsafe_allow_html=True)
+    # Simple centered header - avoids any code showing
+    st.image("assets/logo.svg", width=60)
+    st.markdown("<p style='text-align: center; color: #a5b4fc; margin-top: -10px;'>Stock Market Analyzer</p>", unsafe_allow_html=True)
     
     # Auth tabs
     if "auth_tab" not in st.session_state:
