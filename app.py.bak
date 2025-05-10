@@ -446,264 +446,264 @@ if ticker and search_button:
                     technical = TechnicalAnalysis(ticker)
                     
                     # Moving Averages chart
-                    st.markdown("### Price and Moving Averages")
+                st.markdown("### Price and Moving Averages")
+                
+                ma_data = technical.get_moving_averages(timeframe)
+                if not ma_data.empty:
+                    # Create figure
+                    fig = go.Figure()
                     
-                    ma_data = technical.get_moving_averages(timeframe)
-                    if not ma_data.empty:
-                        # Create figure
-                        fig = go.Figure()
-                        
-                        # Add price line
-                        fig.add_trace(go.Scatter(
-                            x=ma_data.index,
-                            y=ma_data['Close'],
-                            name='Close Price',
-                            line=dict(color='#00BFFF', width=2)
-                        ))
-                        
-                        # Add moving averages
-                        fig.add_trace(go.Scatter(
-                            x=ma_data.index,
-                            y=ma_data['MA20'],
-                            name='20-Day MA',
-                            line=dict(color='#FF7F0E', width=1.5)
-                        ))
-                        
-                        fig.add_trace(go.Scatter(
-                            x=ma_data.index,
-                            y=ma_data['MA50'],
-                            name='50-Day MA',
-                            line=dict(color='#2CA02C', width=1.5)
-                        ))
-                        
-                        fig.add_trace(go.Scatter(
-                            x=ma_data.index,
-                            y=ma_data['MA200'],
-                            name='200-Day MA',
-                            line=dict(color='#D62728', width=1.5)
-                        ))
-                        
-                        # Layout
-                        fig.update_layout(
-                            title='Price and Moving Averages',
-                            xaxis_title='Date',
-                            yaxis_title='Price ($)',
-                            template='plotly_dark',
-                            legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
-                            height=500
-                        )
-                        
-                        st.plotly_chart(fig, use_container_width=True)
-                        
-                        # Technical indicators interpretation
-                        st.markdown("#### Moving Average Interpretation")
-                        
-                        ma_signals = technical.interpret_moving_averages()
-                        
-                        for signal, details in ma_signals.items():
-                            signal_color = "green" if "bullish" in signal.lower() else "red" if "bearish" in signal.lower() else "orange"
-                            st.markdown(f"**{signal}**: :{signal_color}[{details}]")
-                    
-                    else:
-                        st.info("Moving average data not available")
-                    
-                    # RSI and MACD charts
-                    col1, col2 = st.columns(2)
-                    
-                    with col1:
-                        st.markdown("### Relative Strength Index (RSI)")
-                        
-                        rsi_data = technical.get_rsi(timeframe)
-                        if not rsi_data.empty:
-                            # Create RSI chart
-                            fig = go.Figure()
-                            
-                            # Add RSI line
-                            fig.add_trace(go.Scatter(
-                                x=rsi_data.index,
-                                y=rsi_data['RSI'],
-                                name='RSI',
-                                line=dict(color='#00BFFF', width=2)
-                            ))
-                            
-                            # Add overbought/oversold lines
-                            fig.add_hline(y=70, line_dash="dash", line_color="red", annotation_text="Overbought")
-                            fig.add_hline(y=30, line_dash="dash", line_color="green", annotation_text="Oversold")
-                            
-                            # Layout
-                            fig.update_layout(
-                                title='14-Day RSI',
-                                xaxis_title='Date',
-                                yaxis_title='RSI Value',
-                                template='plotly_dark',
-                                yaxis=dict(range=[0, 100]),
-                                height=300
-                            )
-                            
-                            st.plotly_chart(fig, use_container_width=True)
-                            
-                            # RSI interpretation
-                            rsi_value = rsi_data['RSI'].iloc[-1]
-                            if rsi_value > 70:
-                                st.markdown(f"**Current RSI: {rsi_value:.2f}** - :red[Overbought (Potential Sell Signal)]")
-                            elif rsi_value < 30:
-                                st.markdown(f"**Current RSI: {rsi_value:.2f}** - :green[Oversold (Potential Buy Signal)]")
-                            else:
-                                st.markdown(f"**Current RSI: {rsi_value:.2f}** - Neutral")
-                        else:
-                            st.info("RSI data not available")
-                    
-                    with col2:
-                        st.markdown("### MACD Indicator")
-                        
-                        macd_data = technical.get_macd(timeframe)
-                        if not macd_data.empty:
-                            # Create MACD chart
-                            fig = go.Figure()
-                            
-                            # Add MACD line
-                            fig.add_trace(go.Scatter(
-                                x=macd_data.index,
-                                y=macd_data['MACD'],
-                                name='MACD',
-                                line=dict(color='#00BFFF', width=2)
-                            ))
-                            
-                            # Add Signal line
-                            fig.add_trace(go.Scatter(
-                                x=macd_data.index,
-                                y=macd_data['Signal'],
-                                name='Signal Line',
-                                line=dict(color='#FF7F0E', width=1.5)
-                            ))
-                            
-                            # Add Histogram
-                            colors = ['red' if val < 0 else 'green' for val in macd_data['Histogram']]
-                            
-                            fig.add_trace(go.Bar(
-                                x=macd_data.index,
-                                y=macd_data['Histogram'],
-                                name='Histogram',
-                                marker_color=colors
-                            ))
-                            
-                            # Layout
-                            fig.update_layout(
-                                title='MACD (12,26,9)',
-                                xaxis_title='Date',
-                                yaxis_title='Value',
-                                template='plotly_dark',
-                                height=300
-                            )
-                            
-                            st.plotly_chart(fig, use_container_width=True)
-                            
-                            # MACD interpretation
-                            macd_signal = technical.interpret_macd()
-                            signal_color = "green" if "bullish" in macd_signal.lower() else "red" if "bearish" in macd_signal.lower() else "orange"
-                            st.markdown(f"**MACD Signal: :{signal_color}[{macd_signal}]**")
-                        else:
-                            st.info("MACD data not available")
-                    
-                    # Bollinger Bands
-                    st.markdown("### Bollinger Bands")
-                    
-                    bb_data = technical.get_bollinger_bands(timeframe)
-                    if not bb_data.empty:
-                        # Create Bollinger Bands chart
-                        fig = go.Figure()
-                        
-                        # Add price line
-                        fig.add_trace(go.Scatter(
-                            x=bb_data.index,
-                            y=bb_data['Close'],
-                            name='Close Price',
-                            line=dict(color='#00BFFF', width=2)
-                        ))
-                        
-                        # Add Bollinger Bands
-                        fig.add_trace(go.Scatter(
-                            x=bb_data.index,
-                            y=bb_data['Upper Band'],
-                            name='Upper Band',
-                            line=dict(color='rgba(250, 0, 0, 0.5)', width=1),
-                            fill=None
-                        ))
-                        
-                        fig.add_trace(go.Scatter(
-                            x=bb_data.index,
-                            y=bb_data['Lower Band'],
-                            name='Lower Band',
-                            line=dict(color='rgba(250, 0, 0, 0.5)', width=1),
-                            fill='tonexty',
-                            fillcolor='rgba(250, 0, 0, 0.1)'
-                        ))
-                        
-                        fig.add_trace(go.Scatter(
-                            x=bb_data.index,
-                            y=bb_data['Middle Band'],
-                            name='Middle Band (SMA20)',
-                            line=dict(color='#FF7F0E', width=1, dash='dash')
-                        ))
-                        
-                        # Layout
-                        fig.update_layout(
-                            title='Bollinger Bands (20,2)',
-                            xaxis_title='Date',
-                            yaxis_title='Price ($)',
-                            template='plotly_dark',
-                            legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
-                            height=500
-                        )
-                        
-                        st.plotly_chart(fig, use_container_width=True)
-                        
-                        # Bollinger Bands interpretation
-                        bb_signal = technical.interpret_bollinger_bands()
-                        signal_color = "green" if "bullish" in bb_signal.lower() else "red" if "bearish" in bb_signal.lower() else "orange"
-                        st.markdown(f"**Bollinger Bands Signal: :{signal_color}[{bb_signal}]**")
-                    else:
-                        st.info("Bollinger Bands data not available")
-                    
-                    # Summary of technical signals
-                    st.markdown("### Technical Analysis Summary")
-                    
-                    signals = technical.get_technical_signals()
-                    
-                    # Count bullish vs bearish signals
-                    bullish_count = sum(1 for signal in signals.values() if "bullish" in signal.lower())
-                    bearish_count = sum(1 for signal in signals.values() if "bearish" in signal.lower())
-                    neutral_count = len(signals) - bullish_count - bearish_count
-                    
-                    # Create bar chart for signal summary
-                    signal_summary = pd.DataFrame({
-                        'Signal Type': ['Bullish', 'Neutral', 'Bearish'],
-                        'Count': [bullish_count, neutral_count, bearish_count]
-                    })
-                    
-                    fig = go.Figure(go.Bar(
-                        x=signal_summary['Signal Type'],
-                        y=signal_summary['Count'],
-                        marker_color=['green', 'gray', 'red']
+                    # Add price line
+                    fig.add_trace(go.Scatter(
+                        x=ma_data.index,
+                        y=ma_data['Close'],
+                        name='Close Price',
+                        line=dict(color='#00BFFF', width=2)
                     ))
                     
+                    # Add moving averages
+                    fig.add_trace(go.Scatter(
+                        x=ma_data.index,
+                        y=ma_data['MA20'],
+                        name='20-Day MA',
+                        line=dict(color='#FF7F0E', width=1.5)
+                    ))
+                    
+                    fig.add_trace(go.Scatter(
+                        x=ma_data.index,
+                        y=ma_data['MA50'],
+                        name='50-Day MA',
+                        line=dict(color='#2CA02C', width=1.5)
+                    ))
+                    
+                    fig.add_trace(go.Scatter(
+                        x=ma_data.index,
+                        y=ma_data['MA200'],
+                        name='200-Day MA',
+                        line=dict(color='#D62728', width=1.5)
+                    ))
+                    
+                    # Layout
                     fig.update_layout(
-                        title='Technical Signals Summary',
-                        xaxis_title='Signal Type',
-                        yaxis_title='Count',
+                        title='Price and Moving Averages',
+                        xaxis_title='Date',
+                        yaxis_title='Price ($)',
                         template='plotly_dark',
-                        height=300
+                        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
+                        height=500
                     )
                     
                     st.plotly_chart(fig, use_container_width=True)
                     
-                    # List all technical signals
-                    st.markdown("#### Detailed Technical Signals")
+                    # Technical indicators interpretation
+                    st.markdown("#### Moving Average Interpretation")
                     
-                    for indicator, signal in signals.items():
+                    ma_signals = technical.interpret_moving_averages()
+                    
+                    for signal, details in ma_signals.items():
                         signal_color = "green" if "bullish" in signal.lower() else "red" if "bearish" in signal.lower() else "orange"
-                        st.markdown(f"**{indicator}**: :{signal_color}[{signal}]")
+                        st.markdown(f"**{signal}**: :{signal_color}[{details}]")
+                
+                else:
+                    st.info("Moving average data not available")
+                
+                # RSI and MACD charts
+                col1, col2 = st.columns(2)
+                
+                with col1:
+                    st.markdown("### Relative Strength Index (RSI)")
+                    
+                    rsi_data = technical.get_rsi(timeframe)
+                    if not rsi_data.empty:
+                        # Create RSI chart
+                        fig = go.Figure()
                         
+                        # Add RSI line
+                        fig.add_trace(go.Scatter(
+                            x=rsi_data.index,
+                            y=rsi_data['RSI'],
+                            name='RSI',
+                            line=dict(color='#00BFFF', width=2)
+                        ))
+                        
+                        # Add overbought/oversold lines
+                        fig.add_hline(y=70, line_dash="dash", line_color="red", annotation_text="Overbought")
+                        fig.add_hline(y=30, line_dash="dash", line_color="green", annotation_text="Oversold")
+                        
+                        # Layout
+                        fig.update_layout(
+                            title='14-Day RSI',
+                            xaxis_title='Date',
+                            yaxis_title='RSI Value',
+                            template='plotly_dark',
+                            yaxis=dict(range=[0, 100]),
+                            height=300
+                        )
+                        
+                        st.plotly_chart(fig, use_container_width=True)
+                        
+                        # RSI interpretation
+                        rsi_value = rsi_data['RSI'].iloc[-1]
+                        if rsi_value > 70:
+                            st.markdown(f"**Current RSI: {rsi_value:.2f}** - :red[Overbought (Potential Sell Signal)]")
+                        elif rsi_value < 30:
+                            st.markdown(f"**Current RSI: {rsi_value:.2f}** - :green[Oversold (Potential Buy Signal)]")
+                        else:
+                            st.markdown(f"**Current RSI: {rsi_value:.2f}** - Neutral")
+                    else:
+                        st.info("RSI data not available")
+                
+                with col2:
+                    st.markdown("### MACD Indicator")
+                    
+                    macd_data = technical.get_macd(timeframe)
+                    if not macd_data.empty:
+                        # Create MACD chart
+                        fig = go.Figure()
+                        
+                        # Add MACD line
+                        fig.add_trace(go.Scatter(
+                            x=macd_data.index,
+                            y=macd_data['MACD'],
+                            name='MACD',
+                            line=dict(color='#00BFFF', width=2)
+                        ))
+                        
+                        # Add Signal line
+                        fig.add_trace(go.Scatter(
+                            x=macd_data.index,
+                            y=macd_data['Signal'],
+                            name='Signal Line',
+                            line=dict(color='#FF7F0E', width=1.5)
+                        ))
+                        
+                        # Add Histogram
+                        colors = ['red' if val < 0 else 'green' for val in macd_data['Histogram']]
+                        
+                        fig.add_trace(go.Bar(
+                            x=macd_data.index,
+                            y=macd_data['Histogram'],
+                            name='Histogram',
+                            marker_color=colors
+                        ))
+                        
+                        # Layout
+                        fig.update_layout(
+                            title='MACD (12,26,9)',
+                            xaxis_title='Date',
+                            yaxis_title='Value',
+                            template='plotly_dark',
+                            height=300
+                        )
+                        
+                        st.plotly_chart(fig, use_container_width=True)
+                        
+                        # MACD interpretation
+                        macd_signal = technical.interpret_macd()
+                        signal_color = "green" if "bullish" in macd_signal.lower() else "red" if "bearish" in macd_signal.lower() else "orange"
+                        st.markdown(f"**MACD Signal: :{signal_color}[{macd_signal}]**")
+                    else:
+                        st.info("MACD data not available")
+                
+                # Bollinger Bands
+                st.markdown("### Bollinger Bands")
+                
+                bb_data = technical.get_bollinger_bands(timeframe)
+                if not bb_data.empty:
+                    # Create Bollinger Bands chart
+                    fig = go.Figure()
+                    
+                    # Add price line
+                    fig.add_trace(go.Scatter(
+                        x=bb_data.index,
+                        y=bb_data['Close'],
+                        name='Close Price',
+                        line=dict(color='#00BFFF', width=2)
+                    ))
+                    
+                    # Add Bollinger Bands
+                    fig.add_trace(go.Scatter(
+                        x=bb_data.index,
+                        y=bb_data['Upper Band'],
+                        name='Upper Band',
+                        line=dict(color='rgba(250, 0, 0, 0.5)', width=1),
+                        fill=None
+                    ))
+                    
+                    fig.add_trace(go.Scatter(
+                        x=bb_data.index,
+                        y=bb_data['Lower Band'],
+                        name='Lower Band',
+                        line=dict(color='rgba(250, 0, 0, 0.5)', width=1),
+                        fill='tonexty',
+                        fillcolor='rgba(250, 0, 0, 0.1)'
+                    ))
+                    
+                    fig.add_trace(go.Scatter(
+                        x=bb_data.index,
+                        y=bb_data['Middle Band'],
+                        name='Middle Band (SMA20)',
+                        line=dict(color='#FF7F0E', width=1, dash='dash')
+                    ))
+                    
+                    # Layout
+                    fig.update_layout(
+                        title='Bollinger Bands (20,2)',
+                        xaxis_title='Date',
+                        yaxis_title='Price ($)',
+                        template='plotly_dark',
+                        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
+                        height=500
+                    )
+                    
+                    st.plotly_chart(fig, use_container_width=True)
+                    
+                    # Bollinger Bands interpretation
+                    bb_signal = technical.interpret_bollinger_bands()
+                    signal_color = "green" if "bullish" in bb_signal.lower() else "red" if "bearish" in bb_signal.lower() else "orange"
+                    st.markdown(f"**Bollinger Bands Signal: :{signal_color}[{bb_signal}]**")
+                else:
+                    st.info("Bollinger Bands data not available")
+                
+                # Summary of technical signals
+                st.markdown("### Technical Analysis Summary")
+                
+                signals = technical.get_technical_signals()
+                
+                # Count bullish vs bearish signals
+                bullish_count = sum(1 for signal in signals.values() if "bullish" in signal.lower())
+                bearish_count = sum(1 for signal in signals.values() if "bearish" in signal.lower())
+                neutral_count = len(signals) - bullish_count - bearish_count
+                
+                # Create bar chart for signal summary
+                signal_summary = pd.DataFrame({
+                    'Signal Type': ['Bullish', 'Neutral', 'Bearish'],
+                    'Count': [bullish_count, neutral_count, bearish_count]
+                })
+                
+                fig = go.Figure(go.Bar(
+                    x=signal_summary['Signal Type'],
+                    y=signal_summary['Count'],
+                    marker_color=['green', 'gray', 'red']
+                ))
+                
+                fig.update_layout(
+                    title='Technical Signals Summary',
+                    xaxis_title='Signal Type',
+                    yaxis_title='Count',
+                    template='plotly_dark',
+                    height=300
+                )
+                
+                st.plotly_chart(fig, use_container_width=True)
+                
+                # List all technical signals
+                st.markdown("#### Detailed Technical Signals")
+                
+                for indicator, signal in signals.items():
+                    signal_color = "green" if "bullish" in signal.lower() else "red" if "bearish" in signal.lower() else "orange"
+                    st.markdown(f"**{indicator}**: :{signal_color}[{signal}]")
+                    
                 except Exception as e:
                     st.error(f"Error generating technical analysis for {ticker}: {str(e)}")
                     st.info("Technical analysis could not be completed. Please check if the ticker symbol is correct and try again.")

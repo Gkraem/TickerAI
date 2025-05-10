@@ -34,7 +34,14 @@ class TechnicalAnalysis:
         pandas.DataFrame
             Historical stock data
         """
-        return self.stock.history(period=timeframe)
+        try:
+            data = self.stock.history(period=timeframe)
+            if data is None or isinstance(data, dict):
+                return pd.DataFrame()
+            return data
+        except Exception as e:
+            print(f"Error fetching historical data for {self.ticker}: {str(e)}")
+            return pd.DataFrame()
     
     def get_moving_averages(self, timeframe='1y'):
         """
