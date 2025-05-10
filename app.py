@@ -491,11 +491,22 @@ Technical analysis reveals bearish patterns with deteriorating price action and 
                                 
                                 fig.update_layout(
                                     title="Price with Moving Averages",
+                                    title_font_size=16,
                                     yaxis_title="Price (USD)",
                                     xaxis_title="Date",
                                     hovermode="x unified",
-                                    legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
-                                    height=400
+                                    legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="center", x=0.5),
+                                    height=350,  # Slightly reduced height for mobile
+                                    autosize=True,
+                                    margin=dict(l=10, r=10, t=40, b=20),
+                                    xaxis=dict(
+                                        titlefont=dict(size=12),
+                                        tickfont=dict(size=10)
+                                    ),
+                                    yaxis=dict(
+                                        titlefont=dict(size=12),
+                                        tickfont=dict(size=10)
+                                    )
                                 )
                                 
                                 st.plotly_chart(fig, use_container_width=True)
@@ -554,11 +565,22 @@ Technical analysis reveals bearish patterns with deteriorating price action and 
                                 
                                 fig.update_layout(
                                     title="MACD Indicator",
+                                    title_font_size=16,
                                     yaxis_title="Value",
                                     xaxis_title="Date",
                                     hovermode="x unified",
-                                    legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
-                                    height=300
+                                    legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="center", x=0.5),
+                                    height=300,
+                                    autosize=True,
+                                    margin=dict(l=10, r=10, t=40, b=20),
+                                    xaxis=dict(
+                                        titlefont=dict(size=12),
+                                        tickfont=dict(size=10)
+                                    ),
+                                    yaxis=dict(
+                                        titlefont=dict(size=12),
+                                        tickfont=dict(size=10)
+                                    )
                                 )
                                 
                                 st.plotly_chart(fig, use_container_width=True)
@@ -612,11 +634,22 @@ Technical analysis reveals bearish patterns with deteriorating price action and 
                                 
                                 fig.update_layout(
                                     title="RSI (14-Day)",
+                                    title_font_size=16,
                                     yaxis_title="RSI Value",
                                     xaxis_title="Date",
-                                    yaxis=dict(range=[0, 100]),
+                                    yaxis=dict(
+                                        range=[0, 100],
+                                        titlefont=dict(size=12),
+                                        tickfont=dict(size=10)
+                                    ),
+                                    xaxis=dict(
+                                        titlefont=dict(size=12),
+                                        tickfont=dict(size=10)
+                                    ),
                                     hovermode="x unified",
-                                    height=400
+                                    height=300,  # Reduced height for mobile
+                                    autosize=True,
+                                    margin=dict(l=10, r=10, t=40, b=20)
                                 )
                                 
                                 st.plotly_chart(fig, use_container_width=True)
@@ -693,11 +726,22 @@ Technical analysis reveals bearish patterns with deteriorating price action and 
                                 
                                 fig.update_layout(
                                     title="Bollinger Bands",
+                                    title_font_size=16,
                                     yaxis_title="Price (USD)",
                                     xaxis_title="Date",
                                     hovermode="x unified",
-                                    legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
-                                    height=300
+                                    legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="center", x=0.5),
+                                    height=300,
+                                    autosize=True,
+                                    margin=dict(l=10, r=10, t=40, b=20),
+                                    xaxis=dict(
+                                        titlefont=dict(size=12),
+                                        tickfont=dict(size=10)
+                                    ),
+                                    yaxis=dict(
+                                        titlefont=dict(size=12),
+                                        tickfont=dict(size=10)
+                                    )
                                 )
                                 
                                 st.plotly_chart(fig, use_container_width=True)
@@ -735,8 +779,41 @@ Technical analysis reveals bearish patterns with deteriorating price action and 
                         with col3:
                             st.markdown(f"<div style='text-align: center; color: orange; font-weight: bold; font-size: 24px;'>{neutral_count}</div><div style='text-align: center;'>Neutral Signals</div>", unsafe_allow_html=True)
                         
-                        # Display signals in a table
-                        st.dataframe(signals_df, use_container_width=True, height=200)
+                        # Display signals in a mobile-friendly table
+                        st.markdown("""
+                        <style>
+                        .mobile-friendly-table {
+                            font-size: 14px !important;
+                            white-space: normal !important;
+                            overflow-x: auto !important;
+                            max-width: 100% !important;
+                        }
+                        .mobile-friendly-table table {
+                            width: 100% !important;
+                        }
+                        .mobile-friendly-table th, .mobile-friendly-table td {
+                            padding: 5px !important;
+                            white-space: normal !important;
+                            word-break: break-word !important;
+                        }
+                        </style>
+                        """, unsafe_allow_html=True)
+                        
+                        # Apply color styling based on signal type
+                        def color_signal(val):
+                            if 'buy' in str(val).lower():
+                                return 'color: green'
+                            elif 'sell' in str(val).lower():
+                                return 'color: red'
+                            else:
+                                return 'color: orange'
+                        
+                        # Apply styling to dataframe
+                        styled_df = signals_df.style.applymap(color_signal, subset=['Signal'])
+                        
+                        # Convert to HTML and wrap with mobile-friendly div
+                        html_table = styled_df.to_html()
+                        st.markdown(f'<div class="mobile-friendly-table">{html_table}</div>', unsafe_allow_html=True)
                     
                     with tab3:
                         st.subheader("Fundamental Analysis")
