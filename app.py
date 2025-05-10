@@ -47,13 +47,15 @@ navbar_html = f"""
             {render_svg("assets/logo.svg")}
             <div class="navbar-title">Ticker AI</div>
         </div>
+        <div class="navbar-company-name" id="company-name-display">
+            <span class="company-name-text">Stock Market Analyzer</span>
+        </div>
         <div class="navbar-links">
             <a href="#" class="navbar-link">Overview</a>
             <a href="#" class="navbar-link">Price Charts</a>
             <a href="#" class="navbar-link">Fundamentals</a>
             <a href="#" class="navbar-link">Technicals</a>
             <a href="#" class="navbar-link">News</a>
-            <a href="#" class="navbar-link">Watchlist</a>
         </div>
         <div class="navbar-icons">
             <a href="#" class="navbar-link">⚙️</a>
@@ -131,8 +133,25 @@ else:
                 # Initialize stock analyzer
                 analyzer = StockAnalyzer(ticker)
                 
-                # Main metrics
-                col1, col2, col3, col4 = st.columns(4)
+                # Get company name and update navbar
+                company_info = analyzer.get_company_info()
+                if company_info and 'shortName' in company_info:
+                    company_name = company_info['shortName']
+                    # Add JavaScript to update company name in navbar
+                    update_company_name_js = f"""
+                    <script>
+                    document.addEventListener('DOMContentLoaded', function() {{
+                        const companyNameElement = document.getElementById('company-name-display');
+                        if (companyNameElement) {{
+                            companyNameElement.innerHTML = '<span class="company-name-text">{company_name}</span>';
+                        }}
+                    }});
+                    </script>
+                    """
+                    st.markdown(update_company_name_js, unsafe_allow_html=True)
+
+                # Main metrics using custom styling for better spacing
+                st.markdown('<div class="data-row">', unsafe_allow_html=True)
                 
                 # Get current price and daily change
                 current_price = analyzer.get_current_price()
@@ -142,23 +161,57 @@ else:
                 price_color = "green" if price_change >= 0 else "red"
                 price_arrow = "↑" if price_change >= 0 else "↓"
                 
-                col1.metric(
-                    "Current Price", 
-                    f"${current_price:.2f}", 
-                    f"{price_arrow} ${abs(price_change):.2f} ({abs(price_change_percent):.2f}%)"
+                # Custom HTML for metrics with better spacing
+                st.markdown(
+                    f'''
+                    <div class="data-item">
+                        <h3>Current Price</h3>
+                        <div class="data-value" style="color: {price_color};">
+                            ${current_price:.2f}
+                            <span>{price_arrow} ${abs(price_change):.2f} ({abs(price_change_percent):.2f}%)</span>
+                        </div>
+                    </div>
+                    ''', 
+                    unsafe_allow_html=True
                 )
                 
                 # Market Cap
                 market_cap = analyzer.get_market_cap()
-                col2.metric("Market Cap", format_large_number(market_cap))
+                st.markdown(
+                    f'''
+                    <div class="data-item">
+                        <h3>Market Cap</h3>
+                        <div class="data-value">{format_large_number(market_cap)}</div>
+                    </div>
+                    ''', 
+                    unsafe_allow_html=True
+                )
                 
                 # P/E Ratio
                 pe_ratio = analyzer.get_pe_ratio()
-                col3.metric("P/E Ratio", f"{pe_ratio:.2f}" if pe_ratio else "N/A")
+                st.markdown(
+                    f'''
+                    <div class="data-item">
+                        <h3>P/E Ratio</h3>
+                        <div class="data-value">{f"{pe_ratio:.2f}" if pe_ratio else "N/A"}</div>
+                    </div>
+                    ''', 
+                    unsafe_allow_html=True
+                )
                 
                 # 52-Week Range
                 week_low, week_high = analyzer.get_52_week_range()
-                col4.metric("52-Week Range", f"${week_low:.2f} - ${week_high:.2f}")
+                st.markdown(
+                    f'''
+                    <div class="data-item">
+                        <h3>52-Week Range</h3>
+                        <div class="data-value">${week_low:.2f} - ${week_high:.2f}</div>
+                    </div>
+                    ''', 
+                    unsafe_allow_html=True
+                )
+                
+                st.markdown('</div>', unsafe_allow_html=True)
                 
                 # Tab sections
                 tab1, tab2, tab3, tab4, tab5 = st.tabs([
