@@ -104,3 +104,21 @@ def get_total_user_count():
     """
     users_data = load_users()
     return len(users_data["users"])
+
+
+def is_admin():
+    """
+    Checks if the current user is an admin
+    
+    Returns:
+    --------
+    bool
+        True if the user is an admin, False otherwise
+    """
+    user = get_session_user()
+    if not user:
+        return False
+    
+    # Admin email address - only this account has admin access
+    admin_email = "gkraem@vt.edu"
+    return user.get("email", "") == admin_email
