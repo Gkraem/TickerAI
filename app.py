@@ -188,38 +188,101 @@ else:
                     
                     st.markdown('</div>', unsafe_allow_html=True)
                     
+                    # Company information/business summary
+                    st.subheader("Company Overview")
+                    
+                    if company_info:
+                        business_summary = company_info.get('longBusinessSummary', None)
+                        if business_summary:
+                            st.markdown(business_summary)
+                        else:
+                            st.info(f"No business summary available for {ticker}")
+                            
+                        # Additional company details in columns
+                        col1, col2 = st.columns(2)
+                        
+                        with col1:
+                            st.markdown("**Company Details**")
+                            st.markdown(f"Sector: {company_info.get('sector', 'N/A')}")
+                            st.markdown(f"Industry: {company_info.get('industry', 'N/A')}")
+                            if 'website' in company_info and company_info['website']:
+                                st.markdown(f"Website: [{company_info['website']}]({company_info['website']})")
+                            st.markdown(f"Full Time Employees: {format_large_number(company_info.get('fullTimeEmployees', 'N/A'))}")
+                            
+                        with col2:
+                            st.markdown("**Financial Details**")
+                            st.markdown(f"Revenue (TTM): {format_large_number(company_info.get('totalRevenue', 'N/A'))}")
+                            st.markdown(f"Gross Profits: {format_large_number(company_info.get('grossProfits', 'N/A'))}")
+                            if 'profitMargins' in company_info and company_info['profitMargins'] is not None:
+                                profit_margin = company_info['profitMargins'] * 100
+                                st.markdown(f"Profit Margin: {profit_margin:.2f}%")
+                            st.markdown(f"Exchange: {company_info.get('exchange', 'N/A')}")
+                    
                     # Calculate buy rating
                     buy_rating, rating_components = analyzer.calculate_buy_rating()
                     
-                    # Display buy rating with custom styling
-                    st.markdown("<div class='rating-container'>", unsafe_allow_html=True)
+                    # Display investment rating with gauge chart
+                    st.subheader("Investment Rating")
                     
-                    # Determine color based on rating
+                    # Determine rating text based on score
                     if buy_rating >= 7.5:
-                        rating_color = "green"
                         rating_text = "Strong Buy"
                     elif buy_rating >= 6:
-                        rating_color = "lightgreen"
                         rating_text = "Buy"
                     elif buy_rating >= 4:
-                        rating_color = "orange"
                         rating_text = "Hold"
                     else:
-                        rating_color = "red"
                         rating_text = "Sell"
                     
-                    st.markdown(
-                        f"""
-                        <div class="buy-rating" style="border-color: {rating_color};">
-                            <div class="rating-score" style="color: {rating_color};">{buy_rating:.1f}</div>
-                            <div class="rating-label">Buy Rating</div>
-                            <div class="rating-text" style="color: {rating_color};">{rating_text}</div>
-                        </div>
-                        """,
-                        unsafe_allow_html=True
+                    # Create gauge chart
+                    fig = go.Figure(go.Indicator(
+                        mode = "gauge+number",
+                        value = buy_rating,
+                        title = {'text': f"Buy Rating ({rating_text})"},
+                        gauge = {
+                            'axis': {'range': [0, 10], 'tickwidth': 1},
+                            'bar': {'color': "rgba(50, 50, 50, 0.8)"},
+                            'steps': [
+                                {'range': [0, 3], 'color': "rgba(255, 0, 0, 0.3)"},
+                                {'range': [3, 5], 'color': "rgba(255, 165, 0, 0.3)"},
+                                {'range': [5, 7], 'color': "rgba(255, 255, 0, 0.3)"},
+                                {'range': [7, 10], 'color': "rgba(0, 128, 0, 0.3)"}
+                            ],
+                            'threshold': {
+                                'line': {'color': "black", 'width': 4},
+                                'thickness': 0.75,
+                                'value': buy_rating
+                            }
+                        }
+                    ))
+                    
+                    # Set labels on the gauge
+                    fig.add_annotation(x=0.15, y=0.8, text="SELL", showarrow=False)
+                    fig.add_annotation(x=0.85, y=0.8, text="BUY", showarrow=False)
+                    fig.add_annotation(x=0.5, y=0.9, text="NEUTRAL", showarrow=False)
+                    
+                    # Update layout
+                    fig.update_layout(
+                        height=250, 
+                        margin=dict(l=20, r=20, t=70, b=20),
+                        paper_bgcolor="rgba(0,0,0,0)",
+                        plot_bgcolor="rgba(0,0,0,0)"
                     )
                     
-                    st.markdown("</div>", unsafe_allow_html=True)
+                    st.plotly_chart(fig, use_container_width=True)
+                    
+                    # Display rating components
+                    st.markdown("#### Rating Components")
+                    col1, col2, col3 = st.columns(3)
+                    
+                    with col1:
+                        st.metric("Technical Score", f"{rating_components.get('technical', 0):.1f}/10")
+                    
+                    with col2:
+                        st.metric("Fundamental Score", f"{rating_components.get('fundamental', 0):.1f}/10")
+                    
+                    with col3:
+                        st.metric("Sentiment Score", f"{rating_components.get('sentiment', 0):.1f}/10")
                     
                     # Create tabs for different analyses
                     tab1, tab2, tab3, tab4 = st.tabs(["Price History", "Technical Analysis", "Fundamentals", "News"])
