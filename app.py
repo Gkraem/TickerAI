@@ -12,9 +12,9 @@ from technical_analysis import TechnicalAnalysis
 from fundamental_analysis import FundamentalAnalysis
 from utils import format_large_number, get_stock_news
 from data_sources import DATA_SOURCES
-from user_management import is_authenticated, get_session_user
+from user_management import is_authenticated, get_session_user 
 from auth_components import auth_page, logout_button
-from admin import is_admin
+from admin import is_admin, admin_panel
 
 # Set page configuration without title to avoid header bar
 st.set_page_config(
@@ -57,6 +57,10 @@ footer_html = """
 """
 st.markdown(footer_html, unsafe_allow_html=True)
 
+# Initialize view mode state if not exists
+if "view_mode" not in st.session_state:
+    st.session_state.view_mode = "main"  # Options: "main", "admin"
+
 # Check if user is authenticated
 if not is_authenticated():
     # Show authentication page when not logged in
@@ -68,794 +72,838 @@ else:
         st.sidebar.markdown(f"### Welcome, {user['name']}")
     else:
         st.sidebar.markdown("### Welcome")
+    
     logout_button()
     
-    # Add admin link if the user is an admin
+    # Add admin controls if the user is an admin
     if is_admin():
         st.sidebar.markdown("---")
-        if st.sidebar.button("Admin Panel", type="primary"):
-            # Save current user state
-            admin_user = st.session_state["user"]
-            # Reset the entire session state to start fresh
-            for key in list(st.session_state.keys()):
-                del st.session_state[key]
-            # Restore user state to maintain login
-            st.session_state["user"] = admin_user
-            # Redirect to admin page
-            st.switch_page("01_Admin_Panel")
+        
+        # Toggle between main app and admin panel
+        if st.session_state.view_mode == "main":
+            if st.sidebar.button("Admin Panel", type="primary"):
+                st.session_state.view_mode = "admin"
+                st.rerun()
+        else:  # In admin mode
+            if st.sidebar.button("Return to Stock Analyzer", type="primary"):
+                st.session_state.view_mode = "main"
+                st.rerun()
     
     # Completely removed all headers and keeping proper spacing
     st.markdown("<div style='height: 30px;'></div>", unsafe_allow_html=True)
     
-    # Sidebar for ticker input
-    st.sidebar.title("Stock Search")
-    ticker = st.sidebar.text_input("Enter Stock Ticker Symbol (e.g., AAPL)", "").upper()
-    
-    # Timeframe selector
-    timeframe = st.sidebar.selectbox(
-        "Select Timeframe",
-        ["1d", "5d", "1mo", "3mo", "6mo", "1y", "2y", "5y", "max"],
-        index=5  # Default to 1 year
-    )
-    
-    # Search button
-    search_button = st.sidebar.button("Analyze Stock")
-    
-    # Display data sources
-    st.sidebar.markdown("---")
-    st.sidebar.markdown("### Data Sources")
-    for source, url in DATA_SOURCES.items():
-        st.sidebar.markdown(f"- [{source}]({url})")
-    
-    # Main app
-    if ticker and search_button:
-        # Create a placeholder for loading state
-        with st.spinner(f'Analyzing {ticker}...'):
-            try:
-                # Initialize stock analyzer
-                analyzer = StockAnalyzer(ticker)
-                
-                # Get company name and display prominently
-                company_info = analyzer.get_company_info()
-                
-                if company_info and 'shortName' in company_info:
-                    company_name = company_info['shortName']
-                    # Display company name as a header
-                    st.markdown(f"<h1 class='company-name'>{company_name} ({ticker})</h1>", unsafe_allow_html=True)
-
-                # Main metrics using custom styling for better spacing
-                st.markdown('<div class="data-row">', unsafe_allow_html=True)
-                
-                # Get current price and daily change
-                current_price = analyzer.get_current_price()
-                price_change, price_change_percent = analyzer.get_price_change()
-                
-                # Display price with up/down indicator
-                price_color = "green" if price_change >= 0 else "red"
-                price_arrow = "↑" if price_change >= 0 else "↓"
-                
-                # Custom HTML for metrics with better spacing
-                st.markdown(
-                    f'''
-                    <div class="data-item">
-                        <h3>Current Price</h3>
-                        <div class="data-value" style="color: {price_color};">
-                            ${current_price:.2f}
-                            <span>{price_arrow} ${abs(price_change):.2f} ({abs(price_change_percent):.2f}%)</span>
-                        </div>
-                    </div>
-                    ''', 
-                    unsafe_allow_html=True
-                )
-                
-                # Market Cap
-                market_cap = analyzer.get_market_cap()
-                st.markdown(
-                    f'''
-                    <div class="data-item">
-                        <h3>Market Cap</h3>
-                        <div class="data-value">{format_large_number(market_cap)}</div>
-                    </div>
-                    ''', 
-                    unsafe_allow_html=True
-                )
-                
-                # P/E Ratio
-                pe_ratio = analyzer.get_pe_ratio()
-                st.markdown(
-                    f'''
-                    <div class="data-item">
-                        <h3>P/E Ratio</h3>
-                        <div class="data-value">{f"{pe_ratio:.2f}" if pe_ratio else "N/A"}</div>
-                    </div>
-                    ''', 
-                    unsafe_allow_html=True
-                )
-                
-                # 52-Week Range
-                week_low, week_high = analyzer.get_52_week_range()
-                st.markdown(
-                    f'''
-                    <div class="data-item">
-                        <h3>52-Week Range</h3>
-                        <div class="data-value">${week_low:.2f} - ${week_high:.2f}</div>
-                    </div>
-                    ''', 
-                    unsafe_allow_html=True
-                )
-                
-                st.markdown('</div>', unsafe_allow_html=True)
-                
-                # Tab sections
-                tab1, tab2, tab3, tab4, tab5 = st.tabs([
-                    "Overview", 
-                    "Price Chart", 
-                    "Fundamental Analysis", 
-                    "Technical Analysis", 
-                    "News & Sentiment"
-                ])
-                
-                # Tab 1: Overview
-                with tab1:
-                    # Company information
-                    st.subheader("Company Information")
+    # Check view mode to determine what content to display
+    if st.session_state.view_mode == "admin" and is_admin():
+        # === ADMIN PANEL CONTENT ===
+        st.title("Ticker AI Admin Panel")
+        
+        # Show user info
+        user = get_session_user()
+        if user and isinstance(user, dict):
+            st.markdown(f"**Logged in as:** {user.get('name', 'Unknown')} ({user.get('email', 'No email')})")
+        
+        # Add a separator
+        st.markdown("<hr style='margin-top: 0; margin-bottom: 20px;'>", unsafe_allow_html=True)
+        
+        # Display admin panel content
+        admin_panel()
+        
+    else:
+        # === MAIN APP CONTENT ===
+        # Set view mode to main (in case coming from admin page or for initial state)
+        st.session_state.view_mode = "main"
+        
+        # Sidebar for ticker input
+        st.sidebar.title("Stock Search")
+        ticker = st.sidebar.text_input("Enter Stock Ticker Symbol (e.g., AAPL)", "").upper()
+        
+        # Timeframe selector
+        timeframe = st.sidebar.selectbox(
+            "Select Timeframe",
+            ["1d", "5d", "1mo", "3mo", "6mo", "1y", "2y", "5y", "max"],
+            index=5  # Default to 1 year
+        )
+        
+        # Search button
+        search_button = st.sidebar.button("Analyze Stock")
+        
+        # Display data sources
+        st.sidebar.markdown("---")
+        st.sidebar.markdown("### Data Sources")
+        for source, url in DATA_SOURCES.items():
+            st.sidebar.markdown(f"- [{source}]({url})")
+        
+        # Main app content
+        if ticker and search_button:
+            # Create a placeholder for loading state
+            with st.spinner(f'Analyzing {ticker}...'):
+                try:
+                    # Initialize stock analyzer
+                    analyzer = StockAnalyzer(ticker)
+                    
+                    # Get company name and display prominently
                     company_info = analyzer.get_company_info()
-                    if company_info:
-                        st.markdown(f"**Business Summary**")
-                        st.markdown(company_info['longBusinessSummary'] if 'longBusinessSummary' in company_info else "No business summary available.")
-                        
-                        # Key metrics in columns
-                        col1, col2, col3 = st.columns(3)
-                        
-                        with col1:
-                            st.markdown("**Key Statistics**")
-                            st.markdown(f"Sector: {company_info.get('sector', 'N/A')}")
-                            st.markdown(f"Industry: {company_info.get('industry', 'N/A')}")
-                            st.markdown(f"Full Time Employees: {company_info.get('fullTimeEmployees', 'N/A')}")
-                            st.markdown(f"Website: [{company_info.get('website', 'N/A')}]({company_info.get('website', '#')})")
-                        
-                        with col2:
-                            st.markdown("**Financial Metrics**")
-                            st.markdown(f"Revenue (TTM): {format_large_number(company_info.get('totalRevenue', 'N/A'))}")
-                            st.markdown(f"Gross Profit: {format_large_number(company_info.get('grossProfits', 'N/A'))}")
-                            st.markdown(f"Profit Margin: {company_info.get('profitMargins', 'N/A') * 100:.2f}%" if company_info.get('profitMargins') else "Profit Margin: N/A")
-                            st.markdown(f"EPS (TTM): ${company_info.get('trailingEPS', 'N/A')}")
-                        
-                        with col3:
-                            st.markdown("**Trading Information**")
-                            st.markdown(f"Average Volume: {format_large_number(company_info.get('averageVolume', 'N/A'))}")
-                            st.markdown(f"Dividend Yield: {company_info.get('dividendYield', 0) * 100:.2f}%" if company_info.get('dividendYield') else "Dividend Yield: N/A")
-                            st.markdown(f"Beta: {company_info.get('beta', 'N/A')}")
-                            st.markdown(f"Exchange: {company_info.get('exchange', 'N/A')}")
                     
-                    # Buy Rating Score
-                    st.subheader("Investment Rating")
-                    score, score_breakdown = analyzer.calculate_buy_rating()
+                    if company_info and 'shortName' in company_info:
+                        company_name = company_info['shortName']
+                        # Display company name as a header
+                        st.markdown(f"<h1 class='company-name'>{company_name} ({ticker})</h1>", unsafe_allow_html=True)
                     
-                    # Colorful gauge chart for score
-                    fig = go.Figure(go.Indicator(
-                        mode = "gauge+number",
-                        value = score,
-                        title = {'text': "Buy Rating Score (1-10)"},
-                        gauge = {
-                            'axis': {'range': [0, 10], 'tickwidth': 1},
-                            'bar': {'color': "rgba(255, 75, 75, 0.8)"},
-                            'steps': [
-                                {'range': [0, 3], 'color': "rgba(255, 0, 0, 0.3)"},
-                                {'range': [3, 7], 'color': "rgba(255, 165, 0, 0.3)"},
-                                {'range': [7, 10], 'color': "rgba(0, 128, 0, 0.3)"}
-                            ],
-                            'threshold': {
-                                'line': {'color': "white", 'width': 4},
-                                'thickness': 0.75,
-                                'value': score
-                            }
-                        }
-                    ))
-                    fig.update_layout(height=300, margin=dict(l=20, r=20, t=50, b=20))
-                    st.plotly_chart(fig, use_container_width=True)
+                    # Main metrics using custom styling for better spacing
+                    st.markdown('<div class="data-row">', unsafe_allow_html=True)
                     
-                    # Score breakdown
-                    st.markdown("**Rating Breakdown**")
-                    for category, details in score_breakdown.items():
-                        st.markdown(f"**{category}**: {details['score']}/10 - {details['reason']}")
+                    # Get current price and daily change
+                    current_price = analyzer.get_current_price()
+                    price_change, price_change_percent = analyzer.get_price_change()
                     
-                    st.info("**Note**: This rating is based on an algorithmic analysis of various metrics. Always conduct your own research before making investment decisions.")
-
-                # Tab 2: Price Chart
-                with tab2:
-                    st.subheader(f"{ticker} Price History ({timeframe})")
+                    # Display price with up/down indicator
+                    price_color = "green" if price_change >= 0 else "red"
+                    price_arrow = "↑" if price_change >= 0 else "↓"
                     
-                    # Get historical data based on selected timeframe
-                    stock_data = analyzer.get_historical_data(timeframe)
+                    # Format metrics for display
+                    market_cap = analyzer.get_market_cap()
+                    pe_ratio = analyzer.get_pe_ratio()
+                    low_52w, high_52w = analyzer.get_52_week_range()
                     
-                    if not stock_data.empty:
-                        # Create interactive Plotly chart
-                        fig = go.Figure()
-                        
-                        # Add candlestick chart
-                        fig.add_trace(go.Candlestick(
-                            x=stock_data.index,
-                            open=stock_data['Open'],
-                            high=stock_data['High'],
-                            low=stock_data['Low'],
-                            close=stock_data['Close'],
-                            name='Price'
-                        ))
-                        
-                        # Add volume bars at the bottom
-                        fig.add_trace(go.Bar(
-                            x=stock_data.index,
-                            y=stock_data['Volume'],
-                            name='Volume',
-                            marker_color='rgba(128, 128, 128, 0.5)',
-                            yaxis='y2'
-                        ))
-                        
-                        # Customize layout
-                        fig.update_layout(
-                            title=f'{ticker} Stock Price',
-                            xaxis_title='Date',
-                            yaxis_title='Price ($)',
-                            height=600,
-                            yaxis=dict(
-                                title="Price ($)",
-                                side="left",
-                                showgrid=True
-                            ),
-                            yaxis2=dict(
-                                title="Volume",
-                                side="right",
-                                overlaying="y",
-                                showgrid=False,
-                                rangemode='normal',
-                                scaleanchor='x',
-                                scaleratio=1,
-                                position=0.95
-                            ),
-                            xaxis=dict(
-                                rangeslider=dict(visible=True),
-                                type="date"
-                            ),
-                            template="plotly_dark",
-                            legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
-                        )
-                        
-                        st.plotly_chart(fig, use_container_width=True)
-                        
-                        # Statistics of price data
-                        col1, col2, col3 = st.columns(3)
-                        
-                        # Calculate metrics based on close prices
-                        close_prices = stock_data['Close']
-                        
-                        col1.metric("Highest Price", f"${close_prices.max():.2f}")
-                        col1.metric("Lowest Price", f"${close_prices.min():.2f}")
-                        
-                        col2.metric("Average Price", f"${close_prices.mean():.2f}")
-                        col2.metric("Median Price", f"${close_prices.median():.2f}")
-                        
-                        # Calculate volatility (standard deviation of percentage changes)
-                        returns = close_prices.pct_change().dropna()
-                        volatility = returns.std() * (252 ** 0.5)  # Annualized volatility
-                        
-                        col3.metric("Volatility (Annualized)", f"{volatility * 100:.2f}%")
-                        
-                        # Calculate max drawdown
-                        rolling_max = close_prices.cummax()
-                        drawdown = (close_prices - rolling_max) / rolling_max
-                        max_drawdown = drawdown.min()
-                        
-                        col3.metric("Maximum Drawdown", f"{max_drawdown * 100:.2f}%")
-                        
-                    else:
-                        st.error(f"No historical data available for {ticker} with timeframe {timeframe}")
-
-                # Tab 3: Fundamental Analysis
-                with tab3:
-                    st.subheader("Fundamental Analysis")
-                    
-                    # Initialize fundamental analysis
-                    fundamental = FundamentalAnalysis(ticker)
-                    
-                    # Financial ratios
-                    st.markdown("### Financial Ratios")
-                    
-                    col1, col2 = st.columns(2)
+                    # Create columns for metrics
+                    col1, col2, col3, col4 = st.columns(4)
                     
                     with col1:
-                        # Valuation ratios
-                        st.markdown("#### Valuation Ratios")
-                        valuation_df = fundamental.get_valuation_ratios()
-                        if not valuation_df.empty:
-                            st.dataframe(valuation_df, use_container_width=True)
-                        else:
-                            st.info("Valuation data not available")
+                        st.metric(
+                            "Current Price",
+                            f"${current_price:.2f}",
+                            f"{price_arrow} {abs(price_change):.2f} ({abs(price_change_percent):.2f}%)",
+                            delta_color="normal" if price_change >= 0 else "inverse"
+                        )
                     
                     with col2:
-                        # Profitability ratios
-                        st.markdown("#### Profitability Ratios")
-                        profitability_df = fundamental.get_profitability_ratios()
-                        if not profitability_df.empty:
-                            st.dataframe(profitability_df, use_container_width=True)
+                        st.metric("Market Cap", format_large_number(market_cap) if market_cap else "N/A")
+                    
+                    with col3:
+                        st.metric("P/E Ratio", f"{pe_ratio:.2f}" if pe_ratio and pe_ratio > 0 else "N/A")
+                    
+                    with col4:
+                        st.metric("52-Week Range", f"${low_52w:.2f} - ${high_52w:.2f}" if low_52w and high_52w else "N/A")
+                    
+                    st.markdown('</div>', unsafe_allow_html=True)
+                    
+                    # Calculate buy rating
+                    buy_rating, rating_components = analyzer.calculate_buy_rating()
+                    
+                    # Display buy rating with custom styling
+                    st.markdown("<div class='rating-container'>", unsafe_allow_html=True)
+                    
+                    # Determine color based on rating
+                    if buy_rating >= 7.5:
+                        rating_color = "green"
+                        rating_text = "Strong Buy"
+                    elif buy_rating >= 6:
+                        rating_color = "lightgreen"
+                        rating_text = "Buy"
+                    elif buy_rating >= 4:
+                        rating_color = "orange"
+                        rating_text = "Hold"
+                    else:
+                        rating_color = "red"
+                        rating_text = "Sell"
+                    
+                    st.markdown(
+                        f"""
+                        <div class="buy-rating" style="border-color: {rating_color};">
+                            <div class="rating-score" style="color: {rating_color};">{buy_rating:.1f}</div>
+                            <div class="rating-label">Buy Rating</div>
+                            <div class="rating-text" style="color: {rating_color};">{rating_text}</div>
+                        </div>
+                        """,
+                        unsafe_allow_html=True
+                    )
+                    
+                    st.markdown("</div>", unsafe_allow_html=True)
+                    
+                    # Create tabs for different analyses
+                    tab1, tab2, tab3, tab4 = st.tabs(["Price History", "Technical Analysis", "Fundamentals", "News"])
+                    
+                    with tab1:
+                        st.subheader(f"Price History - {timeframe}")
+                        
+                        # Get historical data
+                        hist_data = analyzer.get_historical_data(timeframe)
+                        
+                        if hist_data is not None and not hist_data.empty:
+                            # Create interactive price chart
+                            fig = go.Figure()
+                            
+                            # Add price line
+                            fig.add_trace(
+                                go.Scatter(
+                                    x=hist_data.index, 
+                                    y=hist_data['Close'],
+                                    mode='lines',
+                                    name='Price',
+                                    line=dict(color='#1f77b4', width=2)
+                                )
+                            )
+                            
+                            # Add volume as bar chart
+                            fig.add_trace(
+                                go.Bar(
+                                    x=hist_data.index,
+                                    y=hist_data['Volume'],
+                                    name='Volume',
+                                    marker_color='rgba(200, 200, 200, 0.4)',
+                                    opacity=0.5,
+                                    yaxis='y2'
+                                )
+                            )
+                            
+                            # Add buttons for different time ranges
+                            fig.update_layout(
+                                title=f"{ticker} Price History",
+                                yaxis_title="Price (USD)",
+                                xaxis_title="Date",
+                                hovermode="x unified",
+                                legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
+                                yaxis2=dict(
+                                    title="Volume",
+                                    overlaying="y",
+                                    side="right",
+                                    showgrid=False
+                                ),
+                                height=500
+                            )
+                            
+                            st.plotly_chart(fig, use_container_width=True)
+                            
+                            # Add summary statistics
+                            st.subheader("Summary Statistics")
+                            
+                            # Calculate stats
+                            price_start = hist_data['Close'].iloc[0]
+                            price_end = hist_data['Close'].iloc[-1]
+                            price_change_total = price_end - price_start
+                            price_change_percent_total = (price_change_total / price_start) * 100
+                            price_min = hist_data['Low'].min()
+                            price_max = hist_data['High'].max()
+                            
+                            # Create columns for stats
+                            col1, col2, col3 = st.columns(3)
+                            
+                            with col1:
+                                st.metric("Starting Price", f"${price_start:.2f}")
+                                st.metric("Total Volume", format_large_number(hist_data['Volume'].sum()))
+                            
+                            with col2:
+                                st.metric("Ending Price", f"${price_end:.2f}")
+                                st.metric("Average Volume", format_large_number(hist_data['Volume'].mean()))
+                            
+                            with col3:
+                                st.metric(
+                                    "Total Change",
+                                    f"${price_end:.2f}",
+                                    f"{price_change_total:.2f} ({price_change_percent_total:.2f}%)",
+                                    delta_color="normal" if price_change_total >= 0 else "inverse"
+                                )
+                                st.metric("Price Range", f"${price_min:.2f} - ${price_max:.2f}")
                         else:
-                            st.info("Profitability data not available")
+                            st.error(f"No historical data available for {ticker}")
                     
-                    # Financial statements
-                    st.markdown("### Financial Statements")
-                    
-                    # Tabs for financial statements
-                    fs_tab1, fs_tab2, fs_tab3 = st.tabs(["Income Statement", "Balance Sheet", "Cash Flow"])
-                    
-                    with fs_tab1:
-                        income_df = fundamental.get_income_statement()
-                        if not income_df.empty:
-                            st.dataframe(income_df, use_container_width=True)
-                        else:
-                            st.info("Income statement data not available")
-                    
-                    with fs_tab2:
-                        balance_df = fundamental.get_balance_sheet()
-                        if not balance_df.empty:
-                            st.dataframe(balance_df, use_container_width=True)
-                        else:
-                            st.info("Balance sheet data not available")
-                    
-                    with fs_tab3:
-                        cashflow_df = fundamental.get_cash_flow()
-                        if not cashflow_df.empty:
-                            st.dataframe(cashflow_df, use_container_width=True)
-                        else:
-                            st.info("Cash flow data not available")
-                    
-                    # Earnings and growth
-                    st.markdown("### Earnings & Growth")
-                    
-                    earnings_df = fundamental.get_earnings_growth()
-                    if not earnings_df.empty:
-                        # Plot earnings growth
-                        try:
-                            # Check if there are columns to plot
-                            if "Revenue" in earnings_df.columns and "Earnings" in earnings_df.columns:
+                    with tab2:
+                        st.subheader("Technical Analysis")
+                        
+                        # Initialize technical analysis
+                        tech_analysis = TechnicalAnalysis(ticker)
+                        
+                        # Get technical signals
+                        signals = tech_analysis.get_technical_signals()
+                        
+                        # Create columns for different indicators
+                        col1, col2 = st.columns(2)
+                        
+                        with col1:
+                            # Moving Averages
+                            st.markdown("### Moving Averages")
+                            
+                            ma_data = tech_analysis.get_moving_averages(timeframe)
+                            
+                            if ma_data is not None and not ma_data.empty:
+                                # Plot moving averages
                                 fig = go.Figure()
                                 
-                                # Add traces
-                                fig.add_trace(go.Bar(
-                                    x=earnings_df.index,
-                                    y=earnings_df["Revenue"],
-                                    name="Revenue",
-                                    marker_color='rgba(65, 105, 225, 0.7)'
-                                ))
+                                # Add price line
+                                fig.add_trace(
+                                    go.Scatter(
+                                        x=ma_data.index,
+                                        y=ma_data['Close'],
+                                        mode='lines',
+                                        name='Price',
+                                        line=dict(color='#1f77b4', width=2)
+                                    )
+                                )
                                 
-                                fig.add_trace(go.Bar(
-                                    x=earnings_df.index,
-                                    y=earnings_df["Earnings"],
-                                    name="Earnings",
-                                    marker_color='rgba(34, 139, 34, 0.7)'
-                                ))
+                                # Add moving averages
+                                fig.add_trace(
+                                    go.Scatter(
+                                        x=ma_data.index,
+                                        y=ma_data['MA50'],
+                                        mode='lines',
+                                        name='50-Day MA',
+                                        line=dict(color='orange', width=1.5)
+                                    )
+                                )
                                 
-                                # Customize layout
+                                fig.add_trace(
+                                    go.Scatter(
+                                        x=ma_data.index,
+                                        y=ma_data['MA200'],
+                                        mode='lines',
+                                        name='200-Day MA',
+                                        line=dict(color='red', width=1.5)
+                                    )
+                                )
+                                
                                 fig.update_layout(
-                                    title="Revenue and Earnings Growth",
-                                    xaxis_title="Year",
-                                    yaxis_title="Amount (USD)",
-                                    barmode='group',
-                                    height=500,
-                                    template="plotly_dark"
+                                    title="Price with Moving Averages",
+                                    yaxis_title="Price (USD)",
+                                    xaxis_title="Date",
+                                    hovermode="x unified",
+                                    legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
+                                    height=400
                                 )
                                 
                                 st.plotly_chart(fig, use_container_width=True)
                                 
+                                # Moving Average Interpretation
+                                ma_signals = tech_analysis.interpret_moving_averages()
+                                
+                                for signal, interpretation in ma_signals.items():
+                                    signal_color = "green" if "bullish" in interpretation.lower() else "red" if "bearish" in interpretation.lower() else "orange"
+                                    st.markdown(f"**{signal}:** <span style='color:{signal_color}'>{interpretation}</span>", unsafe_allow_html=True)
                             else:
-                                st.info("Earnings data does not contain expected columns")
-                        except Exception as e:
-                            st.error(f"Error plotting earnings data: {str(e)}")
-                    else:
-                        st.info("Earnings data not available")
-                    
-                    # Analyst recommendations
-                    st.markdown("### Analyst Recommendations")
-                    
-                    recommendations_df = fundamental.get_analyst_recommendations()
-                    if not recommendations_df.empty:
-                        st.dataframe(recommendations_df, use_container_width=True)
-                    else:
-                        st.info("Analyst recommendations not available")
-
-                # Tab 4: Technical Analysis
-                with tab4:
-                    st.subheader("Technical Analysis")
-                    
-                    # Initialize technical analysis
-                    technical = TechnicalAnalysis(ticker)
-                    
-                    # Moving Averages Chart
-                    st.markdown("### Moving Averages")
-                    
-                    # Get moving averages based on selected timeframe
-                    ma_data = technical.get_moving_averages(timeframe)
-                    
-                    if not ma_data.empty:
-                        # Create interactive Plotly chart
-                        fig = go.Figure()
-                        
-                        # Add price line
-                        fig.add_trace(go.Scatter(
-                            x=ma_data.index,
-                            y=ma_data['Close'],
-                            name='Price',
-                            line=dict(color='white', width=1)
-                        ))
-                        
-                        # Add moving averages
-                        fig.add_trace(go.Scatter(
-                            x=ma_data.index,
-                            y=ma_data['MA20'],
-                            name='20-Day MA',
-                            line=dict(color='blue', width=1)
-                        ))
-                        
-                        fig.add_trace(go.Scatter(
-                            x=ma_data.index,
-                            y=ma_data['MA50'],
-                            name='50-Day MA',
-                            line=dict(color='green', width=1)
-                        ))
-                        
-                        fig.add_trace(go.Scatter(
-                            x=ma_data.index,
-                            y=ma_data['MA200'],
-                            name='200-Day MA',
-                            line=dict(color='red', width=1)
-                        ))
-                        
-                        # Customize layout
-                        fig.update_layout(
-                            title=f'{ticker} Moving Averages',
-                            xaxis_title='Date',
-                            yaxis_title='Price ($)',
-                            height=500,
-                            template="plotly_dark",
-                            legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
-                        )
-                        
-                        st.plotly_chart(fig, use_container_width=True)
-                        
-                        # Show interpretation
-                        st.markdown("### Moving Average Interpretation")
-                        
-                        ma_signals = technical.interpret_moving_averages()
-                        
-                        for ma_type, signal in ma_signals.items():
-                            signal_color = "green" if "Bullish" in signal else "red" if "Bearish" in signal else "orange"
-                            st.markdown(f"**{ma_type}**: <span style='color:{signal_color}'>{signal}</span>", unsafe_allow_html=True)
-                    
-                    else:
-                        st.error(f"No moving average data available for {ticker} with timeframe {timeframe}")
-                    
-                    # Technical indicators
-                    st.markdown("### Technical Indicators")
-                    
-                    # Tabs for technical indicators
-                    tech_tab1, tech_tab2, tech_tab3 = st.tabs(["RSI", "MACD", "Bollinger Bands"])
-                    
-                    # Tab 1: RSI
-                    with tech_tab1:
-                        # Get RSI based on selected timeframe
-                        rsi_data = technical.get_rsi(timeframe)
-                        
-                        if not rsi_data.empty:
-                            # Create interactive Plotly chart
-                            fig = go.Figure()
+                                st.error("Could not calculate moving averages")
                             
-                            # Add RSI line
-                            fig.add_trace(go.Scatter(
-                                x=rsi_data.index,
-                                y=rsi_data['RSI'],
-                                name='RSI',
-                                line=dict(color='purple', width=2)
-                            ))
+                            # MACD
+                            st.markdown("### MACD")
                             
-                            # Add overbought/oversold lines
-                            fig.add_shape(
-                                type="line",
-                                x0=rsi_data.index[0],
-                                y0=70,
-                                x1=rsi_data.index[-1],
-                                y1=70,
-                                line=dict(color="red", width=1, dash="dash")
-                            )
+                            macd_data = tech_analysis.get_macd(timeframe)
                             
-                            fig.add_shape(
-                                type="line",
-                                x0=rsi_data.index[0],
-                                y0=30,
-                                x1=rsi_data.index[-1],
-                                y1=30,
-                                line=dict(color="green", width=1, dash="dash")
-                            )
-                            
-                            # Customize layout
-                            fig.update_layout(
-                                title=f'{ticker} Relative Strength Index (RSI)',
-                                xaxis_title='Date',
-                                yaxis_title='RSI Value',
-                                height=400,
-                                template="plotly_dark",
-                                yaxis=dict(range=[0, 100])
-                            )
-                            
-                            # Add hover annotations
-                            fig.update_layout(
-                                annotations=[
-                                    dict(
-                                        x=0.02,
-                                        y=70,
-                                        xref="paper",
-                                        yref="y",
-                                        text="Overbought (70)",
-                                        showarrow=False,
-                                        font=dict(color="red")
-                                    ),
-                                    dict(
-                                        x=0.02,
-                                        y=30,
-                                        xref="paper",
-                                        yref="y",
-                                        text="Oversold (30)",
-                                        showarrow=False,
-                                        font=dict(color="green")
+                            if macd_data is not None and not macd_data.empty:
+                                # Create MACD plot
+                                fig = go.Figure()
+                                
+                                # Add MACD line
+                                fig.add_trace(
+                                    go.Scatter(
+                                        x=macd_data.index,
+                                        y=macd_data['MACD'],
+                                        mode='lines',
+                                        name='MACD',
+                                        line=dict(color='#1f77b4', width=1.5)
                                     )
-                                ]
-                            )
-                            
-                            st.plotly_chart(fig, use_container_width=True)
-                            
-                            # RSI interpretation
-                            current_rsi = rsi_data['RSI'].iloc[-1]
-                            
-                            st.markdown(f"**Current RSI Value**: {current_rsi:.2f}")
-                            
-                            if current_rsi > 70:
-                                st.markdown("**Interpretation**: <span style='color:red'>Overbought - potential reversal or correction may occur</span>", unsafe_allow_html=True)
-                            elif current_rsi < 30:
-                                st.markdown("**Interpretation**: <span style='color:green'>Oversold - potential buying opportunity</span>", unsafe_allow_html=True)
+                                )
+                                
+                                # Add signal line
+                                fig.add_trace(
+                                    go.Scatter(
+                                        x=macd_data.index,
+                                        y=macd_data['Signal'],
+                                        mode='lines',
+                                        name='Signal',
+                                        line=dict(color='red', width=1.5)
+                                    )
+                                )
+                                
+                                # Add histogram
+                                colors = ['green' if val >= 0 else 'red' for val in macd_data['Histogram']]
+                                
+                                fig.add_trace(
+                                    go.Bar(
+                                        x=macd_data.index,
+                                        y=macd_data['Histogram'],
+                                        name='Histogram',
+                                        marker_color=colors
+                                    )
+                                )
+                                
+                                fig.update_layout(
+                                    title="MACD Indicator",
+                                    yaxis_title="Value",
+                                    xaxis_title="Date",
+                                    hovermode="x unified",
+                                    legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
+                                    height=300
+                                )
+                                
+                                st.plotly_chart(fig, use_container_width=True)
+                                
+                                # MACD Interpretation
+                                macd_signal = tech_analysis.interpret_macd()
+                                signal_color = "green" if "bullish" in macd_signal.lower() else "red" if "bearish" in macd_signal.lower() else "orange"
+                                st.markdown(f"**MACD Signal:** <span style='color:{signal_color}'>{macd_signal}</span>", unsafe_allow_html=True)
                             else:
-                                st.markdown("**Interpretation**: <span style='color:orange'>Neutral - neither overbought nor oversold</span>", unsafe_allow_html=True)
-                            
-                            st.markdown("""
-                            **About RSI**:
-                            The Relative Strength Index (RSI) measures the speed and change of price movements on a scale of 0 to 100. 
-                            RSI above 70 is generally considered overbought, while RSI below 30 is considered oversold.
-                            """)
-                            
-                        else:
-                            st.error(f"No RSI data available for {ticker}")
-                    
-                    # Tab 2: MACD
-                    with tech_tab2:
-                        # Get MACD based on selected timeframe
-                        macd_data = technical.get_macd(timeframe)
+                                st.error("Could not calculate MACD")
                         
-                        if not macd_data.empty:
-                            # Create interactive Plotly chart
-                            fig = go.Figure()
+                        with col2:
+                            # RSI
+                            st.markdown("### RSI")
                             
-                            # Add MACD line
-                            fig.add_trace(go.Scatter(
-                                x=macd_data.index,
-                                y=macd_data['MACD'],
-                                name='MACD',
-                                line=dict(color='blue', width=2)
-                            ))
+                            rsi_data = tech_analysis.get_rsi(timeframe)
                             
-                            # Add Signal line
-                            fig.add_trace(go.Scatter(
-                                x=macd_data.index,
-                                y=macd_data['Signal'],
-                                name='Signal',
-                                line=dict(color='red', width=1)
-                            ))
-                            
-                            # Add Histogram
-                            colors = ['green' if val >= 0 else 'red' for val in macd_data['Histogram']]
-                            
-                            fig.add_trace(go.Bar(
-                                x=macd_data.index,
-                                y=macd_data['Histogram'],
-                                name='Histogram',
-                                marker_color=colors
-                            ))
-                            
-                            # Add zero line
-                            fig.add_shape(
-                                type="line",
-                                x0=macd_data.index[0],
-                                y0=0,
-                                x1=macd_data.index[-1],
-                                y1=0,
-                                line=dict(color="gray", width=1, dash="dash")
-                            )
-                            
-                            # Customize layout
-                            fig.update_layout(
-                                title=f'{ticker} Moving Average Convergence Divergence (MACD)',
-                                xaxis_title='Date',
-                                yaxis_title='Value',
-                                height=400,
-                                template="plotly_dark",
-                                legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
-                            )
-                            
-                            st.plotly_chart(fig, use_container_width=True)
-                            
-                            # MACD interpretation
-                            macd_signal = technical.interpret_macd()
-                            
-                            signal_color = "green" if "bullish" in macd_signal.lower() else "red" if "bearish" in macd_signal.lower() else "orange"
-                            st.markdown(f"**MACD Signal**: <span style='color:{signal_color}'>{macd_signal}</span>", unsafe_allow_html=True)
-                            
-                            st.markdown("""
-                            **About MACD**:
-                            The Moving Average Convergence Divergence (MACD) is a trend-following momentum indicator.
-                            - When MACD crosses above the signal line, it's a bullish signal
-                            - When MACD crosses below the signal line, it's a bearish signal
-                            - The histogram represents the difference between MACD and the signal line
-                            """)
-                            
-                        else:
-                            st.error(f"No MACD data available for {ticker}")
-                    
-                    # Tab 3: Bollinger Bands
-                    with tech_tab3:
-                        # Get Bollinger Bands based on selected timeframe
-                        bb_data = technical.get_bollinger_bands(timeframe)
-                        
-                        if not bb_data.empty:
-                            # Create interactive Plotly chart
-                            fig = go.Figure()
-                            
-                            # Add price line
-                            fig.add_trace(go.Scatter(
-                                x=bb_data.index,
-                                y=bb_data['Close'],
-                                name='Price',
-                                line=dict(color='white', width=1)
-                            ))
-                            
-                            # Add middle band (20-day SMA)
-                            fig.add_trace(go.Scatter(
-                                x=bb_data.index,
-                                y=bb_data['Middle Band'],
-                                name='Middle Band (20-day SMA)',
-                                line=dict(color='yellow', width=1)
-                            ))
-                            
-                            # Add upper band
-                            fig.add_trace(go.Scatter(
-                                x=bb_data.index,
-                                y=bb_data['Upper Band'],
-                                name='Upper Band (+2σ)',
-                                line=dict(color='red', width=1)
-                            ))
-                            
-                            # Add lower band
-                            fig.add_trace(go.Scatter(
-                                x=bb_data.index,
-                                y=bb_data['Lower Band'],
-                                name='Lower Band (-2σ)',
-                                line=dict(color='green', width=1)
-                            ))
-                            
-                            # Customize layout
-                            fig.update_layout(
-                                title=f'{ticker} Bollinger Bands',
-                                xaxis_title='Date',
-                                yaxis_title='Price ($)',
-                                height=500,
-                                template="plotly_dark",
-                                legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
-                            )
-                            
-                            st.plotly_chart(fig, use_container_width=True)
-                            
-                            # Bollinger Bands interpretation
-                            bb_signal = technical.interpret_bollinger_bands()
-                            
-                            signal_color = "green" if "bullish" in bb_signal.lower() else "red" if "bearish" in bb_signal.lower() else "orange"
-                            st.markdown(f"**Bollinger Bands Signal**: <span style='color:{signal_color}'>{bb_signal}</span>", unsafe_allow_html=True)
-                            
-                            st.markdown("""
-                            **About Bollinger Bands**:
-                            Bollinger Bands consist of a middle band (20-day simple moving average) and two outer bands that represent price volatility.
-                            - When price touches or breaks through the upper band, it may indicate overbought conditions
-                            - When price touches or breaks through the lower band, it may indicate oversold conditions
-                            - During trending markets, prices can "ride" the bands for extended periods
-                            """)
-                            
-                        else:
-                            st.error(f"No Bollinger Bands data available for {ticker}")
-                    
-                    # Summary of technical signals
-                    st.markdown("### Technical Analysis Summary")
-                    
-                    tech_signals = technical.get_technical_signals()
-                    
-                    for category, signals in tech_signals.items():
-                        st.markdown(f"**{category}**")
-                        for signal_name, details in signals.items():
-                            signal_value = details['value']
-                            signal_interp = details['interpretation']
-                            signal_color = "green" if "bullish" in signal_interp.lower() else "red" if "bearish" in signal_interp.lower() else "orange"
-                            
-                            st.markdown(f"- {signal_name}: {signal_value} (<span style='color:{signal_color}'>{signal_interp}</span>)", unsafe_allow_html=True)
-
-                # Tab 5: News & Sentiment
-                with tab5:
-                    st.subheader("Recent News & Sentiment Analysis")
-                    
-                    # Get news for the ticker
-                    news_articles = get_stock_news(ticker)
-                    
-                    if news_articles:
-                        # Calculate sentiment scores
-                        sentiment_scores = []
-                        
-                        for article in news_articles:
-                            # Placeholder for sentiment analysis - would use NLP in a real app
-                            # Here, we'll use a simple random score for demonstration
-                            sentiment = np.random.uniform(-1, 1)
-                            sentiment_scores.append(sentiment)
-                        
-                        # Display articles
-                        for i, article in enumerate(news_articles):
-                            col1, col2 = st.columns([1, 4])
-                            
-                            date_str = article.get('date', 'Unknown date')
-                            
-                            # Determine sentiment icon
-                            sentiment = sentiment_scores[i]
-                            if sentiment > 0.3:
-                                sentiment_icon = "👍"
-                            elif sentiment < -0.3:
-                                sentiment_icon = "👎"
+                            if rsi_data is not None and not rsi_data.empty:
+                                # Create RSI plot
+                                fig = go.Figure()
+                                
+                                # Add RSI line
+                                fig.add_trace(
+                                    go.Scatter(
+                                        x=rsi_data.index,
+                                        y=rsi_data['RSI'],
+                                        mode='lines',
+                                        name='RSI',
+                                        line=dict(color='purple', width=1.5)
+                                    )
+                                )
+                                
+                                # Add overbought/oversold lines
+                                fig.add_shape(
+                                    type="line",
+                                    x0=rsi_data.index[0],
+                                    y0=70,
+                                    x1=rsi_data.index[-1],
+                                    y1=70,
+                                    line=dict(color="red", width=1, dash="dash")
+                                )
+                                
+                                fig.add_shape(
+                                    type="line",
+                                    x0=rsi_data.index[0],
+                                    y0=30,
+                                    x1=rsi_data.index[-1],
+                                    y1=30,
+                                    line=dict(color="green", width=1, dash="dash")
+                                )
+                                
+                                fig.update_layout(
+                                    title="RSI (14-Day)",
+                                    yaxis_title="RSI Value",
+                                    xaxis_title="Date",
+                                    yaxis=dict(range=[0, 100]),
+                                    hovermode="x unified",
+                                    height=400
+                                )
+                                
+                                st.plotly_chart(fig, use_container_width=True)
+                                
+                                # RSI Interpretation
+                                current_rsi = rsi_data['RSI'].iloc[-1]
+                                
+                                if current_rsi > 70:
+                                    rsi_signal = "Overbought - Potential sell signal"
+                                    signal_color = "red"
+                                elif current_rsi < 30:
+                                    rsi_signal = "Oversold - Potential buy signal"
+                                    signal_color = "green"
+                                else:
+                                    rsi_signal = "Neutral"
+                                    signal_color = "orange"
+                                
+                                st.markdown(f"**Current RSI:** <span style='color:{signal_color}'>{current_rsi:.2f} - {rsi_signal}</span>", unsafe_allow_html=True)
                             else:
-                                sentiment_icon = "🔄"
+                                st.error("Could not calculate RSI")
                             
-                            with col1:
-                                st.markdown(f"**{date_str}**")
-                                st.markdown(f"**{sentiment_icon}**")
+                            # Bollinger Bands
+                            st.markdown("### Bollinger Bands")
                             
-                            with col2:
-                                st.markdown(f"**[{article.get('title', 'No Title')}]({article.get('link', '#')})**")
-                                summary = article.get('summary', 'No summary available')
-                                st.markdown(f"{summary[:200]}..." if len(summary) > 200 else summary)
+                            bb_data = tech_analysis.get_bollinger_bands(timeframe)
                             
-                            st.markdown("---")
+                            if bb_data is not None and not bb_data.empty:
+                                # Create Bollinger Bands plot
+                                fig = go.Figure()
+                                
+                                # Add price line
+                                fig.add_trace(
+                                    go.Scatter(
+                                        x=bb_data.index,
+                                        y=bb_data['Close'],
+                                        mode='lines',
+                                        name='Price',
+                                        line=dict(color='#1f77b4', width=2)
+                                    )
+                                )
+                                
+                                # Add upper band
+                                fig.add_trace(
+                                    go.Scatter(
+                                        x=bb_data.index,
+                                        y=bb_data['Upper Band'],
+                                        mode='lines',
+                                        name='Upper Band',
+                                        line=dict(color='red', width=1, dash='dash')
+                                    )
+                                )
+                                
+                                # Add middle band
+                                fig.add_trace(
+                                    go.Scatter(
+                                        x=bb_data.index,
+                                        y=bb_data['Middle Band'],
+                                        mode='lines',
+                                        name='Middle Band (SMA)',
+                                        line=dict(color='orange', width=1)
+                                    )
+                                )
+                                
+                                # Add lower band
+                                fig.add_trace(
+                                    go.Scatter(
+                                        x=bb_data.index,
+                                        y=bb_data['Lower Band'],
+                                        mode='lines',
+                                        name='Lower Band',
+                                        line=dict(color='green', width=1, dash='dash')
+                                    )
+                                )
+                                
+                                fig.update_layout(
+                                    title="Bollinger Bands",
+                                    yaxis_title="Price (USD)",
+                                    xaxis_title="Date",
+                                    hovermode="x unified",
+                                    legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
+                                    height=300
+                                )
+                                
+                                st.plotly_chart(fig, use_container_width=True)
+                                
+                                # Bollinger Bands Interpretation
+                                bb_signal = tech_analysis.interpret_bollinger_bands()
+                                signal_color = "green" if "bullish" in bb_signal.lower() else "red" if "bearish" in bb_signal.lower() else "orange"
+                                st.markdown(f"**Bollinger Bands Signal:** <span style='color:{signal_color}'>{bb_signal}</span>", unsafe_allow_html=True)
+                            else:
+                                st.error("Could not calculate Bollinger Bands")
+                        
+                        # Summary of all technical signals
+                        st.subheader("Technical Signals Summary")
+                        
+                        # Create a DataFrame for display
+                        signals_df = pd.DataFrame({
+                            'Indicator': list(signals.keys()),
+                            'Signal': list(signals.values())
+                        })
+                        
+                        # Count signals by type
+                        buy_count = sum(1 for signal in signals.values() if "buy" in signal.lower())
+                        sell_count = sum(1 for signal in signals.values() if "sell" in signal.lower())
+                        neutral_count = sum(1 for signal in signals.values() if "neutral" in signal.lower())
+                        
+                        # Create columns for the summary
+                        col1, col2, col3 = st.columns(3)
+                        
+                        with col1:
+                            st.markdown(f"<div style='text-align: center; color: green; font-weight: bold; font-size: 24px;'>{buy_count}</div><div style='text-align: center;'>Buy Signals</div>", unsafe_allow_html=True)
+                        
+                        with col2:
+                            st.markdown(f"<div style='text-align: center; color: red; font-weight: bold; font-size: 24px;'>{sell_count}</div><div style='text-align: center;'>Sell Signals</div>", unsafe_allow_html=True)
+                        
+                        with col3:
+                            st.markdown(f"<div style='text-align: center; color: orange; font-weight: bold; font-size: 24px;'>{neutral_count}</div><div style='text-align: center;'>Neutral Signals</div>", unsafe_allow_html=True)
+                        
+                        # Display signals in a table
+                        st.dataframe(signals_df, use_container_width=True, height=200)
                     
-                    else:
-                        st.info(f"No recent news found for {ticker}")
-            except Exception as e:
-                st.error(f"Error analyzing {ticker}: {str(e)}")
-                st.info("Please check if the ticker symbol is correct and try again.")
-
-    else:
-        # Display welcome message and stock market image for new users
-        st.markdown("""
-        ## Welcome to the Ticker AI Stock Market Analyzer
+                    with tab3:
+                        st.subheader("Fundamental Analysis")
+                        
+                        # Initialize fundamental analysis
+                        fund_analysis = FundamentalAnalysis(ticker)
+                        
+                        # Create tabs for different fundamental data
+                        subtab1, subtab2, subtab3, subtab4 = st.tabs(["Key Ratios", "Income Statement", "Balance Sheet", "Recommendations"])
+                        
+                        with subtab1:
+                            st.markdown("### Valuation Ratios")
+                            
+                            # Get valuation ratios
+                            valuation_ratios = fund_analysis.get_valuation_ratios()
+                            
+                            if valuation_ratios is not None and not valuation_ratios.empty:
+                                # Display as a table
+                                st.dataframe(valuation_ratios, use_container_width=True)
+                                
+                                # Plot P/E ratio if available
+                                if 'trailingPE' in valuation_ratios.columns:
+                                    st.markdown("#### P/E Ratio Comparison")
+                                    
+                                    # Get sector average P/E as a placeholder
+                                    sector_pe = 20.5  # This would ideally come from real data
+                                    
+                                    # Create a bar chart for P/E comparison
+                                    pe_fig = go.Figure()
+                                    
+                                    # Add company P/E
+                                    company_pe = valuation_ratios['trailingPE'].iloc[-1]
+                                    
+                                    pe_data = pd.DataFrame({
+                                        'Category': [f"{ticker} P/E", "Sector Average"],
+                                        'P/E Ratio': [company_pe, sector_pe]
+                                    })
+                                    
+                                    # Plot P/E comparison
+                                    pe_fig = px.bar(
+                                        pe_data,
+                                        x='Category',
+                                        y='P/E Ratio',
+                                        color='Category',
+                                        color_discrete_map={
+                                            f"{ticker} P/E": 'blue',
+                                            "Sector Average": 'gray'
+                                        }
+                                    )
+                                    
+                                    pe_fig.update_layout(
+                                        title="P/E Ratio Comparison",
+                                        showlegend=False,
+                                        height=300
+                                    )
+                                    
+                                    st.plotly_chart(pe_fig, use_container_width=True)
+                            else:
+                                st.info("Valuation ratios not available for this stock")
+                            
+                            st.markdown("### Profitability Ratios")
+                            
+                            # Get profitability ratios
+                            profit_ratios = fund_analysis.get_profitability_ratios()
+                            
+                            if profit_ratios is not None and not profit_ratios.empty:
+                                # Display as a table
+                                st.dataframe(profit_ratios, use_container_width=True)
+                            else:
+                                st.info("Profitability ratios not available for this stock")
+                        
+                        with subtab2:
+                            st.markdown("### Income Statement")
+                            
+                            # Get income statement
+                            income_stmt = fund_analysis.get_income_statement()
+                            
+                            if income_stmt is not None and not income_stmt.empty:
+                                # Display as a table
+                                st.dataframe(income_stmt, use_container_width=True)
+                                
+                                # Plot revenue and earnings
+                                if 'totalRevenue' in income_stmt.columns and 'netIncome' in income_stmt.columns:
+                                    st.markdown("#### Revenue and Earnings Trend")
+                                    
+                                    # Create a figure
+                                    fig = go.Figure()
+                                    
+                                    # Add revenue bars
+                                    fig.add_trace(
+                                        go.Bar(
+                                            x=income_stmt.index,
+                                            y=income_stmt['totalRevenue'],
+                                            name='Revenue',
+                                            marker_color='blue'
+                                        )
+                                    )
+                                    
+                                    # Add earnings line
+                                    fig.add_trace(
+                                        go.Scatter(
+                                            x=income_stmt.index,
+                                            y=income_stmt['netIncome'],
+                                            name='Net Income',
+                                            marker_color='green',
+                                            mode='lines+markers'
+                                        )
+                                    )
+                                    
+                                    fig.update_layout(
+                                        title="Revenue and Net Income",
+                                        xaxis_title="Date",
+                                        yaxis_title="USD",
+                                        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
+                                        height=400
+                                    )
+                                    
+                                    st.plotly_chart(fig, use_container_width=True)
+                            else:
+                                st.info("Income statement not available for this stock")
+                        
+                        with subtab3:
+                            st.markdown("### Balance Sheet")
+                            
+                            # Get balance sheet
+                            balance_sheet = fund_analysis.get_balance_sheet()
+                            
+                            if balance_sheet is not None and not balance_sheet.empty:
+                                # Display as a table
+                                st.dataframe(balance_sheet, use_container_width=True)
+                                
+                                # Plot assets and liabilities
+                                if 'totalAssets' in balance_sheet.columns and 'totalLiab' in balance_sheet.columns:
+                                    st.markdown("#### Assets, Liabilities and Equity")
+                                    
+                                    # Calculate equity
+                                    balance_sheet['totalEquity'] = balance_sheet['totalAssets'] - balance_sheet['totalLiab']
+                                    
+                                    # Create a stacked bar chart
+                                    fig = go.Figure()
+                                    
+                                    # Add liabilities
+                                    fig.add_trace(
+                                        go.Bar(
+                                            x=balance_sheet.index,
+                                            y=balance_sheet['totalLiab'],
+                                            name='Liabilities',
+                                            marker_color='red'
+                                        )
+                                    )
+                                    
+                                    # Add equity
+                                    fig.add_trace(
+                                        go.Bar(
+                                            x=balance_sheet.index,
+                                            y=balance_sheet['totalEquity'],
+                                            name='Equity',
+                                            marker_color='green'
+                                        )
+                                    )
+                                    
+                                    # Add total assets line
+                                    fig.add_trace(
+                                        go.Scatter(
+                                            x=balance_sheet.index,
+                                            y=balance_sheet['totalAssets'],
+                                            name='Total Assets',
+                                            marker_color='blue',
+                                            mode='lines+markers'
+                                        )
+                                    )
+                                    
+                                    fig.update_layout(
+                                        title="Assets, Liabilities and Equity",
+                                        xaxis_title="Date",
+                                        yaxis_title="USD",
+                                        barmode='stack',
+                                        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
+                                        height=400
+                                    )
+                                    
+                                    st.plotly_chart(fig, use_container_width=True)
+                            else:
+                                st.info("Balance sheet not available for this stock")
+                        
+                        with subtab4:
+                            st.markdown("### Analyst Recommendations")
+                            
+                            # Get analyst recommendations
+                            recommendations = fund_analysis.get_analyst_recommendations()
+                            
+                            if recommendations is not None and not recommendations.empty:
+                                # Display as a table
+                                st.dataframe(recommendations, use_container_width=True)
+                                
+                                # Create a summary of recent recommendations
+                                recent_recommendations = recommendations.iloc[:5]
+                                
+                                # Plot recommendations
+                                fig = px.bar(
+                                    recent_recommendations,
+                                    x=recent_recommendations.index,
+                                    y=['strongBuy', 'buy', 'hold', 'sell', 'strongSell'],
+                                    title="Recent Analyst Recommendations",
+                                    color_discrete_map={
+                                        'strongBuy': 'darkgreen',
+                                        'buy': 'green',
+                                        'hold': 'orange',
+                                        'sell': 'red',
+                                        'strongSell': 'darkred'
+                                    }
+                                )
+                                
+                                fig.update_layout(
+                                    barmode='stack',
+                                    yaxis_title="Number of Analysts",
+                                    xaxis_title="Date",
+                                    legend_title="Recommendation",
+                                    height=400
+                                )
+                                
+                                st.plotly_chart(fig, use_container_width=True)
+                            else:
+                                st.info("Analyst recommendations not available for this stock")
+                    
+                    with tab4:
+                        st.subheader("Recent News")
+                        
+                        # Get news articles
+                        news_articles = get_stock_news(ticker)
+                        
+                        if news_articles:
+                            # Calculate sentiment scores
+                            sentiment_scores = []
+                            
+                            for article in news_articles:
+                                # Placeholder for sentiment analysis - would use NLP in a real app
+                                # Here, we'll use a simple random score for demonstration
+                                sentiment = np.random.uniform(-1, 1)
+                                sentiment_scores.append(sentiment)
+                            
+                            # Display articles
+                            for i, article in enumerate(news_articles):
+                                col1, col2 = st.columns([1, 4])
+                                
+                                date_str = article.get('date', 'Unknown date')
+                                
+                                # Determine sentiment icon
+                                sentiment = sentiment_scores[i]
+                                if sentiment > 0.3:
+                                    sentiment_icon = "👍"
+                                elif sentiment < -0.3:
+                                    sentiment_icon = "👎"
+                                else:
+                                    sentiment_icon = "🔄"
+                                
+                                with col1:
+                                    st.markdown(f"**{date_str}**")
+                                    st.markdown(f"**{sentiment_icon}**")
+                                
+                                with col2:
+                                    st.markdown(f"**[{article.get('title', 'No Title')}]({article.get('link', '#')})**")
+                                    summary = article.get('summary', 'No summary available')
+                                    st.markdown(f"{summary[:200]}..." if len(summary) > 200 else summary)
+                                
+                                st.markdown("---")
+                        
+                        else:
+                            st.info(f"No recent news found for {ticker}")
+                except Exception as e:
+                    st.error(f"Error analyzing {ticker}: {str(e)}")
+                    st.info("Please check if the ticker symbol is correct and try again.")
         
-        This tool helps you analyze stocks with comprehensive financial data and visualizations.
-        
-        **To get started:**
-        1. Enter a stock ticker symbol in the sidebar (e.g., AAPL for Apple)
-        2. Select your preferred timeframe
-        3. Click "Analyze Stock" to see the results
-        
-        You'll get detailed information including:
-        - Current price and key metrics
-        - Interactive price charts
-        - Fundamental analysis
-        - Technical indicators
-        - News sentiment
-        - Buy rating score (1-10)
-        """)
+        else:
+            # Display welcome message and stock market image for new users
+            st.markdown("""
+            ## Welcome to the Ticker AI Stock Market Analyzer
+            
+            This tool helps you analyze stocks with comprehensive financial data and visualizations.
+            
+            **To get started:**
+            1. Enter a stock ticker symbol in the sidebar (e.g., AAPL for Apple)
+            2. Select your preferred timeframe
+            3. Click "Analyze Stock" to see the results
+            
+            You'll get detailed information including:
+            - Current price and change
+            - Key financial metrics
+            - Technical analysis with indicators
+            - Fundamental analysis with financial statements
+            - Recent news about the company
+            - A proprietary buy rating score from 1-10
+            
+            All data comes from reliable financial sources.
+            """)
+            
+            # Display stock market image
+            st.image("generated-icon.png", use_column_width=True)
