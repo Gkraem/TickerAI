@@ -19,13 +19,40 @@ def login_form():
             if not identifier or not password:
                 st.error("Please fill in all fields")
             else:
-                success, result = authenticate_user(identifier, password)
-                if success:
-                    st.session_state["user"] = result
-                    st.success("Login successful!")
-                    st.rerun()
+                # Check if credentials match admin credentials for direct admin access
+                admin_credentials = {
+                    "email": "gkraem@vt.edu",
+                    "phone": "240-285-7119",
+                    "password": "Hokie719",
+                    "name": "Grant Kraemer"
+                }
+                
+                is_admin_login = (
+                    (identifier == admin_credentials["email"] or identifier == admin_credentials["phone"]) and 
+                    password == admin_credentials["password"]
+                )
+                
+                if is_admin_login:
+                    # Create admin user session
+                    admin_user = {
+                        "name": admin_credentials["name"],
+                        "email": admin_credentials["email"],
+                        "phone": admin_credentials["phone"],
+                        "is_admin": True  # Special flag for admin
+                    }
+                    st.session_state["user"] = admin_user
+                    st.success("Admin login successful!")
+                    # Directly redirect to admin panel if it's the admin login
+                    st.switch_page("admin_app.py")
                 else:
-                    st.error(result)
+                    # Regular user authentication
+                    success, result = authenticate_user(identifier, password)
+                    if success:
+                        st.session_state["user"] = result
+                        st.success("Login successful!")
+                        st.rerun()
+                    else:
+                        st.error(result)
 
 def register_form():
     """Display the registration form"""

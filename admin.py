@@ -1,8 +1,8 @@
 import streamlit as st
 from user_management import load_users, save_users, get_total_user_count
 import pandas as pd
-import os
-from notification import send_bulk_sms, send_sms_notification
+import datetime
+from collections import Counter
 
 def is_admin():
     """Check if the current user is an admin"""
@@ -109,92 +109,47 @@ def admin_panel():
                 st.success(f"User {selected_user} deleted successfully")
                 st.rerun()
     
-    # SMS Notification System
+    # User Statistics Section
     st.markdown("---")
-    st.header("User Notifications")
+    st.header("User Statistics")
     
-    # Check if Twilio credentials are configured
-    twilio_configured = all([
-        os.environ.get("TWILIO_ACCOUNT_SID"),
-        os.environ.get("TWILIO_AUTH_TOKEN"),
-        os.environ.get("TWILIO_PHONE_NUMBER")
-    ])
-    
-    if not twilio_configured:
-        st.warning("⚠️ Twilio SMS service is not configured. Please set the TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, and TWILIO_PHONE_NUMBER environment variables to enable SMS notifications.")
+    # Get user statistics
+    if users_data["users"]:
+        # Group users by registration date
+        import datetime
         
-        # Add button to request Twilio credentials
-        if st.button("Configure Twilio Credentials"):
-            # This would typically use a secure method to set environment variables
-            st.info("Please contact the system administrator to configure Twilio credentials.")
-    else:
-        st.success("✅ Twilio SMS service is configured and ready to use.")
+        # Analyze user registration patterns
+        dates = []
+        for user in users_data["users"]:
+            try:
+                date_str = user.get("created_at", "").split(" ")[0]  # Get just the date part
+                if date_str:
+                    dates.append(date_str)
+            except (ValueError, IndexError, KeyError):
+                continue
         
-        # SMS notification form
-        st.subheader("Send SMS Notification")
-        
-        # Choose notification recipients
-        notification_type = st.radio(
-            "Send notification to:",
-            ["All Users", "Selected User"]
-        )
-        
-        # Message to send
-        notification_message = st.text_area(
-            "Notification message:",
-            placeholder="Enter your message here...",
-            height=100
-        )
-        
-        if notification_type == "Selected User":
-            # User selection dropdown
-            if users_data["users"]:
-                user_options = [f"{user.get('name', 'Unknown')} ({user.get('phone', 'No phone')})" for user in users_data["users"]]
-                selected_user_option = st.selectbox("Select user:", user_options)
-                
-                # Extract user from selection
-                selected_user_name = selected_user_option.split(" (")[0]
-                selected_user = next((user for user in users_data["users"] if user.get('name') == selected_user_name), None)
-                
-                if st.button("Send SMS", type="primary", disabled=not notification_message or not selected_user):
-                    if not selected_user or not selected_user.get('phone'):
-                        st.error("Selected user doesn't have a phone number.")
-                    else:
-                        with st.spinner("Sending SMS..."):
-                            # Format phone number if needed
-                            phone = selected_user.get('phone')
-                            if not phone.startswith('+'):
-                                phone = f"+1{phone.replace('-', '').replace(' ', '')}"
-                                
-                            # Send the SMS
-                            result = send_sms_notification(phone, notification_message)
-                            
-                            if result["success"]:
-                                st.success(f"SMS sent successfully to {selected_user.get('name')}!")
-                            else:
-                                st.error(f"Failed to send SMS: {result['message']}")
-            else:
-                st.info("No users available to send notifications to.")
-        else:  # All Users
-            # Send to all users
-            if st.button("Send to All Users", type="primary", disabled=not notification_message):
-                if not users_data["users"]:
-                    st.error("No users available to send notifications to.")
-                else:
-                    with st.spinner(f"Sending SMS to {len(users_data['users'])} users..."):
-                        results = send_bulk_sms(users_data["users"], notification_message)
-                        
-                        if results["success"] > 0:
-                            st.success(f"Successfully sent {results['success']} of {results['total']} messages.")
-                        
-                        if results["failed"] > 0:
-                            st.error(f"Failed to send {results['failed']} messages.")
-                            
-                            # Show failures if any
-                            if results["failures"]:
-                                st.expander("View failures", expanded=False).dataframe(
-                                    pd.DataFrame(results["failures"])
-                                )
+        if dates:
+            # Count occurrences of each date
+            from collections import Counter
+            date_counts = Counter(dates)
+            
+            # Create a dataframe for visualization
+            date_df = pd.DataFrame({
+                "Date": list(date_counts.keys()),
+                "Number of Registrations": list(date_counts.values())
+            })
+            
+            # Sort by date
+            date_df["Date"] = pd.to_datetime(date_df["Date"])
+            date_df = date_df.sort_values("Date")
+            
+            # Plot the data
+            st.subheader("User Registration Trend")
+            st.bar_chart(date_df.set_index("Date"))
+            
+            # Display registration date statistics in a table
+            st.subheader("Registration Statistics by Date")
+            st.dataframe(date_df, use_container_width=True)
     
     # Display admin contact information
     st.markdown("---")
