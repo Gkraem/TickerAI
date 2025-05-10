@@ -91,8 +91,8 @@ def auth_page():
             }}
             </style>
             <div class="full-centered">
-                <img src="data:image/svg+xml;base64,{base64.b64encode(svg_content.encode()).decode()}" width="200" height="200">
-                <p style="color: #a5b4fc; margin-top: 15px; font-size: 18px; white-space: nowrap; width: 100%; text-align: center;">Stock Market Analyzer</p>
+                <img src="data:image/svg+xml;base64,{base64.b64encode(svg_content.encode()).decode()}" width="200" height="200" style="margin-bottom: -10px;">
+                <p style="color: #a5b4fc; margin-top: 0; font-size: 18px; white-space: nowrap; width: 100%; text-align: center;">Stock Market Analyzer</p>
             </div>
             """, unsafe_allow_html=True)
     
