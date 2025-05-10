@@ -373,28 +373,27 @@ Technical analysis reveals bearish patterns with deteriorating price action and 
                             
                             # Add buttons for different time ranges with mobile-friendly layout
                             fig.update_layout(
-                                title=f"{ticker} Price History",
-                                title_font_size=16,
-                                yaxis_title="Price (USD)",
-                                xaxis_title="Date",
-                                hovermode="x unified",
-                                legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="center", x=0.5),
+                                title=dict(
+                                    text=f"{ticker} Price History",
+                                    font=dict(size=16)
+                                ),
+                                xaxis=dict(
+                                    title="Date",
+                                    tickfont=dict(size=10)
+                                ),
+                                yaxis=dict(
+                                    title="Price (USD)",
+                                    tickfont=dict(size=10)
+                                ),
                                 yaxis2=dict(
                                     title="Volume",
-                                    titlefont=dict(size=12),
                                     tickfont=dict(size=10),
                                     overlaying="y",
                                     side="right",
                                     showgrid=False
                                 ),
-                                xaxis=dict(
-                                    titlefont=dict(size=12),
-                                    tickfont=dict(size=10)
-                                ),
-                                yaxis=dict(
-                                    titlefont=dict(size=12),
-                                    tickfont=dict(size=10)
-                                ),
+                                hovermode="x unified",
+                                legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="center", x=0.5),
                                 height=400,  # Reduced height for better mobile view
                                 autosize=True,
                                 margin=dict(l=10, r=10, t=40, b=20)
@@ -490,23 +489,23 @@ Technical analysis reveals bearish patterns with deteriorating price action and 
                                 )
                                 
                                 fig.update_layout(
-                                    title="Price with Moving Averages",
-                                    title_font_size=16,
-                                    yaxis_title="Price (USD)",
-                                    xaxis_title="Date",
+                                    title=dict(
+                                        text="Price with Moving Averages",
+                                        font=dict(size=16)
+                                    ),
+                                    xaxis=dict(
+                                        title="Date",
+                                        tickfont=dict(size=10)
+                                    ),
+                                    yaxis=dict(
+                                        title="Price (USD)",
+                                        tickfont=dict(size=10)
+                                    ),
                                     hovermode="x unified",
                                     legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="center", x=0.5),
                                     height=350,  # Slightly reduced height for mobile
                                     autosize=True,
-                                    margin=dict(l=10, r=10, t=40, b=20),
-                                    xaxis=dict(
-                                        titlefont=dict(size=12),
-                                        tickfont=dict(size=10)
-                                    ),
-                                    yaxis=dict(
-                                        titlefont=dict(size=12),
-                                        tickfont=dict(size=10)
-                                    )
+                                    margin=dict(l=10, r=10, t=40, b=20)
                                 )
                                 
                                 st.plotly_chart(fig, use_container_width=True)
@@ -564,23 +563,23 @@ Technical analysis reveals bearish patterns with deteriorating price action and 
                                 )
                                 
                                 fig.update_layout(
-                                    title="MACD Indicator",
-                                    title_font_size=16,
-                                    yaxis_title="Value",
-                                    xaxis_title="Date",
+                                    title=dict(
+                                        text="MACD Indicator",
+                                        font=dict(size=16)
+                                    ),
+                                    xaxis=dict(
+                                        title="Date",
+                                        tickfont=dict(size=10)
+                                    ),
+                                    yaxis=dict(
+                                        title="Value",
+                                        tickfont=dict(size=10)
+                                    ),
                                     hovermode="x unified",
                                     legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="center", x=0.5),
                                     height=300,
                                     autosize=True,
-                                    margin=dict(l=10, r=10, t=40, b=20),
-                                    xaxis=dict(
-                                        titlefont=dict(size=12),
-                                        tickfont=dict(size=10)
-                                    ),
-                                    yaxis=dict(
-                                        titlefont=dict(size=12),
-                                        tickfont=dict(size=10)
-                                    )
+                                    margin=dict(l=10, r=10, t=40, b=20)
                                 )
                                 
                                 st.plotly_chart(fig, use_container_width=True)
@@ -633,17 +632,17 @@ Technical analysis reveals bearish patterns with deteriorating price action and 
                                 )
                                 
                                 fig.update_layout(
-                                    title="RSI (14-Day)",
-                                    title_font_size=16,
-                                    yaxis_title="RSI Value",
-                                    xaxis_title="Date",
+                                    title=dict(
+                                        text="RSI (14-Day)",
+                                        font=dict(size=16)
+                                    ),
                                     yaxis=dict(
+                                        title="RSI Value",
                                         range=[0, 100],
-                                        titlefont=dict(size=12),
                                         tickfont=dict(size=10)
                                     ),
                                     xaxis=dict(
-                                        titlefont=dict(size=12),
+                                        title="Date",
                                         tickfont=dict(size=10)
                                     ),
                                     hovermode="x unified",
@@ -725,23 +724,23 @@ Technical analysis reveals bearish patterns with deteriorating price action and 
                                 )
                                 
                                 fig.update_layout(
-                                    title="Bollinger Bands",
-                                    title_font_size=16,
-                                    yaxis_title="Price (USD)",
-                                    xaxis_title="Date",
+                                    title=dict(
+                                        text="Bollinger Bands",
+                                        font=dict(size=16)
+                                    ),
+                                    xaxis=dict(
+                                        title="Date",
+                                        tickfont=dict(size=10)
+                                    ),
+                                    yaxis=dict(
+                                        title="Price (USD)",
+                                        tickfont=dict(size=10)
+                                    ),
                                     hovermode="x unified",
                                     legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="center", x=0.5),
                                     height=300,
                                     autosize=True,
-                                    margin=dict(l=10, r=10, t=40, b=20),
-                                    xaxis=dict(
-                                        titlefont=dict(size=12),
-                                        tickfont=dict(size=10)
-                                    ),
-                                    yaxis=dict(
-                                        titlefont=dict(size=12),
-                                        tickfont=dict(size=10)
-                                    )
+                                    margin=dict(l=10, r=10, t=40, b=20)
                                 )
                                 
                                 st.plotly_chart(fig, use_container_width=True)
