@@ -271,18 +271,36 @@ else:
                     
                     st.plotly_chart(fig, use_container_width=True)
                     
+                    # Generate a brief explanation of the rating
+                    st.markdown("#### Rating Explanation")
+                    
+                    # Simple explanation text based on the rating
+                    if buy_rating >= 7.5:
+                        explanation = f"**Strong Buy ({buy_rating:.1f}/10):** {ticker} shows excellent technical momentum, strong fundamentals, and positive market sentiment. Consider this stock for potential significant growth opportunities."
+                    elif buy_rating >= 6:
+                        explanation = f"**Buy ({buy_rating:.1f}/10):** {ticker} demonstrates good technical indicators, solid fundamentals, and favorable market sentiment. This stock appears to be a good investment opportunity."
+                    elif buy_rating >= 4:
+                        explanation = f"**Hold ({buy_rating:.1f}/10):** {ticker} shows mixed signals with some positive aspects but also areas of concern. Consider maintaining current positions without increasing exposure."
+                    else:
+                        explanation = f"**Sell ({buy_rating:.1f}/10):** {ticker} exhibits concerning technical signals, weak fundamentals, or negative market sentiment. Consider reducing exposure or looking for better opportunities."
+                    
+                    st.markdown(explanation)
+                    
                     # Display rating components
                     st.markdown("#### Rating Components")
                     col1, col2, col3 = st.columns(3)
                     
                     with col1:
-                        st.metric("Technical Score", f"{rating_components.get('technical', 0):.1f}/10")
-                    
+                        technical_score = rating_components.get('technical', 0)
+                        st.metric("Technical Score", f"{technical_score:.1f}/10")
+                        
                     with col2:
-                        st.metric("Fundamental Score", f"{rating_components.get('fundamental', 0):.1f}/10")
-                    
+                        fundamental_score = rating_components.get('fundamental', 0)
+                        st.metric("Fundamental Score", f"{fundamental_score:.1f}/10")
+                        
                     with col3:
-                        st.metric("Sentiment Score", f"{rating_components.get('sentiment', 0):.1f}/10")
+                        sentiment_score = rating_components.get('sentiment', 0)
+                        st.metric("Sentiment Score", f"{sentiment_score:.1f}/10")
                     
                     # Create tabs for different analyses
                     tab1, tab2, tab3, tab4 = st.tabs(["Price History", "Technical Analysis", "Fundamentals", "News"])

@@ -64,7 +64,12 @@ header[data-testid="stHeader"] {
     text-align: center;
     padding: 10px 0;
     border-top: 1px solid #333;
-    z-index: 9999; /* Very high z-index to ensure footer is above everything */
+    z-index: 999999; /* Extremely high z-index to ensure footer is above EVERYTHING */
+}
+
+/* Override sidebar to ensure it doesn't appear over footer */
+section[data-testid="stSidebar"] {
+    z-index: 99999 !important; /* Lower than footer's z-index */
 }
 
 .footer-content {
