@@ -159,6 +159,77 @@ section[data-testid="stSidebar"] h3 {
     margin-bottom: 1rem;
 }
 
+/* Auth page vertical centering */
+.element-container:has(.auth-header) {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Auth container */
+.auth-container {
+    max-width: 450px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0 20px; 
+}
+
+/* Auth header styling */
+.auth-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.auth-logo-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 5px;
+}
+
+.auth-logo {
+    display: inline-flex;
+    margin-right: 10px;
+}
+
+.auth-logo svg, .auth-logo img {
+    height: 40px;
+    width: 40px;
+}
+
+.auth-title {
+    font-size: 32px;
+    font-weight: bold;
+    color: white;
+    background: linear-gradient(90deg, #3b82f6, #60a5fa);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.auth-subtitle {
+    color: #a5b4fc;
+    margin-top: 5px;
+    font-size: 16px;
+}
+
+/* Remove form borders */
+.stForm > div:first-child {
+    border: none !important;
+    box-shadow: none !important;
+    background-color: transparent !important;
+}
+
+/* Style form inputs */
+.stTextInput > div {
+    border-radius: 6px !important;
+}
+
 /* Fix main content area */
 .stApp {
     height: 100vh !important;

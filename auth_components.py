@@ -9,9 +9,16 @@ def render_svg(svg_file):
 
 def display_auth_header():
     """Display the auth header with logo"""
-    st.markdown(f'<div class="auth-logo">{render_svg("assets/logo.svg")}</div>', unsafe_allow_html=True)
-    st.markdown("<h1 style='text-align: center; color: white; font-size: 28px;'>Ticker AI</h1>", unsafe_allow_html=True)
-    st.markdown("<p style='text-align: center; color: #CCCCCC; margin-bottom: 30px;'>Stock Market Analyzer</p>", unsafe_allow_html=True)
+    # Create a centered logo with Ticker AI text
+    st.markdown("""
+    <div class="auth-header">
+        <div class="auth-logo-container">
+            <span class="auth-logo">{}</span>
+            <span class="auth-title">Ticker AI</span>
+        </div>
+        <p class="auth-subtitle">Stock Market Analyzer</p>
+    </div>
+    """.format(render_svg("assets/logo.svg")), unsafe_allow_html=True)
 
 def login_form():
     """Display the login form"""
@@ -65,12 +72,18 @@ def register_form():
 
 def auth_page():
     """Main authentication page with tabs for login and registration"""
+    # Add some vertical space for better centering
+    st.markdown("<div style='height: 100px;'></div>", unsafe_allow_html=True)
+    
     # Display logo and title
     display_auth_header()
     
-    # Auth tabs
+    # Auth tabs with custom styling
     if "auth_tab" not in st.session_state:
         st.session_state["auth_tab"] = "login"
+    
+    # Create a container for the tabs and form
+    st.markdown("<div class='auth-container'>", unsafe_allow_html=True)
     
     col1, col2 = st.columns(2)
     
@@ -91,6 +104,8 @@ def auth_page():
         login_form()
     else:
         register_form()
+        
+    st.markdown("</div>", unsafe_allow_html=True)
 
 def logout_button():
     """Display a logout button in the sidebar"""
