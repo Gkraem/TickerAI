@@ -14,6 +14,7 @@ from utils import format_large_number, get_stock_news
 from data_sources import DATA_SOURCES
 from user_management import is_authenticated, get_session_user
 from auth_components import auth_page, logout_button
+from admin import admin_panel, is_admin
 
 # Set page configuration without title to avoid header bar
 st.set_page_config(
@@ -69,19 +70,38 @@ else:
         st.sidebar.markdown("### Welcome")
     logout_button()
     
+    # Add admin panel link for admin users
+    if is_admin():
+        st.sidebar.markdown("---")
+        if st.sidebar.button("Admin Panel", type="secondary"):
+            st.session_state["show_admin"] = True
+            st.rerun()
+    
+    # Initialize admin state if not present
+    if "show_admin" not in st.session_state:
+        st.session_state["show_admin"] = False
+    
     # Completely removed all headers and keeping proper spacing
     st.markdown("<div style='height: 30px;'></div>", unsafe_allow_html=True)
     
-    # Sidebar for ticker input
-    st.sidebar.title("Stock Search")
-    ticker = st.sidebar.text_input("Enter Stock Ticker Symbol (e.g., AAPL)", "").upper()
+    # Show admin panel if requested
+    if st.session_state["show_admin"]:
+        admin_panel()
+        if st.button("Back to Stock Analysis"):
+            st.session_state["show_admin"] = False
+            st.rerun()
+    else:
     
-    # Timeframe selector
-    timeframe = st.sidebar.selectbox(
-        "Select Timeframe",
-        ["1d", "5d", "1mo", "3mo", "6mo", "1y", "2y", "5y", "max"],
-        index=5  # Default to 1 year
-    )
+        # Sidebar for ticker input
+        st.sidebar.title("Stock Search")
+        ticker = st.sidebar.text_input("Enter Stock Ticker Symbol (e.g., AAPL)", "").upper()
+    
+        # Timeframe selector
+        timeframe = st.sidebar.selectbox(
+            "Select Timeframe",
+            ["1d", "5d", "1mo", "3mo", "6mo", "1y", "2y", "5y", "max"],
+            index=5  # Default to 1 year
+        )
     
     # Search button
     search_button = st.sidebar.button("Analyze Stock")
