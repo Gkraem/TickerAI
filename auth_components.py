@@ -1,4 +1,5 @@
 import streamlit as st
+import base64
 from user_management import register_user, authenticate_user, logout_user
 
 def render_svg(svg_file):
@@ -69,9 +70,23 @@ def auth_page():
     # Add padding for vertical centering
     st.markdown("<div style='padding-top: 20vh;'></div>", unsafe_allow_html=True)
     
-    # Simple centered header - avoids any code showing
-    st.image("assets/logo.svg", width=60)
-    st.markdown("<p style='text-align: center; color: #a5b4fc; margin-top: -10px;'>Stock Market Analyzer</p>", unsafe_allow_html=True)
+    # Use container and columns for proper centering
+    with st.container():
+        col1, col2, col3 = st.columns([1, 1, 1])
+        with col2:
+            # Use base64 to embed the SVG directly
+            with open("assets/logo.svg", "r") as f:
+                svg_content = f.read()
+            
+            # Create a centered div with the SVG
+            st.markdown(f"""
+            <div style="display: flex; justify-content: center;">
+                <img src="data:image/svg+xml;base64,{base64.b64encode(svg_content.encode()).decode()}" width="70" height="70">
+            </div>
+            <div style="text-align: center;">
+                <p style="color: #a5b4fc; margin-top: 5px; font-size: 16px;">Stock Market Analyzer</p>
+            </div>
+            """, unsafe_allow_html=True)
     
     # Auth tabs
     if "auth_tab" not in st.session_state:
