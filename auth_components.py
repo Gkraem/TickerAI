@@ -69,13 +69,18 @@ def auth_page():
     # Add padding for vertical centering
     st.markdown("<div style='padding-top: 20vh;'></div>", unsafe_allow_html=True)
     
-    # Center title with one logo
+    # Center title with logo to the left
     col1, col2, col3 = st.columns([1, 2, 1])
     with col2:
-        # Fixed markup with only one logo
-        st.markdown("""
+        # Logo and text in flexbox for proper alignment
+        st.markdown(f"""
+        <div style="display: flex; justify-content: center; align-items: center; margin-bottom: 5px;">
+            <div style="width: 35px; height: 35px; margin-right: 8px;">
+                {render_svg("assets/logo.svg")}
+            </div>
+            <h1 style="font-size: 24px; color: white; margin: 0;">Ticker AI</h1>
+        </div>
         <div style="text-align: center; width: 100%;">
-            <h1 style="font-size: 24px; color: white; margin-bottom: 5px;">Ticker AI</h1>
             <p style="color: #a5b4fc; font-size: 16px;">Stock Market Analyzer</p>
         </div>
         """, unsafe_allow_html=True)
