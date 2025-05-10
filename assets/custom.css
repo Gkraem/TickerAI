@@ -64,7 +64,7 @@ header[data-testid="stHeader"] {
     text-align: center;
     padding: 10px 0;
     border-top: 1px solid #333;
-    z-index: 1001; /* Higher z-index to ensure footer is above sidebar */
+    z-index: 9999; /* Very high z-index to ensure footer is above everything */
 }
 
 .footer-content {

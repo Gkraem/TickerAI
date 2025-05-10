@@ -945,6 +945,9 @@ else:
                 except Exception as e:
                     st.error(f"Error analyzing {ticker}: {str(e)}")
                     st.info("Please check if the ticker symbol is correct and try again.")
+                    
+                # Add bottom padding for better spacing with footer
+                st.markdown("<div style='margin-bottom: 100px;'></div>", unsafe_allow_html=True)
         
         else:
             # Display welcome message and stock market image for new users
