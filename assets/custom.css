@@ -2,10 +2,26 @@
 
 /* Modern gradient background */
 .stApp {
-    background: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
+    background: linear-gradient(135deg, #111827 0%, #1e3a8a 100%);
     background-size: cover;
     background-repeat: no-repeat;
     background-attachment: fixed;
+}
+
+/* Add subtle grid overlay for modern look */
+.stApp::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: 
+        linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+    background-size: 25px 25px;
+    pointer-events: none; /* Allow clicks to pass through */
+    z-index: 0;
 }
 
 /* Top navigation bar */
@@ -14,16 +30,16 @@
     top: 0;
     left: 0;
     width: 100%;
-    height: 60px;
-    background-color: rgba(17, 24, 39, 0.95);
+    height: 70px;
+    background-color: rgba(10, 15, 30, 0.98);
     backdrop-filter: saturate(180%) blur(20px);
     display: flex;
     align-items: center;
     justify-content: center;
     padding: 0;
-    z-index: 1002; /* Higher z-index to ensure it stays on top */
-    border-bottom: 1px solid rgba(75, 85, 99, 0.3);
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    z-index: 9999; /* Extremely high z-index to ensure it overlaps everything */
+    border-bottom: 1px solid rgba(59, 130, 246, 0.3);
+    box-shadow: 0 4px 15px -1px rgba(0, 0, 0, 0.2), 0 2px 10px -1px rgba(0, 0, 0, 0.1);
 }
 
 .navbar-container {
@@ -31,44 +47,51 @@
     align-items: center;
     justify-content: space-between;
     width: 100%;
-    max-width: 1400px;
-    padding: 0 22px;
+    max-width: 1600px;
+    padding: 0 30px;
 }
 
 .navbar-logo {
     display: flex;
     align-items: center;
-    min-width: 120px;
+    min-width: 140px;
 }
 
 .navbar-title {
     color: white;
-    font-size: 22px;
+    font-size: 26px;
     font-weight: bold;
-    margin-left: 10px;
-    background: linear-gradient(90deg, #00bfff, #00ffff);
+    margin-left: 12px;
+    background: linear-gradient(90deg, #3b82f6, #60a5fa);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+    text-shadow: 0 0 20px rgba(59, 130, 246, 0.5);
 }
 
 .navbar-company-name {
     flex: 1;
     text-align: center;
-    font-size: 24px;
+    font-size: 28px;
     font-weight: bold;
     color: white;
-    margin: 0 20px;
+    margin: 0 30px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    padding: 5px 20px;
+    border-radius: 30px;
+    background-color: rgba(30, 58, 138, 0.3);
+    border: 1px solid rgba(59, 130, 246, 0.2);
+    box-shadow: 0 0 15px rgba(59, 130, 246, 0.2);
 }
 
 .company-name-text {
-    background: linear-gradient(90deg, #ffffff, #eeeeee);
+    background: linear-gradient(90deg, #ffffff, #e0e7ff);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+    letter-spacing: 0.5px;
 }
 
 .navbar-links {
@@ -125,42 +148,95 @@
 /* Main content padding to accommodate header and footer */
 .main-content {
     position: fixed;
-    top: 60px; /* Updated navbar height */
+    top: 70px; /* Updated for taller navbar */
     bottom: 40px; /* Height of footer */
     left: 0;
     right: 0;
-    padding: 20px 0;
+    padding: 30px 0;
     overflow-y: auto;
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    justify-content: flex-start; /* Start from top with padding */
     align-items: center;
 }
 
 /* Override Streamlit default container */
 .block-container {
-    max-width: 100% !important;
+    max-width: 90% !important; /* Limit width for better spacing */
     padding: 0 !important;
-    margin: 0 !important;
+    margin: 0 auto !important;
 }
 
-/* Apply padding to streamlit elements */
+/* Apply padding to streamlit elements with more buffer */
 div[data-testid="stVerticalBlock"] {
-    padding: 0 15px;
+    padding: 0 30px; /* More horizontal padding */
+}
+
+/* Fix streamlit columns to prevent overflow and add spacing */
+div[data-testid="column"] {
+    padding: 0 15px !important;
+    box-sizing: border-box !important;
+}
+
+/* Add spacing between stMetric elements */
+div[data-testid="stMetric"] {
+    background-color: rgba(17, 24, 39, 0.7);
+    border-radius: 8px;
+    padding: 15px !important;
+    margin-bottom: 15px !important;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(75, 85, 99, 0.2);
+}
+
+/* Make sure metrics have enough space */
+div[data-testid="stMetricValue"] {
+    font-size: 22px !important;
+    white-space: normal !important;
+    overflow-wrap: break-word !important;
 }
 
 /* Fix sidebar positioning */
 section[data-testid="stSidebar"] {
     position: fixed !important;
     height: auto !important; 
-    top: 60px !important; /* Updated navbar height */
+    top: 70px !important; /* Match updated navbar height */
     bottom: 40px !important; /* Same as footer height */
-    z-index: 999 !important; /* Below footer */
+    z-index: 999 !important; /* Below navbar but above content */
     overflow-y: auto !important;
     padding-bottom: 50px !important; /* Extra padding at bottom */
-    background-color: rgba(17, 24, 39, 0.8) !important; /* Match the new color scheme */
-    border-right: 1px solid rgba(75, 85, 99, 0.3) !important;
-    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1) !important;
+    background-color: rgba(15, 23, 42, 0.9) !important; /* Darker background */
+    border-right: 1px solid rgba(59, 130, 246, 0.2) !important; /* Blue accent */
+    box-shadow: 4px 0 10px rgba(0, 0, 0, 0.2) !important;
+    width: 320px !important; /* Fixed width for better spacing */
+}
+
+/* Style sidebar expand/collapse button */
+button[kind="header"] {
+    background-color: rgba(30, 58, 138, 0.8) !important;
+    border-radius: 8px !important;
+    border: 1px solid rgba(59, 130, 246, 0.4) !important;
+    color: white !important;
+    transition: all 0.3s ease !important;
+}
+
+button[kind="header"]:hover {
+    background-color: rgba(37, 99, 235, 0.9) !important;
+    transform: translateY(-1px) !important;
+}
+
+/* Improve sidebar content styling */
+section[data-testid="stSidebar"] .block-container {
+    padding: 2rem 1rem !important;
+}
+
+/* Make sidebar headers more prominent */
+section[data-testid="stSidebar"] h1, 
+section[data-testid="stSidebar"] h2, 
+section[data-testid="stSidebar"] h3 {
+    color: rgba(219, 234, 254, 0.95) !important;
+    border-bottom: 1px solid rgba(59, 130, 246, 0.3);
+    padding-bottom: 0.5rem;
+    margin-bottom: 1rem;
 }
 
 /* Fix main content area */
@@ -197,14 +273,26 @@ button[kind="header"] {
 
 /* Card styling */
 .card {
-    background-color: rgba(31, 41, 55, 0.85);
-    border-radius: 12px;
-    padding: 30px;
-    margin: 0 auto; /* Center horizontally */
-    width: 85%; /* Narrower width for better spacing */
+    background-color: rgba(15, 23, 42, 0.8);
+    border-radius: 16px;
+    padding: 40px;
+    margin: 20px auto; /* Center horizontally with vertical margin */
+    width: 80%; /* Even narrower width for better spacing */
+    max-width: 1600px; /* Maximum width */
     max-height: 80vh; /* Limit height */
     overflow-y: auto; /* Allow scrolling inside card if needed */
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 15px 25px -3px rgba(0, 0, 0, 0.2), 0 10px 10px -2px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(59, 130, 246, 0.2);
+    /* Blue highlight at top of card */
+    border-top: 4px solid rgba(59, 130, 246, 0.7);
+}
+
+/* Card container */
+.card-container {
+    margin: 20px 0;
+    padding: 20px;
+    background-color: rgba(17, 24, 39, 0.6);
+    border-radius: 12px;
     border: 1px solid rgba(75, 85, 99, 0.2);
 }
 
