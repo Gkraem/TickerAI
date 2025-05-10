@@ -69,20 +69,32 @@ def auth_page():
     # Add padding for vertical centering
     st.markdown("<div style='padding-top: 20vh;'></div>", unsafe_allow_html=True)
     
-    # Center title with logo to the left
-    col1, col2, col3 = st.columns([1, 2, 1])
-    with col2:
-        # Just the logo centered, shifted 15px left
-        st.markdown(f"""
-        <div style="display: flex; justify-content: center; align-items: center; margin-bottom: 5px; margin-left: -15px;">
-            <div style="width: 50px; height: 50px;">
-                {render_svg("assets/logo.svg")}
-            </div>
+    # Better approach to center logo
+    st.markdown(f"""
+    <style>
+    /* Fix logo position */
+    .centered-logo {{
+        position: relative;
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+        margin-bottom: 20px;
+    }}
+    .logo-container {{
+        width: 60px;
+        height: 60px;
+    }}
+    </style>
+    
+    <div class="centered-logo">
+        <div class="logo-container">
+            {render_svg("assets/logo.svg")}
         </div>
-        <div style="text-align: center; width: 100%; margin-left: -15px;">
-            <p style="color: #a5b4fc; font-size: 16px;">Stock Market Analyzer</p>
-        </div>
-        """, unsafe_allow_html=True)
+        <p style="color: #a5b4fc; font-size: 16px; margin-top: 10px;">Stock Market Analyzer</p>
+    </div>
+    """, unsafe_allow_html=True)
     
     # Auth tabs
     if "auth_tab" not in st.session_state:
