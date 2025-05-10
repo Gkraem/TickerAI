@@ -777,9 +777,15 @@ if ticker and search_button:
                     for i, article in enumerate(news_articles):
                         col1, col2 = st.columns([1, 4])
                         
-                        # Format date
-                        pub_date = datetime.strptime(article.get('published', ''), '%Y-%m-%dT%H:%M:%S%z') if article.get('published') else None
-                        date_str = pub_date.strftime('%b %d, %Y') if pub_date else "N/A"
+                        # Format date - safely handle potential format errors
+                        try:
+                            if article.get('published'):
+                                pub_date = datetime.strptime(article.get('published'), '%Y-%m-%dT%H:%M:%S%z')
+                                date_str = pub_date.strftime('%b %d, %Y')
+                            else:
+                                date_str = "N/A"
+                        except Exception:
+                            date_str = "N/A"
                         
                         # Display sentiment icon
                         sentiment = sentiment_scores[i]
@@ -795,8 +801,9 @@ if ticker and search_button:
                             st.markdown(f"**{sentiment_icon}**")
                         
                         with col2:
-                            st.markdown(f"**[{article.get('title')}]({article.get('link')})**")
-                            st.markdown(f"{article.get('summary', 'No summary available')[:200]}...")
+                            st.markdown(f"**[{article.get('title', 'No Title')}]({article.get('link', '#')})**")
+                            summary = article.get('summary', 'No summary available')
+                            st.markdown(f"{summary[:200]}..." if len(summary) > 200 else summary)
                         
                         st.markdown("---")
                 

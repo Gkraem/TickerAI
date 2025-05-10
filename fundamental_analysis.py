@@ -106,10 +106,10 @@ class FundamentalAnalysis:
             
             # Format the index for better readability if it's a datetime index
             try:
-                if hasattr(income_stmt.index, 'strftime'):
-                    income_stmt.index = income_stmt.index.strftime('%Y-%m-%d')
-            except:
-                pass
+                if isinstance(income_stmt.index, pd.DatetimeIndex):
+                    income_stmt.index = [idx.strftime('%Y-%m-%d') if hasattr(idx, 'strftime') else str(idx) for idx in income_stmt.index]
+            except Exception as e:
+                print(f"Error formatting income statement index: {str(e)}")
             
             return income_stmt
         except Exception as e:
@@ -140,10 +140,10 @@ class FundamentalAnalysis:
             
             # Format the index for better readability if it's a datetime index
             try:
-                if hasattr(balance_sheet.index, 'strftime'):
-                    balance_sheet.index = balance_sheet.index.strftime('%Y-%m-%d')
-            except:
-                pass
+                if isinstance(balance_sheet.index, pd.DatetimeIndex):
+                    balance_sheet.index = [idx.strftime('%Y-%m-%d') if hasattr(idx, 'strftime') else str(idx) for idx in balance_sheet.index]
+            except Exception as e:
+                print(f"Error formatting balance sheet index: {str(e)}")
             
             return balance_sheet
         except Exception as e:
@@ -174,10 +174,10 @@ class FundamentalAnalysis:
             
             # Format the index for better readability if it's a datetime index
             try:
-                if hasattr(cash_flow.index, 'strftime'):
-                    cash_flow.index = cash_flow.index.strftime('%Y-%m-%d')
-            except:
-                pass
+                if isinstance(cash_flow.index, pd.DatetimeIndex):
+                    cash_flow.index = [idx.strftime('%Y-%m-%d') if hasattr(idx, 'strftime') else str(idx) for idx in cash_flow.index]
+            except Exception as e:
+                print(f"Error formatting cash flow index: {str(e)}")
             
             return cash_flow
         except Exception as e:
