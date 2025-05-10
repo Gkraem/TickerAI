@@ -191,42 +191,29 @@ else:
                     # Calculate buy rating
                     buy_rating, rating_components = analyzer.calculate_buy_rating()
                     
-                    # Display buy rating with advanced custom styling as a circular meter
+                    # Display buy rating with custom styling
                     st.markdown("<div class='rating-container'>", unsafe_allow_html=True)
                     
-                    # Determine color and text based on rating
+                    # Determine color based on rating
                     if buy_rating >= 7.5:
-                        rating_color = "#00C853"  # Bright green
+                        rating_color = "green"
                         rating_text = "Strong Buy"
-                        rating_bg = "linear-gradient(135deg, #00C853, #00E676)"
                     elif buy_rating >= 6:
-                        rating_color = "#64DD17"  # Light green
+                        rating_color = "lightgreen"
                         rating_text = "Buy"
-                        rating_bg = "linear-gradient(135deg, #64DD17, #AEEA00)"
                     elif buy_rating >= 4:
-                        rating_color = "#FFB300"  # Amber
+                        rating_color = "orange"
                         rating_text = "Hold"
-                        rating_bg = "linear-gradient(135deg, #FFB300, #FFCA28)"
                     else:
-                        rating_color = "#F44336"  # Red
+                        rating_color = "red"
                         rating_text = "Sell"
-                        rating_bg = "linear-gradient(135deg, #F44336, #FF5252)"
                     
-                    # Calculate the percentage for the circular progress
-                    percentage = min(100, buy_rating * 10)
-                    
-                    # Create a circular meter rating with modern styling
                     st.markdown(
                         f"""
-                        <div class="buy-rating-container">
-                            <div class="circular-meter" style="background: conic-gradient({rating_color} {percentage}%, #2c3e50 0%);">
-                                <div class="circular-meter-inner" style="background: {rating_bg};">
-                                    <div class="rating-score">{buy_rating:.1f}</div>
-                                    <div class="rating-label">Buy Rating</div>
-                                </div>
-                            </div>
+                        <div class="buy-rating" style="border-color: {rating_color};">
+                            <div class="rating-score" style="color: {rating_color};">{buy_rating:.1f}</div>
+                            <div class="rating-label">Buy Rating</div>
                             <div class="rating-text" style="color: {rating_color};">{rating_text}</div>
-                            <div class="rating-explanation">Based on technical, fundamental, and market sentiment analysis</div>
                         </div>
                         """,
                         unsafe_allow_html=True
@@ -919,5 +906,10 @@ else:
             All data comes from reliable financial sources.
             """)
             
-            # Display stock market image
-            st.image("generated-icon.png", use_container_width=True)
+            # Clean, modern stock market welcome display
+            st.markdown("""
+            <div style="text-align: center; padding: 30px; margin-top: 50px;">
+                <h1 style="color: #3b82f6; margin-bottom: 20px;">Ticker AI</h1>
+                <p style="color: #a3a3a3; font-size: 18px;">Advanced stock market analysis powered by data science</p>
+            </div>
+            """, unsafe_allow_html=True)
