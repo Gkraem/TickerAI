@@ -24,49 +24,21 @@
     z-index: 0;
 }
 
-/* Clean, simplified navigation bar */
-.navbar {
-    width: 100%;
-    height: 60px;
-    background-color: #111827;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0;
-    border-bottom: 1px solid #1e3a8a;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.navbar-container {
-    display: flex;
-    align-items: center;
-    width: 100%;
-    max-width: 1200px;
-    padding: 0 20px;
-}
-
-.navbar-logo {
-    display: flex;
-    align-items: center;
-}
-
-.navbar-logo-img {
-    height: 30px;
-    width: auto;
-}
-
-.navbar-title {
-    color: white;
-    font-size: 24px;
+/* Company name styling */
+.company-name {
+    font-size: 32px;
     font-weight: bold;
-    margin-left: 10px;
-}
-
-.navbar-subtitle {
-    color: #a5b4fc;
-    font-size: 16px;
-    margin-left: 20px;
-    font-weight: normal;
+    color: white;
+    margin-top: 10px;
+    margin-bottom: 30px;
+    text-align: center;
+    background: linear-gradient(90deg, #3b82f6, #60a5fa);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+    padding-bottom: 10px;
+    border-bottom: 1px solid rgba(59, 130, 246, 0.3);
 }
 
 /* Footer */
@@ -93,9 +65,9 @@
     font-size: 14px;
 }
 
-/* Main content with simple top margin for header */
+/* Main content with no top margin since navbar removed */
 .main-content {
-    margin-top: 70px; /* Space for navbar */
+    margin-top: 20px; /* Reduced since we removed the navbar */
     margin-bottom: 50px; /* Space for footer */
     padding: 20px 0;
     display: flex;

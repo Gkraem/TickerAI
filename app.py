@@ -39,21 +39,7 @@ def render_svg(svg_file):
         html = f'<img src="data:image/svg+xml;base64,{b64}" class="navbar-logo-img" />'
         return html
 
-# Custom navbar - simplified with just logo and titles
-navbar_html = f"""
-<div class="navbar">
-    <div class="navbar-container">
-        <div class="navbar-logo">
-            {render_svg("assets/logo.svg")}
-            <div class="navbar-title">Ticker AI</div>
-        </div>
-        <div class="navbar-subtitle">
-            Stock Market Analyzer
-        </div>
-    </div>
-</div>
-"""
-st.markdown(navbar_html, unsafe_allow_html=True)
+# No navbar - completely removing the black header bar
 
 # Custom footer
 footer_html = """
@@ -86,7 +72,8 @@ else:
         st.sidebar.markdown("### Welcome")
     logout_button()
     
-    # App description (removing duplicate title since it's in the navbar)
+    # App title and description
+    st.title("Ticker AI - Stock Market Analyzer")
     st.markdown("### Use Data to Get a 360-Degree View of Your Investment Opportunities")
     
     # Sidebar for ticker input
@@ -120,22 +107,12 @@ else:
                 # Initialize stock analyzer
                 analyzer = StockAnalyzer(ticker)
                 
-                # Get company name and update navbar
+                # Get company name and display prominently
                 company_info = analyzer.get_company_info()
                 if company_info and 'shortName' in company_info:
                     company_name = company_info['shortName']
-                    # Add JavaScript to update company name in navbar
-                    update_company_name_js = f"""
-                    <script>
-                    document.addEventListener('DOMContentLoaded', function() {{
-                        const companyNameElement = document.getElementById('company-name-display');
-                        if (companyNameElement) {{
-                            companyNameElement.innerHTML = '<span class="company-name-text">{company_name}</span>';
-                        }}
-                    }});
-                    </script>
-                    """
-                    st.markdown(update_company_name_js, unsafe_allow_html=True)
+                    # Display company name as a header
+                    st.markdown(f"<h1 class='company-name'>{company_name} ({ticker})</h1>", unsafe_allow_html=True)
 
                 # Main metrics using custom styling for better spacing
                 st.markdown('<div class="data-row">', unsafe_allow_html=True)
