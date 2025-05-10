@@ -12,10 +12,12 @@ from technical_analysis import TechnicalAnalysis
 from fundamental_analysis import FundamentalAnalysis
 from utils import format_large_number, get_stock_news
 from data_sources import DATA_SOURCES
+from user_management import is_authenticated, get_session_user
+from auth_components import auth_page, logout_button
 
 # Set page configuration
 st.set_page_config(
-    page_title="Stock Market Analyzer",
+    page_title="Ticker AI - Stock Market Analyzer",
     page_icon="📈",
     layout="wide",
     initial_sidebar_state="expanded"
