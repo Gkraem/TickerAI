@@ -24,101 +24,49 @@
     z-index: 0;
 }
 
-/* Top navigation bar */
+/* Clean, simplified navigation bar */
 .navbar {
-    position: fixed;
-    top: 0;
-    left: 0;
     width: 100%;
-    height: 70px;
-    background-color: rgba(10, 15, 30, 0.98);
-    backdrop-filter: saturate(180%) blur(20px);
+    height: 60px;
+    background-color: #111827;
     display: flex;
     align-items: center;
     justify-content: center;
     padding: 0;
-    z-index: 9999; /* Extremely high z-index to ensure it overlaps everything */
-    border-bottom: 1px solid rgba(59, 130, 246, 0.3);
-    box-shadow: 0 4px 15px -1px rgba(0, 0, 0, 0.2), 0 2px 10px -1px rgba(0, 0, 0, 0.1);
+    border-bottom: 1px solid #1e3a8a;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .navbar-container {
     display: flex;
     align-items: center;
-    justify-content: space-between;
     width: 100%;
-    max-width: 1600px;
-    padding: 0 30px;
+    max-width: 1200px;
+    padding: 0 20px;
 }
 
 .navbar-logo {
     display: flex;
     align-items: center;
-    min-width: 140px;
+}
+
+.navbar-logo-img {
+    height: 30px;
+    width: auto;
 }
 
 .navbar-title {
     color: white;
-    font-size: 26px;
+    font-size: 24px;
     font-weight: bold;
-    margin-left: 12px;
-    background: linear-gradient(90deg, #3b82f6, #60a5fa);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    text-shadow: 0 0 20px rgba(59, 130, 246, 0.5);
+    margin-left: 10px;
 }
 
-.navbar-company-name {
-    flex: 1;
-    text-align: center;
-    font-size: 28px;
-    font-weight: bold;
-    color: white;
-    margin: 0 30px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    padding: 5px 20px;
-    border-radius: 30px;
-    background-color: rgba(30, 58, 138, 0.3);
-    border: 1px solid rgba(59, 130, 246, 0.2);
-    box-shadow: 0 0 15px rgba(59, 130, 246, 0.2);
-}
-
-.company-name-text {
-    background: linear-gradient(90deg, #ffffff, #e0e7ff);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    letter-spacing: 0.5px;
-}
-
-.navbar-links {
-    display: flex;
-    gap: 28px;
-    margin-right: 20px;
-}
-
-.navbar-link {
-    color: #f5f5f7;
-    font-size: 14px;
-    text-decoration: none;
-    opacity: 0.8;
-    transition: all 0.3s;
-    padding: 6px 10px;
-    border-radius: 4px;
-}
-
-.navbar-link:hover {
-    opacity: 1;
-    background-color: rgba(255, 255, 255, 0.1);
-}
-
-.navbar-icons {
-    display: flex;
-    gap: 20px;
-    min-width: 80px;
+.navbar-subtitle {
+    color: #a5b4fc;
+    font-size: 16px;
+    margin-left: 20px;
+    font-weight: normal;
 }
 
 /* Footer */
@@ -145,18 +93,13 @@
     font-size: 14px;
 }
 
-/* Main content padding to accommodate header and footer */
+/* Main content with simple top margin for header */
 .main-content {
-    position: fixed;
-    top: 70px; /* Updated for taller navbar */
-    bottom: 40px; /* Height of footer */
-    left: 0;
-    right: 0;
-    padding: 30px 0;
-    overflow-y: auto;
+    margin-top: 70px; /* Space for navbar */
+    margin-bottom: 50px; /* Space for footer */
+    padding: 20px 0;
     display: flex;
     flex-direction: column;
-    justify-content: flex-start; /* Start from top with padding */
     align-items: center;
 }
 
@@ -195,19 +138,12 @@ div[data-testid="stMetricValue"] {
     overflow-wrap: break-word !important;
 }
 
-/* Fix sidebar positioning */
+/* Clean sidebar styling */
 section[data-testid="stSidebar"] {
-    position: fixed !important;
-    height: auto !important; 
-    top: 70px !important; /* Match updated navbar height */
-    bottom: 40px !important; /* Same as footer height */
-    z-index: 999 !important; /* Below navbar but above content */
-    overflow-y: auto !important;
-    padding-bottom: 50px !important; /* Extra padding at bottom */
-    background-color: rgba(15, 23, 42, 0.9) !important; /* Darker background */
-    border-right: 1px solid rgba(59, 130, 246, 0.2) !important; /* Blue accent */
-    box-shadow: 4px 0 10px rgba(0, 0, 0, 0.2) !important;
-    width: 320px !important; /* Fixed width for better spacing */
+    background-color: rgba(15, 23, 42, 0.7) !important;
+    border-right: 1px solid #1e3a8a !important;
+    padding-top: 20px !important;
+    padding-bottom: 40px !important;
 }
 
 /* Style sidebar expand/collapse button */

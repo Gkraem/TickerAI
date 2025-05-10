@@ -39,7 +39,7 @@ def render_svg(svg_file):
         html = f'<img src="data:image/svg+xml;base64,{b64}" class="navbar-logo-img" />'
         return html
 
-# Custom navbar
+# Custom navbar - simplified with just logo and titles
 navbar_html = f"""
 <div class="navbar">
     <div class="navbar-container">
@@ -47,19 +47,8 @@ navbar_html = f"""
             {render_svg("assets/logo.svg")}
             <div class="navbar-title">Ticker AI</div>
         </div>
-        <div class="navbar-company-name" id="company-name-display">
-            <span class="company-name-text">Stock Market Analyzer</span>
-        </div>
-        <div class="navbar-links">
-            <a href="#" class="navbar-link">Overview</a>
-            <a href="#" class="navbar-link">Price Charts</a>
-            <a href="#" class="navbar-link">Fundamentals</a>
-            <a href="#" class="navbar-link">Technicals</a>
-            <a href="#" class="navbar-link">News</a>
-        </div>
-        <div class="navbar-icons">
-            <a href="#" class="navbar-link">⚙️</a>
-            <a href="#" class="navbar-link">👤</a>
+        <div class="navbar-subtitle">
+            Stock Market Analyzer
         </div>
     </div>
 </div>
@@ -97,10 +86,8 @@ else:
         st.sidebar.markdown("### Welcome")
     logout_button()
     
-    # App title with Ticker AI branding
-    st.title("Ticker AI")
-    st.markdown("### Stock Market Analyzer")
-    st.markdown("Use Data to Get a 360-Degree View of Your Investment Opportunities")
+    # App description (removing duplicate title since it's in the navbar)
+    st.markdown("### Use Data to Get a 360-Degree View of Your Investment Opportunities")
     
     # Sidebar for ticker input
     st.sidebar.title("Stock Search")
