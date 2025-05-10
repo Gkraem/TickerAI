@@ -40,10 +40,11 @@ def login_form():
                         "phone": admin_credentials["phone"],
                         "is_admin": True  # Special flag for admin
                     }
+                    # Set user and view_mode in session state
                     st.session_state["user"] = admin_user
+                    # Set view_mode to "admin" directly
+                    st.session_state.view_mode = "admin"
                     st.success("Admin login successful!")
-                    # Directly redirect to admin panel if it's the admin login
-                    st.switch_page("01_Admin_Panel")
                 else:
                     # Regular user authentication
                     success, result = authenticate_user(identifier, password)
