@@ -69,8 +69,7 @@ else:
         st.sidebar.markdown("### Welcome")
     logout_button()
     
-    # App title and description
-    st.title("Ticker AI - Stock Market Analyzer")
+    # Removed title (it was causing the black header) and keeping only description
     st.markdown("### Use Data to Get a 360-Degree View of Your Investment Opportunities")
     
     # Sidebar for ticker input

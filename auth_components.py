@@ -65,8 +65,6 @@ def register_form():
 
 def auth_page():
     """Main authentication page with tabs for login and registration"""
-    st.markdown('<div class="auth-container">', unsafe_allow_html=True)
-    
     # Display logo and title
     display_auth_header()
     
@@ -88,16 +86,11 @@ def auth_page():
             st.session_state["auth_tab"] = "register"
             st.rerun()
     
-    st.markdown('<div class="auth-form-container">', unsafe_allow_html=True)
-    
     # Show the active tab
     if st.session_state["auth_tab"] == "login":
         login_form()
     else:
         register_form()
-    
-    st.markdown('</div>', unsafe_allow_html=True)
-    st.markdown('</div>', unsafe_allow_html=True)
 
 def logout_button():
     """Display a logout button in the sidebar"""
