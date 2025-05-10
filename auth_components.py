@@ -8,20 +8,7 @@ def render_svg(svg_file):
 
 def login_form():
     """Display the login form"""
-    # Add extra CSS for compact form fields
-    st.markdown("""
-    <style>
-    /* Reduce space between form items */
-    .stTextInput label {
-        margin-top: 0 !important;
-        margin-bottom: 0 !important;
-        padding-top: 0 !important;
-        padding-bottom: 0 !important;
-    }
-    </style>
-    """, unsafe_allow_html=True)
-    
-    with st.form("login_form", border=False, clear_on_submit=False):
+    with st.form("login_form", border=False):
         identifier = st.text_input("Email or Phone", key="login_identifier")
         password = st.text_input("Password", type="password", key="login_password")
         
@@ -41,21 +28,7 @@ def login_form():
 
 def register_form():
     """Display the registration form"""
-    # Add same compact styling as login form
-    st.markdown("""
-    <style>
-    /* Reduce space between form items */
-    .stTextInput label {
-        margin-top: 0 !important;
-        margin-bottom: 0 !important;
-        padding-top: 0 !important;
-        padding-bottom: 0 !important;
-    }
-    </style>
-    """, unsafe_allow_html=True)
-    
-    with st.form("register_form", border=False, clear_on_submit=False):
-        # More compact form with reduced spacing
+    with st.form("register_form", border=False):
         name = st.text_input("Full Name", key="register_name")
         email = st.text_input("Email", key="register_email")
         phone = st.text_input("Phone Number", key="register_phone")
@@ -81,96 +54,36 @@ def register_form():
 
 def auth_page():
     """Main authentication page with tabs for login and registration"""
-    # Add CSS for perfect vertical and horizontal centering
+    # Simple CSS for proper alignment and no borders
     st.markdown("""
     <style>
-    /* Full page vertical centering */
-    section.main {
-        display: flex !important;
-        flex-direction: column !important;
-        justify-content: center !important;
-        align-items: center !important;
-        height: 100vh !important;
-    }
-    
-    /* Center the block container */
-    .block-container {
-        max-width: 100% !important;
-        padding: 0 !important;
-        display: flex !important;
-        justify-content: center !important;
-        align-items: center !important;
-        margin: 0 auto !important;
-    }
-    
-    /* Perfect center the content */
-    div[data-testid="stVerticalBlock"] {
-        display: flex !important;
-        flex-direction: column !important;
-        justify-content: center !important;
-        align-items: center !important;
-        max-width: 500px !important;
-    }
-    
     /* Remove form borders */
     .stForm > div:first-child {
         border: none !important;
         box-shadow: none !important;
         background-color: transparent !important;
     }
-    
-    /* Make form more compact */
-    .stTextInput {
-        margin-bottom: 0 !important;
-    }
-    
-    /* Reduce vertical spacing */
-    .element-container {
-        margin-top: 0 !important;
-        margin-bottom: 0 !important;
-        padding-top: 0 !important;
-        padding-bottom: 0 !important;
-    }
     </style>
     """, unsafe_allow_html=True)
     
-    # Logo and title (perfectly centered)
-    st.markdown(f"""
-    <div style="display: flex; justify-content: center; width: 100%; margin-bottom: 20px;">
-        <div style="width: 40px; height: 40px; margin-left: auto; margin-right: auto;">
-            {render_svg("assets/logo.svg")}
+    # Add padding for vertical centering
+    st.markdown("<div style='padding-top: 20vh;'></div>", unsafe_allow_html=True)
+    
+    # Center logo and title
+    col1, col2, col3 = st.columns([1, 1, 1])
+    with col2:
+        st.markdown(f"""
+        <div style="text-align: center;">
+            <div style="display: inline-block; width: 40px; height: 40px;">
+                {render_svg("assets/logo.svg")}
+            </div>
+            <p style="color: #a5b4fc; margin-top: 10px; font-size: 16px;">Stock Market Analyzer</p>
         </div>
-    </div>
-    <div style="text-align: center; width: 100%;">
-        <p style="color: #a5b4fc; margin-bottom: 20px; font-size: 16px;">Stock Market Analyzer</p>
-    </div>
-    """, unsafe_allow_html=True)
-    
-    # Custom CSS for tab buttons
-    st.markdown("""
-    <style>
-    /* Make buttons full width */
-    div[data-testid="column"] {
-        width: 100% !important;
-        flex: 1 1 0 !important;
-    }
-    
-    /* Fix button alignment */
-    div[data-testid="stHorizontalBlock"] {
-        width: 100% !important;
-        max-width: 400px !important;
-        margin: 0 auto !important;
-        gap: 10px !important;
-    }
-    </style>
-    """, unsafe_allow_html=True)
+        """, unsafe_allow_html=True)
     
     # Auth tabs
     if "auth_tab" not in st.session_state:
         st.session_state["auth_tab"] = "login"
-    
-    # Full width container
-    st.markdown("<div style='width: 100%; max-width: 400px;'></div>", unsafe_allow_html=True)
     
     col1, col2 = st.columns(2)
     
