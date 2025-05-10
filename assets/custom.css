@@ -2,7 +2,7 @@
 
 /* Background image */
 .stApp {
-    background-image: url('.streamlit/assets/background.png');
+    background-image: url('.streamlit/assets/background.svg');
     background-size: cover;
     background-repeat: no-repeat;
     background-attachment: fixed;
