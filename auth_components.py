@@ -72,14 +72,14 @@ def auth_page():
     # Center title with logo to the left
     col1, col2, col3 = st.columns([1, 2, 1])
     with col2:
-        # Just the logo centered
+        # Just the logo centered, shifted 15px left
         st.markdown(f"""
-        <div style="display: flex; justify-content: center; align-items: center; margin-bottom: 5px;">
+        <div style="display: flex; justify-content: center; align-items: center; margin-bottom: 5px; margin-left: -15px;">
             <div style="width: 50px; height: 50px;">
                 {render_svg("assets/logo.svg")}
             </div>
         </div>
-        <div style="text-align: center; width: 100%;">
+        <div style="text-align: center; width: 100%; margin-left: -15px;">
             <p style="color: #a5b4fc; font-size: 16px;">Stock Market Analyzer</p>
         </div>
         """, unsafe_allow_html=True)
