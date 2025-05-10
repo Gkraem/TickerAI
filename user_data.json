@@ -6,6 +6,13 @@
             "phone": "2402857119",
             "password": "$pbkdf2-sha256$29000$m1PKOUfoPQdAaM25N2ZsDQ$L3noPkGbFnjinh4.10srgx2haCLbv4eSBcV.DHooqFI",
             "created_at": "2025-05-10T14:25:40.754942"
+        },
+        {
+            "name": "Grant Kraemer",
+            "email": "grant.kraemer@yahoo.com",
+            "phone": "7039193451",
+            "password": "$pbkdf2-sha256$29000$iREiJCSklLIWQijFWCslpA$2.yx1/wphFwIS/1jgb2IL0ak9Ewyo3a9MzKaEJeFUWg",
+            "created_at": "2025-05-10T14:38:15.197656"
         }
     ]
 }

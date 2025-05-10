@@ -97,6 +97,10 @@
     margin-top: 80px;
     margin-bottom: 60px;
     padding: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-height: calc(100vh - 140px); /* 100vh minus margins */
 }
 
 /* Card styling */
@@ -120,6 +124,16 @@
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
+}
+
+/* Hide unwanted gray bubbles */
+.auth-container + div {
+    display: none !important;
+}
+
+/* Hide other unwanted elements in auth page */
+.stButton + div[data-baseweb="block"] {
+    display: none !important;
 }
 
 .auth-form-container {
