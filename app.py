@@ -274,10 +274,15 @@ else:
                     # Generate a brief explanation of the rating
                     st.markdown("#### Rating Explanation")
                     
-                    # Detailed explanation text based on the rating and components
-                    technical_score = rating_components.get('technical', 0)
-                    fundamental_score = rating_components.get('fundamental', 0)
-                    sentiment_score = rating_components.get('sentiment', 0)
+                    # Get the component scores from the rating_components dictionary
+                    technical_data = rating_components.get('Technical Analysis', {})
+                    fundamental_data = rating_components.get('Fundamental Analysis', {})
+                    sentiment_data = rating_components.get('Market Sentiment', {})
+                    
+                    # Extract the scores
+                    technical_score = technical_data.get('score', 5.0) if isinstance(technical_data, dict) else 5.0
+                    fundamental_score = fundamental_data.get('score', 5.0) if isinstance(fundamental_data, dict) else 5.0
+                    sentiment_score = sentiment_data.get('score', 5.0) if isinstance(sentiment_data, dict) else 5.0
                     
                     # Determine the strength and weakness areas
                     strengths = []
@@ -329,16 +334,19 @@ Technical analysis reveals bearish patterns with deteriorating price action and 
                     col1, col2, col3 = st.columns(3)
                     
                     with col1:
-                        technical_score = rating_components.get('technical', 0)
                         st.metric("Technical Score", f"{technical_score:.1f}/10")
+                        if isinstance(technical_data, dict) and 'reason' in technical_data:
+                            st.caption(technical_data['reason'])
                         
                     with col2:
-                        fundamental_score = rating_components.get('fundamental', 0)
                         st.metric("Fundamental Score", f"{fundamental_score:.1f}/10")
+                        if isinstance(fundamental_data, dict) and 'reason' in fundamental_data:
+                            st.caption(fundamental_data['reason'])
                         
                     with col3:
-                        sentiment_score = rating_components.get('sentiment', 0)
                         st.metric("Sentiment Score", f"{sentiment_score:.1f}/10")
+                        if isinstance(sentiment_data, dict) and 'reason' in sentiment_data:
+                            st.caption(sentiment_data['reason'])
                     
                     # Create tabs for different analyses
                     tab1, tab2, tab3, tab4 = st.tabs(["Price History", "Technical Analysis", "Fundamentals", "News"])
