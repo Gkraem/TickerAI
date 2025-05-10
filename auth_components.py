@@ -8,7 +8,20 @@ def render_svg(svg_file):
 
 def login_form():
     """Display the login form"""
-    with st.form("login_form", border=False):
+    # Add extra CSS for compact form fields
+    st.markdown("""
+    <style>
+    /* Reduce space between form items */
+    .stTextInput label {
+        margin-top: 0 !important;
+        margin-bottom: 0 !important;
+        padding-top: 0 !important;
+        padding-bottom: 0 !important;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+    
+    with st.form("login_form", border=False, clear_on_submit=False):
         identifier = st.text_input("Email or Phone", key="login_identifier")
         password = st.text_input("Password", type="password", key="login_password")
         
@@ -28,7 +41,21 @@ def login_form():
 
 def register_form():
     """Display the registration form"""
-    with st.form("register_form", border=False):
+    # Add same compact styling as login form
+    st.markdown("""
+    <style>
+    /* Reduce space between form items */
+    .stTextInput label {
+        margin-top: 0 !important;
+        margin-bottom: 0 !important;
+        padding-top: 0 !important;
+        padding-bottom: 0 !important;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+    
+    with st.form("register_form", border=False, clear_on_submit=False):
+        # More compact form with reduced spacing
         name = st.text_input("Full Name", key="register_name")
         email = st.text_input("Email", key="register_email")
         phone = st.text_input("Phone Number", key="register_phone")
@@ -54,14 +81,17 @@ def register_form():
 
 def auth_page():
     """Main authentication page with tabs for login and registration"""
-    # Add CSS for vertical centering
+    # Add CSS for compact layout with no scrolling
     st.markdown("""
     <style>
+    /* Compact vertical layout */
     div[data-testid="stVerticalBlock"] {
         display: flex;
         flex-direction: column;
         justify-content: center;
-        min-height: 90vh;
+        max-height: 90vh;
+        padding: 0;
+        margin: 0;
     }
     
     /* Remove form borders */
@@ -70,22 +100,32 @@ def auth_page():
         box-shadow: none !important;
         background-color: transparent !important;
     }
+    
+    /* Make form more compact */
+    .stTextInput {
+        margin-bottom: 0 !important;
+    }
+    
+    /* Reduce vertical spacing */
+    .element-container {
+        margin-top: 0 !important;
+        margin-bottom: 0 !important;
+        padding-top: 0 !important;
+        padding-bottom: 0 !important;
+    }
     </style>
     """, unsafe_allow_html=True)
     
-    # Single branding with logo
+    # Single branding with logo only
     col1, col2, col3 = st.columns([1, 2, 1])
     with col2:
         st.markdown(f"""
-        <div style="display: flex; align-items: center; justify-content: center; margin-bottom: 20px;">
-            <div style="display: flex; align-items: center;">
-                <div style="width: 40px; height: 40px;">
-                    {render_svg("assets/logo.svg")}
-                </div>
-                <h1 style="margin-left: 10px; font-size: 28px; background: linear-gradient(90deg, #3b82f6, #60a5fa); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Ticker AI</h1>
+        <div style="display: flex; align-items: center; justify-content: center; margin-bottom: 10px; margin-top: -30px;">
+            <div style="width: 40px; height: 40px;">
+                {render_svg("assets/logo.svg")}
             </div>
         </div>
-        <p style="text-align: center; color: #a5b4fc; margin-bottom: 30px; font-size: 16px;">Stock Market Analyzer</p>
+        <p style="text-align: center; color: #a5b4fc; margin-bottom: 10px; font-size: 16px;">Stock Market Analyzer</p>
         """, unsafe_allow_html=True)
     
     # Auth tabs
