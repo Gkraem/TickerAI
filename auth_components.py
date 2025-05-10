@@ -74,10 +74,15 @@ def auth_page():
     with col2:
         st.markdown(f"""
         <div style="text-align: center;">
-            <div style="display: inline-block; width: 40px; height: 40px;">
-                {render_svg("assets/logo.svg")}
+            <div style="display: flex; align-items: center; justify-content: center; margin-bottom: 10px;">
+                <div style="width: 40px; height: 40px;">
+                    {render_svg("assets/logo.svg")}
+                </div>
+                <div style="margin-left: 10px; font-size: 22px; color: white; font-weight: 500;">
+                    Ticker AI
+                </div>
             </div>
-            <p style="color: #a5b4fc; margin-top: 10px; font-size: 16px;">Stock Market Analyzer</p>
+            <p style="color: #a5b4fc; font-size: 16px; text-align: center;">Stock Market Analyzer</p>
         </div>
         """, unsafe_allow_html=True)
     
