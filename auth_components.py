@@ -16,7 +16,7 @@ def display_auth_header():
 def login_form():
     """Display the login form"""
     with st.form("login_form"):
-        st.markdown("<h2 class='auth-form-title'>Sign In</h2>", unsafe_allow_html=True)
+        # No duplicate header - removed
         
         identifier = st.text_input("Email or Phone", key="login_identifier")
         password = st.text_input("Password", type="password", key="login_password")
@@ -38,7 +38,7 @@ def login_form():
 def register_form():
     """Display the registration form"""
     with st.form("register_form"):
-        st.markdown("<h2 class='auth-form-title'>Create Account</h2>", unsafe_allow_html=True)
+        # No duplicate header - removed
         
         name = st.text_input("Full Name", key="register_name")
         email = st.text_input("Email", key="register_email")

@@ -21,11 +21,18 @@ class StockAnalyzer:
         """
         self.ticker = ticker
         self.stock = yf.Ticker(ticker)
-        self.info = self.stock.info
         
+        try:
+            self.info = self.stock.info if hasattr(self.stock, 'info') else {}
+        except (AttributeError, TypeError):
+            self.info = {}
+            
         # Get the stock data for the last day
-        self.current_data = self.stock.history(period='2d')
-        
+        try:
+            self.current_data = self.stock.history(period='2d')
+        except Exception:
+            self.current_data = pd.DataFrame()
+            
         # Initialize analysis components
         self.technical = TechnicalAnalysis(ticker)
         self.fundamental = FundamentalAnalysis(ticker)

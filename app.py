@@ -89,7 +89,10 @@ if not is_authenticated():
 else:
     # Display the user's name in the sidebar
     user = get_session_user()
-    st.sidebar.markdown(f"### Welcome, {user['name']}")
+    if user and isinstance(user, dict) and 'name' in user:
+        st.sidebar.markdown(f"### Welcome, {user['name']}")
+    else:
+        st.sidebar.markdown("### Welcome")
     logout_button()
     
     # App title with Ticker AI branding

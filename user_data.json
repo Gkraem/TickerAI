@@ -1,0 +1,11 @@
+{
+    "users": [
+        {
+            "name": "Grant Kraemer",
+            "email": "gkraem@vt.edu",
+            "phone": "2402857119",
+            "password": "$pbkdf2-sha256$29000$m1PKOUfoPQdAaM25N2ZsDQ$L3noPkGbFnjinh4.10srgx2haCLbv4eSBcV.DHooqFI",
+            "created_at": "2025-05-10T14:25:40.754942"
+        }
+    ]
+}
