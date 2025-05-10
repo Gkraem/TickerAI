@@ -43,7 +43,7 @@ def login_form():
                     st.session_state["user"] = admin_user
                     st.success("Admin login successful!")
                     # Directly redirect to admin panel if it's the admin login
-                    st.switch_page("pages/01_Admin_Panel.py")
+                    st.switch_page("01_Admin_Panel")
                 else:
                     # Regular user authentication
                     success, result = authenticate_user(identifier, password)

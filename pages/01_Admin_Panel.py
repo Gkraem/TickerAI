@@ -86,7 +86,7 @@ else:
     
     if not user or not isinstance(user, dict):
         st.error("User session error. Please log in again.")
-        st.button("Return to Login", on_click=lambda: st.switch_page("/app.py"))
+        st.button("Return to Login", on_click=lambda: st.switch_page("app"))
         st.stop()
     
     # Create a modern header with buttons
@@ -108,7 +108,7 @@ else:
     with col2:
         # Return to main app button
         if st.button("Return to Stock Analyzer", use_container_width=True):
-            st.switch_page("/app.py")
+            st.switch_page("app")
     
     # Add a separator
     st.markdown("<hr style='margin-top: 0; margin-bottom: 20px;'>", unsafe_allow_html=True)
@@ -124,4 +124,4 @@ else:
     with col2:
         if st.button("Logout", type="primary", use_container_width=True):
             st.session_state["user"] = None
-            st.switch_page("/app.py")
+            st.switch_page("app")
