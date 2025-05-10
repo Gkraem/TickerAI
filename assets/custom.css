@@ -6,6 +6,18 @@
     background-size: cover;
     background-repeat: no-repeat;
     background-attachment: fixed;
+    padding-top: 20px; /* Add space at the top of the entire app */
+}
+
+/* Hide any headers that Streamlit might be creating */
+header[data-testid="stHeader"] {
+    display: none !important;
+}
+
+/* Hide Streamlit native top elements */
+[data-testid="stToolbar"],
+[data-testid="stDecoration"] {
+    display: none !important;
 }
 
 /* Add subtle grid overlay for modern look */
@@ -29,8 +41,8 @@
     font-size: 32px;
     font-weight: bold;
     color: white;
-    margin-top: 10px;
-    margin-bottom: 30px;
+    margin-top: 60px; /* More space at top */
+    margin-bottom: 40px;
     text-align: center;
     background: linear-gradient(90deg, #3b82f6, #60a5fa);
     -webkit-background-clip: text;

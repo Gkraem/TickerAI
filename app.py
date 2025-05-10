@@ -15,9 +15,9 @@ from data_sources import DATA_SOURCES
 from user_management import is_authenticated, get_session_user
 from auth_components import auth_page, logout_button
 
-# Set page configuration
+# Set page configuration without title to avoid header bar
 st.set_page_config(
-    page_title="Ticker AI - Stock Market Analyzer",
+    page_title="Ticker AI",
     page_icon="📈",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -69,8 +69,8 @@ else:
         st.sidebar.markdown("### Welcome")
     logout_button()
     
-    # Removed title (it was causing the black header) and keeping only description
-    st.markdown("### Use Data to Get a 360-Degree View of Your Investment Opportunities")
+    # Completely removed all headers and keeping proper spacing
+    st.markdown("<div style='height: 30px;'></div>", unsafe_allow_html=True)
     
     # Sidebar for ticker input
     st.sidebar.title("Stock Search")
