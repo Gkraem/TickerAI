@@ -160,31 +160,42 @@ class FundamentalAnalysis:
         pandas.DataFrame
             Earnings and revenue data
         """
-        # Get quarterly earnings data
-        earnings = self.stock.quarterly_earnings
-        
-        if earnings is None or earnings.empty:
-            return pd.DataFrame()
-        
-        # Get quarterly revenue data
-        financials = self.stock.quarterly_financials
-        
-        if financials is None or financials.empty:
+        try:
+            # Get quarterly earnings data
+            earnings = self.stock.quarterly_earnings
+            
+            if earnings is None or earnings.empty:
+                return pd.DataFrame()
+            
+            # Ensure the index is not RangeIndex
+            if isinstance(earnings.index, pd.RangeIndex):
+                # Create a default index if it's a RangeIndex
+                # This helps avoid the 'RangeIndex' object has no attribute 'strftime' error
+                quarters = [f'Q{i+1}' for i in range(len(earnings))]
+                earnings.index = quarters
+            
+            # Get quarterly revenue data
+            financials = self.stock.quarterly_financials
+            
+            if financials is None or financials.empty:
+                return earnings
+            
+            # Extract revenue row if available
+            if 'Total Revenue' in financials.index:
+                revenue = financials.loc['Total Revenue']
+                
+                # Merge with earnings data
+                result = pd.DataFrame({
+                    'Earnings': earnings['Earnings'],
+                    'Revenue': revenue
+                })
+                
+                return result
+            
             return earnings
-        
-        # Extract revenue row if available
-        if 'Total Revenue' in financials.index:
-            revenue = financials.loc['Total Revenue']
-            
-            # Merge with earnings data
-            result = pd.DataFrame({
-                'Earnings': earnings['Earnings'],
-                'Revenue': revenue
-            })
-            
-            return result
-        
-        return earnings
+        except Exception as e:
+            print(f"Error in get_earnings_growth: {str(e)}")
+            return pd.DataFrame()
     
     def get_analyst_recommendations(self):
         """
@@ -195,13 +206,24 @@ class FundamentalAnalysis:
         pandas.DataFrame
             Analyst recommendations
         """
-        # Get recommendations
-        recommendations = self.stock.recommendations
-        
-        if recommendations is None or recommendations.empty:
+        try:
+            # Get recommendations
+            recommendations = self.stock.recommendations
+            
+            if recommendations is None or recommendations.empty:
+                return pd.DataFrame()
+            
+            # Ensure the index is not RangeIndex
+            if isinstance(recommendations.index, pd.RangeIndex):
+                # Create a default index if it's a RangeIndex
+                dates = [f'Analysis {i+1}' for i in range(len(recommendations))]
+                recommendations.index = dates
+                return recommendations
+            
+            # Convert index to string dates for better readability
+            recommendations.index = recommendations.index.strftime('%Y-%m-%d')
+            
+            return recommendations
+        except Exception as e:
+            print(f"Error in get_analyst_recommendations: {str(e)}")
             return pd.DataFrame()
-        
-        # Convert index to string dates for better readability
-        recommendations.index = recommendations.index.strftime('%Y-%m-%d')
-        
-        return recommendations
