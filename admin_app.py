@@ -7,8 +7,55 @@ from admin import admin_panel
 st.set_page_config(
     page_title="Ticker AI Admin",
     page_icon="📈",
-    layout="wide"
+    layout="wide",
+    initial_sidebar_state="collapsed"
 )
+
+# Custom CSS for admin panel
+st.markdown("""
+<style>
+.block-container {
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+}
+.stMetric {
+    background-color: rgba(28, 131, 225, 0.1);
+    border-radius: 8px;
+    padding: 10px;
+    border: 1px solid rgba(28, 131, 225, 0.2);
+}
+.dataframe {
+    font-size: 14px;
+}
+.footer {
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    background-color: rgba(38, 39, 48, 0.8);
+    color: #FAFAFA;
+    text-align: center;
+    padding: 10px 0;
+    font-size: 14px;
+    backdrop-filter: blur(10px);
+}
+.footer-content {
+    display: flex;
+    justify-content: space-between;
+    padding: 0 20px;
+}
+.admin-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+.header-buttons {
+    display: flex;
+    gap: 10px;
+}
+</style>
+""", unsafe_allow_html=True)
 
 # Custom footer
 footer_html = """
@@ -37,18 +84,44 @@ else:
     # User is an admin, show admin panel
     user = get_session_user()
     
-    # Header
-    st.title("Ticker AI Admin Panel")
-    st.markdown(f"Logged in as: **{user['name']}** ({user['email']})")
+    if not user or not isinstance(user, dict):
+        st.error("User session error. Please log in again.")
+        st.button("Return to Login", on_click=lambda: st.switch_page("app.py"))
+        st.stop()
     
-    # Add logout button
-    if st.button("Logout"):
-        st.session_state["user"] = None
-        st.rerun()
+    # Create a modern header with buttons
+    st.markdown(
+        """
+        <div class="admin-header">
+            <h1>Ticker AI Admin Panel</h1>
+        </div>
+        """, 
+        unsafe_allow_html=True
+    )
     
-    # Return to main app button
-    if st.button("Return to Stock Analyzer"):
-        st.switch_page("app.py")
+    # User info and navigation buttons in columns
+    col1, col2 = st.columns([3, 1])
     
-    # Show admin panel
+    with col1:
+        st.markdown(f"**Logged in as:** {user.get('name', 'Unknown')} ({user.get('email', 'No email')})")
+    
+    with col2:
+        # Return to main app button
+        if st.button("Return to Stock Analyzer", use_container_width=True):
+            st.switch_page("app.py")
+    
+    # Add a separator
+    st.markdown("<hr style='margin-top: 0; margin-bottom: 20px;'>", unsafe_allow_html=True)
+    
+    # Show admin panel content
     admin_panel()
+    
+    # Add logout button at bottom 
+    st.markdown("<br><hr>", unsafe_allow_html=True)
+    
+    # Centered logout button
+    col1, col2, col3 = st.columns([2, 1, 2])
+    with col2:
+        if st.button("Logout", type="primary", use_container_width=True):
+            st.session_state["user"] = None
+            st.switch_page("app.py")

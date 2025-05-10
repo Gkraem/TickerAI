@@ -835,7 +835,6 @@ else:
                     
                     else:
                         st.info(f"No recent news found for {ticker}")
-                
             except Exception as e:
                 st.error(f"Error analyzing {ticker}: {str(e)}")
                 st.info("Please check if the ticker symbol is correct and try again.")
