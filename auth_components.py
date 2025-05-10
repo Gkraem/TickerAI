@@ -123,7 +123,7 @@ def auth_page():
     # Display total user count
     user_count = get_total_user_count()
     st.markdown(f"""
-    <div style="position: fixed; bottom: 20px; width: 100%; text-align: center; color: #a5b4fc; font-size: 12px;">
+    <div style="margin-top: 40px; width: 100%; text-align: center; color: #a5b4fc; font-size: 16px;">
         <p>Total registered users: <span style="font-weight: bold;">{user_count}</span></p>
     </div>
     """, unsafe_allow_html=True)
