@@ -55,6 +55,13 @@ def register_user(name, email, phone, password):
     users_data["users"].append(new_user)
     save_users(users_data)
     
+    # Try to send admin notification
+    try:
+        from notification import send_admin_notification
+        send_admin_notification(new_user)
+    except Exception as e:
+        print(f"Failed to send admin notification: {str(e)}")
+    
     return True, "Registration successful"
 
 def authenticate_user(identifier, password):
