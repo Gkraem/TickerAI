@@ -4,6 +4,8 @@ import pandas as pd
 import plotly.graph_objects as go
 import numpy as np
 import matplotlib.pyplot as plt
+import base64
+import os
 from datetime import datetime, timedelta
 from stock_analyzer import StockAnalyzer
 from technical_analysis import TechnicalAnalysis
@@ -18,6 +20,51 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="expanded"
 )
+
+# Load and apply custom CSS
+def load_css(css_file):
+    with open(css_file, "r") as f:
+        css = f"<style>{f.read()}</style>"
+        st.markdown(css, unsafe_allow_html=True)
+
+load_css("assets/custom.css")
+
+# Function to render SVG
+def render_svg(svg_file):
+    with open(svg_file, "r") as f:
+        svg = f.read()
+        b64 = base64.b64encode(svg.encode("utf-8")).decode("utf-8")
+        html = f'<img src="data:image/svg+xml;base64,{b64}" class="navbar-logo-img" />'
+        return html
+
+# Custom navbar
+navbar_html = f"""
+<div class="navbar">
+    <div class="navbar-logo">
+        {render_svg("assets/logo.svg")}
+        <div class="navbar-title">ALPHA PRIME ANALYTICS</div>
+    </div>
+</div>
+"""
+st.markdown(navbar_html, unsafe_allow_html=True)
+
+# Custom footer
+footer_html = """
+<div class="footer">
+    <div class="footer-content">
+        <div class="footer-left">
+            Contact: 240-285-7119 | gkraem@vt.edu
+        </div>
+        <div class="footer-right">
+            © 2025 Alpha Prime Analytics. All rights reserved.
+        </div>
+    </div>
+</div>
+"""
+st.markdown(footer_html, unsafe_allow_html=True)
+
+# Main content container with proper spacing for header/footer
+st.markdown('<div class="main-content">', unsafe_allow_html=True)
 
 # App title
 st.title("Stock Market Analyzer")
@@ -49,6 +96,9 @@ if ticker and search_button:
     # Create a placeholder for loading state
     with st.spinner(f'Analyzing {ticker}...'):
         try:
+            # Create a card-like container for content
+            st.markdown('<div class="card">', unsafe_allow_html=True)
+            
             # Initialize stock analyzer
             analyzer = StockAnalyzer(ticker)
             
@@ -734,12 +784,18 @@ if ticker and search_button:
                 else:
                     st.info(f"No recent news found for {ticker}")
         
+            # Close the card div
+            st.markdown('</div>', unsafe_allow_html=True)
+            
         except Exception as e:
+            st.markdown('<div class="card">', unsafe_allow_html=True)
             st.error(f"Error analyzing {ticker}: {str(e)}")
             st.info("Please check if the ticker symbol is correct and try again.")
+            st.markdown('</div>', unsafe_allow_html=True)
 
 else:
     # Display welcome message and stock market image for new users
+    st.markdown('<div class="card">', unsafe_allow_html=True)
     st.markdown("""
     ## Welcome to the Stock Market Analyzer
     
@@ -760,7 +816,7 @@ else:
     """)
     
     st.markdown("### All data is sourced from reputable financial providers")
+    st.markdown('</div>', unsafe_allow_html=True)
     
-    # Display a sample stock market visualization
-    st.image("https://pixabay.com/get/g96df62c4d4f7b5ca5496d3f50223c6f20fb9e0b53e604af9f07fa65d0a23174340cfbe5c8420c3889e7e8617626f96750fce40cdcb92e5c092824a562fc02119_1280.jpg", 
-             caption="Stock Market Visualization")
+    # Close main content div
+    st.markdown('</div>', unsafe_allow_html=True)

@@ -91,19 +91,30 @@ class FundamentalAnalysis:
         pandas.DataFrame
             Income statement data
         """
-        # Get income statement data
-        income_stmt = self.stock.income_stmt
-        
-        if income_stmt.empty:
+        try:
+            # Get income statement data
+            income_stmt = self.stock.income_stmt
+            
+            if income_stmt is None or isinstance(income_stmt, dict):
+                return pd.DataFrame()
+                
+            if income_stmt.empty:
+                return pd.DataFrame()
+            
+            # Transpose so dates are columns
+            income_stmt = income_stmt.T
+            
+            # Format the index for better readability if it's a datetime index
+            try:
+                if hasattr(income_stmt.index, 'strftime'):
+                    income_stmt.index = income_stmt.index.strftime('%Y-%m-%d')
+            except:
+                pass
+            
+            return income_stmt
+        except Exception as e:
+            print(f"Error in get_income_statement: {str(e)}")
             return pd.DataFrame()
-        
-        # Transpose so dates are columns
-        income_stmt = income_stmt.T
-        
-        # Format the index for better readability
-        income_stmt.index = income_stmt.index.strftime('%Y-%m-%d')
-        
-        return income_stmt
     
     def get_balance_sheet(self):
         """
@@ -114,19 +125,30 @@ class FundamentalAnalysis:
         pandas.DataFrame
             Balance sheet data
         """
-        # Get balance sheet data
-        balance_sheet = self.stock.balance_sheet
-        
-        if balance_sheet.empty:
+        try:
+            # Get balance sheet data
+            balance_sheet = self.stock.balance_sheet
+            
+            if balance_sheet is None or isinstance(balance_sheet, dict):
+                return pd.DataFrame()
+                
+            if balance_sheet.empty:
+                return pd.DataFrame()
+            
+            # Transpose so dates are columns
+            balance_sheet = balance_sheet.T
+            
+            # Format the index for better readability if it's a datetime index
+            try:
+                if hasattr(balance_sheet.index, 'strftime'):
+                    balance_sheet.index = balance_sheet.index.strftime('%Y-%m-%d')
+            except:
+                pass
+            
+            return balance_sheet
+        except Exception as e:
+            print(f"Error in get_balance_sheet: {str(e)}")
             return pd.DataFrame()
-        
-        # Transpose so dates are columns
-        balance_sheet = balance_sheet.T
-        
-        # Format the index for better readability
-        balance_sheet.index = balance_sheet.index.strftime('%Y-%m-%d')
-        
-        return balance_sheet
     
     def get_cash_flow(self):
         """
@@ -137,19 +159,30 @@ class FundamentalAnalysis:
         pandas.DataFrame
             Cash flow statement data
         """
-        # Get cash flow data
-        cash_flow = self.stock.cashflow
-        
-        if cash_flow.empty:
+        try:
+            # Get cash flow data
+            cash_flow = self.stock.cashflow
+            
+            if cash_flow is None or isinstance(cash_flow, dict):
+                return pd.DataFrame()
+                
+            if cash_flow.empty:
+                return pd.DataFrame()
+            
+            # Transpose so dates are columns
+            cash_flow = cash_flow.T
+            
+            # Format the index for better readability if it's a datetime index
+            try:
+                if hasattr(cash_flow.index, 'strftime'):
+                    cash_flow.index = cash_flow.index.strftime('%Y-%m-%d')
+            except:
+                pass
+            
+            return cash_flow
+        except Exception as e:
+            print(f"Error in get_cash_flow: {str(e)}")
             return pd.DataFrame()
-        
-        # Transpose so dates are columns
-        cash_flow = cash_flow.T
-        
-        # Format the index for better readability
-        cash_flow.index = cash_flow.index.strftime('%Y-%m-%d')
-        
-        return cash_flow
     
     def get_earnings_growth(self):
         """
