@@ -78,13 +78,13 @@ def auth_page():
             with open("assets/logo.svg", "r") as f:
                 svg_content = f.read()
             
-            # Create a centered div with the SVG
+            # Create a centered div with larger SVG
             st.markdown(f"""
             <div style="display: flex; justify-content: center;">
-                <img src="data:image/svg+xml;base64,{base64.b64encode(svg_content.encode()).decode()}" width="70" height="70">
+                <img src="data:image/svg+xml;base64,{base64.b64encode(svg_content.encode()).decode()}" width="120" height="120">
             </div>
-            <div style="text-align: center;">
-                <p style="color: #a5b4fc; margin-top: 5px; font-size: 16px;">Stock Market Analyzer</p>
+            <div style="text-align: center; min-width: 200px;">
+                <p style="color: #a5b4fc; margin-top: 10px; font-size: 18px; white-space: nowrap;">Stock Market Analyzer</p>
             </div>
             """, unsafe_allow_html=True)
     
