@@ -40,9 +40,23 @@ def render_svg(svg_file):
 # Custom navbar
 navbar_html = f"""
 <div class="navbar">
-    <div class="navbar-logo">
-        {render_svg("assets/logo.svg")}
-        <div class="navbar-title">ALPHA PRIME ANALYTICS</div>
+    <div class="navbar-container">
+        <div class="navbar-logo">
+            {render_svg("assets/logo.svg")}
+            <div class="navbar-title">Ticker AI</div>
+        </div>
+        <div class="navbar-links">
+            <a href="#" class="navbar-link">Overview</a>
+            <a href="#" class="navbar-link">Price Charts</a>
+            <a href="#" class="navbar-link">Fundamentals</a>
+            <a href="#" class="navbar-link">Technicals</a>
+            <a href="#" class="navbar-link">News</a>
+            <a href="#" class="navbar-link">Watchlist</a>
+        </div>
+        <div class="navbar-icons">
+            <a href="#" class="navbar-link">⚙️</a>
+            <a href="#" class="navbar-link">👤</a>
+        </div>
     </div>
 </div>
 """
@@ -56,7 +70,7 @@ footer_html = """
             Contact: 240-285-7119 | gkraem@vt.edu
         </div>
         <div class="footer-right">
-            © 2025 Alpha Prime Analytics. All rights reserved.
+            © 2025 Ticker AI. All rights reserved.
         </div>
     </div>
 </div>
