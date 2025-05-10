@@ -82,7 +82,7 @@ else:
             # Restore user state to maintain login
             st.session_state["user"] = admin_user
             # Redirect to admin page
-            st.switch_page("admin_app.py")
+            st.switch_page("pages/01_Admin_Panel.py")
     
     # Completely removed all headers and keeping proper spacing
     st.markdown("<div style='height: 30px;'></div>", unsafe_allow_html=True)
