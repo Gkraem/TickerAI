@@ -243,7 +243,12 @@ class FundamentalAnalysis:
             # Get recommendations
             recommendations = self.stock.recommendations
             
-            if recommendations is None or recommendations.empty:
+            # Handle cases where recommendations might be None or not a DataFrame
+            if recommendations is None or not isinstance(recommendations, pd.DataFrame):
+                return pd.DataFrame()
+                
+            # Handle empty DataFrame
+            if len(recommendations) == 0:
                 return pd.DataFrame()
             
             # Ensure the index is not RangeIndex
@@ -253,8 +258,19 @@ class FundamentalAnalysis:
                 recommendations.index = dates
                 return recommendations
             
-            # Convert index to string dates for better readability
-            recommendations.index = recommendations.index.strftime('%Y-%m-%d')
+            # If we have a DatetimeIndex, format it properly
+            if isinstance(recommendations.index, pd.DatetimeIndex):
+                # Convert index to string dates for better readability
+                new_index = []
+                for date in recommendations.index:
+                    try:
+                        if hasattr(date, 'strftime'):
+                            new_index.append(date.strftime('%Y-%m-%d'))
+                        else:
+                            new_index.append(str(date))
+                    except:
+                        new_index.append(str(date))
+                recommendations.index = new_index
             
             return recommendations
         except Exception as e:

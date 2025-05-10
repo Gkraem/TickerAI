@@ -411,29 +411,36 @@ if ticker and search_button:
                 st.markdown("### Analyst Recommendations")
                 
                 recommendations = fundamental.get_analyst_recommendations()
-                if not recommendations.empty:
-                    # Count recommendations by type
-                    rec_counts = recommendations['To Grade'].value_counts()
-                    
-                    # Create pie chart
-                    fig = go.Figure(data=[go.Pie(
-                        labels=rec_counts.index,
-                        values=rec_counts.values,
-                        hole=.3,
-                        marker_colors=['#00CC96', '#00BFC4', '#636EFA', '#EF553B', '#AB63FA']
-                    )])
-                    
-                    fig.update_layout(
-                        title_text='Analyst Recommendations Distribution',
-                        annotations=[dict(text='Recommendations', x=0.5, y=0.5, font_size=12, showarrow=False)],
-                        height=400
-                    )
-                    
-                    st.plotly_chart(fig, use_container_width=True)
-                    
-                    # Show recent recommendations
-                    st.markdown("#### Recent Analyst Actions")
-                    st.dataframe(recommendations.head(10), use_container_width=True)
+                if isinstance(recommendations, pd.DataFrame) and not recommendations.empty and len(recommendations) > 0:
+                    try:
+                        # Count recommendations by type
+                        if 'To Grade' in recommendations.columns:
+                            rec_counts = recommendations['To Grade'].value_counts()
+                            
+                            # Create pie chart
+                            fig = go.Figure(data=[go.Pie(
+                                labels=rec_counts.index,
+                                values=rec_counts.values,
+                                hole=.3,
+                                marker_colors=['#00CC96', '#00BFC4', '#636EFA', '#EF553B', '#AB63FA']
+                            )])
+                            
+                            fig.update_layout(
+                                title_text='Analyst Recommendations Distribution',
+                                annotations=[dict(text='Recommendations', x=0.5, y=0.5, font_size=12, showarrow=False)],
+                                height=400
+                            )
+                            
+                            st.plotly_chart(fig, use_container_width=True)
+                            
+                            # Show recent recommendations
+                            st.markdown("#### Recent Analyst Actions")
+                            display_df = recommendations.head(10) if len(recommendations) > 10 else recommendations
+                            st.dataframe(display_df, use_container_width=True)
+                        else:
+                            st.info("Analyst recommendation details not available")
+                    except Exception as e:
+                        st.warning(f"Error displaying analyst recommendations: {str(e)}")
                 else:
                     st.info("Analyst recommendations not available")
 
@@ -449,7 +456,7 @@ if ticker and search_button:
                     st.markdown("### Price and Moving Averages")
                     
                     ma_data = technical.get_moving_averages(timeframe)
-                    if not ma_data.empty:
+                    if isinstance(ma_data, pd.DataFrame) and not ma_data.empty and len(ma_data) > 0:
                         # Create figure
                         fig = go.Figure()
                         
@@ -514,7 +521,7 @@ if ticker and search_button:
                         st.markdown("### Relative Strength Index (RSI)")
                         
                         rsi_data = technical.get_rsi(timeframe)
-                        if not rsi_data.empty:
+                        if isinstance(rsi_data, pd.DataFrame) and not rsi_data.empty and len(rsi_data) > 0:
                             # Create RSI chart
                             fig = go.Figure()
                             
@@ -557,7 +564,7 @@ if ticker and search_button:
                         st.markdown("### MACD Indicator")
                         
                         macd_data = technical.get_macd(timeframe)
-                        if not macd_data.empty:
+                        if isinstance(macd_data, pd.DataFrame) and not macd_data.empty and len(macd_data) > 0:
                             # Create MACD chart
                             fig = go.Figure()
                             
@@ -609,7 +616,7 @@ if ticker and search_button:
                     st.markdown("### Bollinger Bands")
                     
                     bb_data = technical.get_bollinger_bands(timeframe)
-                    if not bb_data.empty:
+                    if isinstance(bb_data, pd.DataFrame) and not bb_data.empty and len(bb_data) > 0:
                         # Create Bollinger Bands chart
                         fig = go.Figure()
                         
