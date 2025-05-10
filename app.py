@@ -56,9 +56,6 @@ footer_html = """
 """
 st.markdown(footer_html, unsafe_allow_html=True)
 
-# Main content container with proper spacing for header/footer
-st.markdown('<div class="main-content">', unsafe_allow_html=True)
-
 # Check if user is authenticated
 if not is_authenticated():
     # Show authentication page when not logged in
@@ -101,8 +98,6 @@ else:
         # Create a placeholder for loading state
         with st.spinner(f'Analyzing {ticker}...'):
             try:
-                # Create a card-like container for content
-                st.markdown('<div class="card">', unsafe_allow_html=True)
                 
                 # Initialize stock analyzer
                 analyzer = StockAnalyzer(ticker)
@@ -827,18 +822,12 @@ else:
                     else:
                         st.info(f"No recent news found for {ticker}")
                 
-                # Close the card div
-                st.markdown('</div>', unsafe_allow_html=True)
-                
             except Exception as e:
-                st.markdown('<div class="card">', unsafe_allow_html=True)
                 st.error(f"Error analyzing {ticker}: {str(e)}")
                 st.info("Please check if the ticker symbol is correct and try again.")
-                st.markdown('</div>', unsafe_allow_html=True)
 
     else:
         # Display welcome message and stock market image for new users
-        st.markdown('<div class="card">', unsafe_allow_html=True)
         st.markdown("""
         ## Welcome to the Ticker AI Stock Market Analyzer
         
@@ -857,7 +846,3 @@ else:
         - News sentiment
         - Buy rating score (1-10)
         """)
-        st.markdown('</div>', unsafe_allow_html=True)
-
-# Close the main content div
-st.markdown('</div>', unsafe_allow_html=True)
