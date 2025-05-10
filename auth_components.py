@@ -121,7 +121,6 @@ def auth_page():
         register_form()
         
     # Display total user count
-    from user_management import get_total_user_count
     user_count = get_total_user_count()
     st.markdown(f"""
     <div style="position: fixed; bottom: 20px; width: 100%; text-align: center; color: #a5b4fc; font-size: 12px;">
