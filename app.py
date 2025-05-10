@@ -274,15 +274,53 @@ else:
                     # Generate a brief explanation of the rating
                     st.markdown("#### Rating Explanation")
                     
-                    # Simple explanation text based on the rating
+                    # Detailed explanation text based on the rating and components
+                    technical_score = rating_components.get('technical', 0)
+                    fundamental_score = rating_components.get('fundamental', 0)
+                    sentiment_score = rating_components.get('sentiment', 0)
+                    
+                    # Determine the strength and weakness areas
+                    strengths = []
+                    weaknesses = []
+                    
+                    if technical_score >= 7:
+                        strengths.append("strong technical indicators (bullish chart patterns, positive momentum)")
+                    elif technical_score <= 4:
+                        weaknesses.append("concerning technical signals (bearish patterns, negative momentum)")
+                        
+                    if fundamental_score >= 7:
+                        strengths.append("solid fundamentals (strong earnings growth, healthy balance sheet)")
+                    elif fundamental_score <= 4:
+                        weaknesses.append("weak fundamentals (poor financial health, declining margins)")
+                        
+                    if sentiment_score >= 7:
+                        strengths.append("positive market sentiment (analyst upgrades, institutional buying)")
+                    elif sentiment_score <= 4:
+                        weaknesses.append("negative market sentiment (analyst downgrades, institutional selling)")
+                    
+                    # Create the explanation based on the rating and identified strengths/weaknesses
                     if buy_rating >= 7.5:
-                        explanation = f"**Strong Buy ({buy_rating:.1f}/10):** {ticker} shows excellent technical momentum, strong fundamentals, and positive market sentiment. Consider this stock for potential significant growth opportunities."
+                        strength_text = ", ".join(strengths) if strengths else "multiple positive factors"
+                        explanation = f"""**Strong Buy ({buy_rating:.1f}/10):** {ticker} presents a compelling investment case based on {strength_text}. 
+                        
+Technical analysis shows favorable chart patterns with strong price momentum. Fundamentally, the company demonstrates solid financial performance with potential for continued growth. Market sentiment toward {ticker} is highly positive, with favorable analyst coverage and institutional interest. This stock is well-positioned for potential significant appreciation in the near to medium term."""
                     elif buy_rating >= 6:
-                        explanation = f"**Buy ({buy_rating:.1f}/10):** {ticker} demonstrates good technical indicators, solid fundamentals, and favorable market sentiment. This stock appears to be a good investment opportunity."
+                        strength_text = ", ".join(strengths) if strengths else "several positive indicators"
+                        weakness_text = ", ".join(weaknesses) if weaknesses else "some areas requiring monitoring"
+                        explanation = f"""**Buy ({buy_rating:.1f}/10):** {ticker} shows a favorable investment profile highlighted by {strength_text}, despite {weakness_text}. 
+                        
+The technical picture is generally positive with price action indicating upward momentum. Fundamentally, the company has demonstrated reasonable financial stability and competitive positioning. Investor sentiment is moderately to strongly positive, suggesting continued support for the stock price. This security presents a good risk-reward opportunity at current levels."""
                     elif buy_rating >= 4:
-                        explanation = f"**Hold ({buy_rating:.1f}/10):** {ticker} shows mixed signals with some positive aspects but also areas of concern. Consider maintaining current positions without increasing exposure."
+                        strength_text = ", ".join(strengths) if strengths else "some positive aspects"
+                        weakness_text = ", ".join(weaknesses) if weaknesses else "several concerning factors"
+                        explanation = f"""**Hold ({buy_rating:.1f}/10):** {ticker} shows a mixed profile with {strength_text} balanced against {weakness_text}. 
+                        
+The technical analysis reveals conflicting signals without clear directional bias. Fundamentally, the company shows some strengths but also notable areas of concern that may impact future performance. Market sentiment is lukewarm or inconsistent, suggesting uncertainty among investors and analysts. Existing positions may be maintained, but increasing exposure is not recommended without improved metrics."""
                     else:
-                        explanation = f"**Sell ({buy_rating:.1f}/10):** {ticker} exhibits concerning technical signals, weak fundamentals, or negative market sentiment. Consider reducing exposure or looking for better opportunities."
+                        weakness_text = ", ".join(weaknesses) if weaknesses else "multiple concerning indicators"
+                        explanation = f"""**Sell ({buy_rating:.1f}/10):** {ticker} demonstrates significant risk factors driven primarily by {weakness_text}. 
+                        
+Technical analysis reveals bearish patterns with deteriorating price action and negative momentum indicators. Fundamental analysis highlights troubling aspects of the company's financial health or competitive position. Market sentiment has turned negative with downward pressure from analysts or institutional selling. Current shareholders should consider reducing exposure, while new investment is not recommended at this time."""
                     
                     st.markdown(explanation)
                     
@@ -990,10 +1028,9 @@ else:
             All data comes from reliable financial sources.
             """)
             
-            # Clean, modern stock market welcome display
+            # Clean, modern stock market welcome display with only the logo
             st.markdown("""
-            <div style="text-align: center; padding: 30px; margin-top: 50px;">
-                <h1 style="color: #3b82f6; margin-bottom: 20px;">Ticker AI</h1>
-                <p style="color: #a3a3a3; font-size: 18px;">Advanced stock market analysis powered by data science</p>
+            <div style="text-align: center; padding: 50px; margin-top: 80px;">
+                <h1 style="color: #3b82f6; font-size: 60px; margin-bottom: 20px;">Ticker AI</h1>
             </div>
             """, unsafe_allow_html=True)
