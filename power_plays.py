@@ -18,22 +18,36 @@ STOCK_INDICES = {
         "ABT", "ACN", "MCD", "VZ", "CRM", "NKE", "CMCSA", "ADBE", "ORCL", "DHR",
         "IBM", "PM", "UPS", "AMD", "TXN", "INTC", "QCOM", "COP", "T", "AMGN"
     ],
-    "S&P 500 Top 50": [
+    "S&P 500": [
         "AAPL", "MSFT", "AMZN", "NVDA", "GOOGL", "META", "GOOG", "TSLA", "BRK-B", "LLY",
         "AVGO", "UNH", "JPM", "V", "XOM", "JNJ", "PG", "MA", "HD", "MRK", 
         "COST", "ABBV", "CVX", "PEP", "ADBE", "WMT", "CRM", "KO", "BAC", "TMO",
         "MCD", "ACN", "CSCO", "LIN", "AMD", "DIS", "WFC", "ABT", "CMCSA", "NFLX",
-        "TXN", "COP", "INTC", "PM", "ORCL", "TMUS", "DHR", "CAT", "NKE", "VZ"
+        "TXN", "COP", "INTC", "PM", "ORCL", "TMUS", "DHR", "CAT", "NKE", "VZ",
+        "SPGI", "MS", "CB", "AMAT", "RTX", "INTU", "GE", "HON", "CL", "BMY",
+        "AMGN", "AXP", "LOW", "UPS", "DE", "BKNG", "MDLZ", "SCHW", "ADP", "GILD",
+        "SYK", "BLK", "GS", "ISRG", "ELV", "ADI", "REGN", "TJX", "VRTX", "ETN",
+        "SBUX", "PLD", "NOW", "ZTS", "AON", "MMC", "LRCX", "CI", "MO", "BSX",
+        "CME", "SO", "PANW", "FI", "DUK", "ITW", "UNP", "APD", "EOG", "CSX",
+        "AMT", "PGR", "MPC", "MU", "ICE", "KLAC", "HCA", "EQIX", "PYPL", "FCX",
+        "SNPS", "CDNS", "PXD", "GD", "CCI", "SLB", "MCK", "TFC", "NSC", "BDX"
     ],
     "Dow Jones": [
         "AAPL", "MSFT", "UNH", "GS", "HD", "MCD", "CAT", "V", "TRV", "JPM",
         "AMGN", "BA", "CRM", "HON", "JNJ", "PG", "AXP", "IBM", "MRK", "WMT",
         "DIS", "MMM", "CVX", "KO", "CSCO", "DOW", "NKE", "INTC", "VZ", "WBA"
     ],
-    "NASDAQ-100 Top 30": [
+    "NASDAQ-100": [
         "AAPL", "MSFT", "AMZN", "NVDA", "META", "TSLA", "GOOGL", "GOOG", "AVGO", "ADBE",
         "COST", "PEP", "CSCO", "AMD", "CMCSA", "TMUS", "NFLX", "INTC", "TXN", "QCOM", 
-        "HON", "INTU", "AMAT", "ISRG", "BKNG", "SBUX", "MDLZ", "AMGN", "ADI", "PYPL"
+        "HON", "INTU", "AMAT", "ISRG", "BKNG", "SBUX", "MDLZ", "AMGN", "ADI", "PYPL",
+        "REGN", "VRTX", "PANW", "KLAC", "LRCX", "MRNA", "SNPS", "CDNS", "ADP", "MU",
+        "MELI", "ORLY", "MNST", "CRWD", "ASML", "CTAS", "FTNT", "MRVL", "MAR", "ABNB",
+        "PCAR", "PAYX", "DXCM", "CPRT", "WDAY", "CTSH", "ODFL", "CHTR", "AEP", "BIIB",
+        "KDP", "EXC", "KHC", "ROST", "NXPI", "SGEN", "FAST", "EA", "XEL", "DLTR",
+        "IDXX", "GEHC", "BKR", "DASH", "VRSK", "FANG", "ANSS", "CSGP", "CEG", "TEAM",
+        "ILMN", "WBD", "ADSK", "ALGN", "ON", "ZS", "ZM", "JD", "LCID", "RIVN",
+        "CSX", "STLD", "WBA", "CDW", "ENPH", "DDOG", "TTWO", "EBAY", "SWKS", "SPLK"
     ],
     "Tech Giants": [
         "AAPL", "MSFT", "GOOGL", "AMZN", "META", "NVDA", "TSLA", "AVGO", "ADBE", "CRM",
@@ -406,16 +420,13 @@ def display_power_plays():
         </div>
         """
         
-        # Display ticker separately from company name for better rendering
-        st.markdown(f"""
-        <div style="display: flex; align-items: center; margin-bottom: 10px;">
-            {rank_badge}
-            <span style="font-size: 22px; font-weight: bold; margin: 0;">{ticker}</span>
-        </div>
-        """, unsafe_allow_html=True)
-        
-        # Display company name as regular text (not HTML)
-        st.subheader(company_name)
+        # Display ticker and company name separately without HTML
+        col1, col2 = st.columns([1, 11])
+        with col1:
+            st.markdown(rank_badge, unsafe_allow_html=True)
+        with col2:
+            st.markdown(f"**{ticker}**")
+            st.markdown(f"### {company_name}")
         
         # Display buy rating
         color = ""
@@ -452,8 +463,22 @@ def display_power_plays():
         </div>
         """, unsafe_allow_html=True)
         
-        # Display analysis
-        st.markdown(analysis, unsafe_allow_html=True)
+        # Split the analysis into rating and detailed analysis
+        if "\n\n" in analysis:
+            rating_part, detailed_part = analysis.split("\n\n", 1)
+            # Display rating part
+            st.markdown(rating_part, unsafe_allow_html=True)
+            
+            # Display detailed analysis
+            if detailed_part:
+                st.markdown("### Financial Details")
+                detailed_parts = detailed_part.split(". ")
+                for part in detailed_parts:
+                    if part.strip():  # Only add non-empty parts
+                        st.markdown(f"• {part.strip()}.")
+        else:
+            # Fallback if analysis doesn't have the expected format
+            st.markdown(analysis, unsafe_allow_html=True)
         
         # Add horizontal separator except for the last item
         if i < len(top_stocks) - 1:
@@ -464,7 +489,7 @@ def display_power_plays():
     if st.button("Back to Stock Search", key="back_to_search_button"):
         # Clear power_plays_results and go back to the stock search page
         st.session_state.power_plays_results = None
-        st.session_state.current_page = "stock_search"
+        st.session_state.power_plays_view = False
         st.rerun()
     
     # Add vertical buffer at the bottom to push content away from footer

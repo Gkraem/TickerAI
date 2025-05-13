@@ -138,11 +138,7 @@ else:
             # Display Power Plays page
             display_power_plays()
             
-            # Add a button to go back to the main search
-            if st.button("Back to Stock Search"):
-                st.session_state.power_plays_view = False
-                st.rerun()
-                
+            # The back button is now handled in the power_plays.py file
         elif ticker and search_button:
             # Create a placeholder for loading state
             with st.spinner(f'Analyzing {ticker}...'):
