@@ -405,7 +405,7 @@ def display_power_plays():
         st.markdown(f"""
         <div style="display: flex; align-items: center; margin-bottom: 10px;">
             {rank_badge}
-            <h2 style="margin: 0;">{ticker}: {company_name}</h2>
+            <div style="font-size: 22px; font-weight: bold; margin: 0;">{ticker}: {company_name}</div>
         </div>
         """, unsafe_allow_html=True)
         
@@ -450,3 +450,14 @@ def display_power_plays():
         # Add horizontal separator except for the last item
         if i < len(top_stocks) - 1:
             st.markdown("<hr style='margin-top: 30px; margin-bottom: 30px; border-color: rgba(59, 130, 246, 0.2);'>", unsafe_allow_html=True)
+    
+    # Add a button to go back to stock search
+    st.write("")  # Add some spacing
+    if st.button("Back to Stock Search"):
+        # Clear power_plays_results and go back to the stock search page
+        st.session_state.power_plays_results = None
+        st.session_state.current_page = "stock_search"
+        st.rerun()
+    
+    # Add vertical buffer at the bottom to push content away from footer
+    st.markdown("<div style='height: 80px;'></div>", unsafe_allow_html=True)
