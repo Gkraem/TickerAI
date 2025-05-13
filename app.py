@@ -71,71 +71,215 @@ if not is_authenticated():
         # Show authentication page when user clicks "Try for Free"
         auth_page()
     else:
-        # Modern landing page with hero section and CTA
-        col1, col2 = st.columns([2, 1])
+        # IntelIectia.ai-style navigation header
+        st.markdown("""
+        <style>
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 2rem;
+            background-color: #1a1a1a;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+        }
         
+        .navbar .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+        
+        .navbar ul {
+            list-style: none;
+            display: flex;
+            gap: 1rem;
+            margin: 0;
+            padding: 0;
+        }
+        
+        .navbar li {
+            display: inline-block;
+        }
+        
+        .navbar a {
+            color: #ffffff;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+        }
+        
+        .navbar .cta {
+            background-color: #007bff;
+            border-radius: 4px;
+        }
+        
+        .hero {
+            text-align: center;
+            padding: 4rem 2rem;
+            background: linear-gradient(135deg, #1a1a1a, #333333);
+            border-radius: 8px;
+            margin-bottom: 2rem;
+        }
+        
+        .hero h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .hero p {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+            opacity: 0.8;
+        }
+        
+        .hero .cta {
+            background-color: #007bff;
+            color: #ffffff;
+            padding: 0.75rem 1.5rem;
+            border-radius: 4px;
+            text-decoration: none;
+            font-weight: 500;
+            display: inline-block;
+        }
+        
+        .features {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 2rem;
+            padding: 2rem;
+            background-color: #1a1a1a;
+            border-radius: 8px;
+        }
+        
+        .feature {
+            background-color: #2a2a2a;
+            padding: 1.5rem;
+            border-radius: 8px;
+            width: calc(33.333% - 2rem);
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .feature h2 {
+            margin-bottom: 1rem;
+            font-size: 1.5rem;
+        }
+        
+        .feature p {
+            opacity: 0.8;
+            font-size: 1rem;
+            line-height: 1.5;
+        }
+        
+        @media (max-width: 768px) {
+            .navbar {
+                flex-direction: column;
+                padding: 1rem;
+            }
+            
+            .navbar .logo {
+                margin-bottom: 1rem;
+            }
+            
+            .navbar ul {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            
+            .feature {
+                width: 100%;
+            }
+        }
+        </style>
+        
+        <header class="navbar">
+            <div class="logo">Ticker AI</div>
+            <nav>
+                <ul>
+                    <li><a href="#">Product</a></li>
+                    <li><a href="#">Markets</a></li>
+                    <li><a href="#">Resources</a></li>
+                    <li><a href="#">Pricing</a></li>
+                    <li><a href="#" id="sign-in-btn">Sign In</a></li>
+                    <li><a class="cta" href="#" id="try-free-btn">Try for Free</a></li>
+                </ul>
+            </nav>
+        </header>
+        
+        <script>
+            document.getElementById('sign-in-btn').addEventListener('click', function() {
+                // This will be handled by Streamlit event handler instead
+            });
+            
+            document.getElementById('try-free-btn').addEventListener('click', function() {
+                // This will be handled by Streamlit event handler instead
+            });
+        </script>
+        """, unsafe_allow_html=True)
+        
+        # Create two buttons for auth but keep them hidden
+        col1, col2 = st.columns([1, 1])
         with col1:
-            st.markdown("""
-            <div style='padding: 20px 0; background: rgba(20, 25, 35, 0.2); border-radius: 10px;'>
-                <h1 style='font-size: 3.5rem; margin-bottom: 1rem;'>Ticker AI</h1>
-                <h2 style='font-size: 1.8rem; font-weight: 300; margin-bottom: 2rem;'>
-                    AI-Powered Stock Analysis for Smarter Investing
-                </h2>
-                <p style='font-size: 1.2rem; line-height: 1.6; margin-bottom: 2rem;'>
-                    Unlock the power of AI to analyze stocks, identify investment opportunities, 
-                    and make data-driven decisions with confidence.
-                </p>
-            </div>
-            """, unsafe_allow_html=True)
-            
-            # Feature highlights
-            st.markdown("""
-            <div style='margin-top: 2rem;'>
-                <h3 style='font-size: 1.5rem;'>Advanced Features</h3>
-                <div style='display: flex; gap: 1rem; flex-wrap: wrap;'>
-                    <div style='background: rgba(30, 40, 60, 0.3); padding: 1rem; border-radius: 8px; flex: 1; min-width: 200px;'>
-                        <h4>AI-Powered Analysis</h4>
-                        <p>Get comprehensive buy ratings with detailed explanations</p>
-                    </div>
-                    <div style='background: rgba(30, 40, 60, 0.3); padding: 1rem; border-radius: 8px; flex: 1; min-width: 200px;'>
-                        <h4>Power Plays</h4>
-                        <p>Discover top investment opportunities across major indices</p>
-                    </div>
-                    <div style='background: rgba(30, 40, 60, 0.3); padding: 1rem; border-radius: 8px; flex: 1; min-width: 200px;'>
-                        <h4>Technical Indicators</h4>
-                        <p>View advanced technical analysis and charting</p>
-                    </div>
-                </div>
-            </div>
-            """, unsafe_allow_html=True)
-            
+            signin_button = st.button("Sign In", key="signin", use_container_width=True)
         with col2:
-            # CTA card for sign up/login
-            st.markdown("""
-            <div style='background: rgba(20, 25, 35, 0.6); 
-                        border-radius: 10px; 
-                        padding: 2rem; 
-                        margin-top: 2rem;
-                        box-shadow: 0 4px 6px rgba(0,0,0,0.1);'>
-                <h3 style='text-align: center; margin-bottom: 1.5rem;'>Ready to Get Started?</h3>
-                <p style='text-align: center; margin-bottom: 2rem;'>
-                    Access all features with a free account
-                </p>
-            </div>
-            """, unsafe_allow_html=True)
+            tryfree_button = st.button("Try for Free", key="tryfree", use_container_width=True)
             
-            # Button to navigate to auth page
-            if st.button("Try for Free", type="primary", use_container_width=True):
-                st.session_state.auth_view = True
-                st.rerun()
+        if signin_button or tryfree_button:
+            st.session_state.auth_view = True
+            st.rerun()
+        
+        # Replace the buttons with empty space since we're using the navigation buttons
+        st.markdown('<style>div[data-testid="stHorizontalBlock"] {display: none;}</style>', unsafe_allow_html=True)
+        
+        # Hero section
+        st.markdown("""
+        <section class="hero">
+            <h1>The Most Powerful AI Platform for Smarter Investing</h1>
+            <p>From Wall Street to Main Street, where AI meets your ambition.</p>
+            <a class="cta" href="#" id="hero-try-now">Try Now</a>
+        </section>
+        
+        <script>
+            document.getElementById('hero-try-now').addEventListener('click', function(e) {
+                e.preventDefault();
+                // Will be handled by Streamlit
+            });
+        </script>
+        """, unsafe_allow_html=True)
+        
+        # Another hidden button for the hero "Try Now" link
+        if st.button("Try Now", key="herocta", use_container_width=True):
+            st.session_state.auth_view = True
+            st.rerun()
             
-            # Show total users count
-            user_count = get_total_user_count()
-            st.markdown(f"""
-            <div style='text-align: center; margin-top: 1rem;'>
-                <p>Join our community of {user_count} investors</p>
+        # Hide this button too
+        st.markdown('<style>button[kind="secondary"] {display: none;}</style>', unsafe_allow_html=True)
+        
+        # Features section
+        st.markdown("""
+        <section class="features">
+            <div class="feature">
+                <h2>AI Stock Picker</h2>
+                <p>Daily top stock picks with over 200% annualized returns based on AI analysis.</p>
             </div>
-            """, unsafe_allow_html=True)
+            <div class="feature">
+                <h2>Advanced Analytics</h2>
+                <p>Comprehensive technical and fundamental analysis with AI-powered insights.</p>
+            </div>
+            <div class="feature">
+                <h2>Power Plays</h2>
+                <p>Discover the most promising investment opportunities across major indices.</p>
+            </div>
+        </section>
+        """, unsafe_allow_html=True)
+        
+        # User stats in a modern, subtle footer
+        user_count = get_total_user_count()
+        st.markdown(f"""
+        <div style="text-align: center; padding: 2rem 0; opacity: 0.7; font-size: 0.9rem;">
+            <p>Join our community of {user_count} investors making smarter decisions with AI</p>
+        </div>
+        """, unsafe_allow_html=True)
 else:
     # User is authenticated - show main app content
     st.session_state.landing_page_shown = False
