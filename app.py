@@ -16,6 +16,7 @@ from data_sources import DATA_SOURCES
 from user_management import is_authenticated, get_session_user 
 from auth_components import auth_page, logout_button
 from admin import is_admin, admin_panel
+from power_plays import display_power_plays
 
 # Set page configuration without title to avoid header bar
 st.set_page_config(
@@ -115,14 +116,34 @@ else:
         # Search button
         search_button = st.sidebar.button("Analyze Stock")
         
+        # Power Plays button
+        power_plays_button = st.sidebar.button("Power Plays", key="power_plays")
+        
         # Display data sources
         st.sidebar.markdown("---")
         st.sidebar.markdown("### Data Sources")
         for source, url in DATA_SOURCES.items():
             st.sidebar.markdown(f"- [{source}]({url})")
         
+        # Initialize view state for Power Plays if not exists
+        if "power_plays_view" not in st.session_state:
+            st.session_state.power_plays_view = False
+            
+        # Handle Power Plays button
+        if power_plays_button:
+            st.session_state.power_plays_view = True
+            
         # Main app content
-        if ticker and search_button:
+        if st.session_state.power_plays_view:
+            # Display Power Plays page
+            display_power_plays()
+            
+            # Add a button to go back to the main search
+            if st.button("Back to Stock Search"):
+                st.session_state.power_plays_view = False
+                st.rerun()
+                
+        elif ticker and search_button:
             # Create a placeholder for loading state
             with st.spinner(f'Analyzing {ticker}...'):
                 try:
