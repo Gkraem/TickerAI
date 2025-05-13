@@ -196,64 +196,35 @@ if not is_authenticated():
             <div class="logo">Ticker AI</div>
             <nav>
                 <ul>
-                    <li><a href="#">Product</a></li>
-                    <li><a href="#">Markets</a></li>
-                    <li><a href="#">Resources</a></li>
-                    <li><a href="#">Pricing</a></li>
-                    <li><a href="#" id="sign-in-btn">Sign In</a></li>
-                    <li><a class="cta" href="#" id="try-free-btn">Try for Free</a></li>
+                    <li><a href="#" id="sign-in-btn" onclick="document.getElementById('signin-button').click();">Sign In</a></li>
+                    <li><a class="cta" href="#" id="try-free-btn" onclick="document.getElementById('tryfree-button').click();">Try for Free</a></li>
                 </ul>
             </nav>
         </header>
-        
-        <script>
-            document.getElementById('sign-in-btn').addEventListener('click', function() {
-                // This will be handled by Streamlit event handler instead
-            });
-            
-            document.getElementById('try-free-btn').addEventListener('click', function() {
-                // This will be handled by Streamlit event handler instead
-            });
-        </script>
         """, unsafe_allow_html=True)
         
-        # Create two buttons for auth but keep them hidden
-        col1, col2 = st.columns([1, 1])
-        with col1:
-            signin_button = st.button("Sign In", key="signin", use_container_width=True)
-        with col2:
-            tryfree_button = st.button("Try for Free", key="tryfree", use_container_width=True)
+        # Create buttons for auth but make them hidden and give them IDs for the onclick handlers
+        signin_button = st.button("Sign In", key="signin", use_container_width=True)
+        st.markdown('<div id="signin-button" style="display:none;"></div>', unsafe_allow_html=True)
+        
+        tryfree_button = st.button("Try for Free", key="tryfree", use_container_width=True)
+        st.markdown('<div id="tryfree-button" style="display:none;"></div>', unsafe_allow_html=True)
             
         if signin_button or tryfree_button:
             st.session_state.auth_view = True
             st.rerun()
         
-        # Replace the buttons with empty space since we're using the navigation buttons
-        st.markdown('<style>div[data-testid="stHorizontalBlock"] {display: none;}</style>', unsafe_allow_html=True)
+        # Hide Streamlit buttons
+        st.markdown('<style>button[kind="secondary"], button[kind="primary"] {display: none;}</style>', unsafe_allow_html=True)
         
-        # Hero section
+        # Hero section with Try Now button linked to tryfree button
         st.markdown("""
         <section class="hero">
             <h1>The Most Powerful AI Platform for Smarter Investing</h1>
             <p>From Wall Street to Main Street, where AI meets your ambition.</p>
-            <a class="cta" href="#" id="hero-try-now">Try Now</a>
+            <a class="cta" href="#" onclick="document.getElementById('tryfree-button').click(); return false;">Try Now</a>
         </section>
-        
-        <script>
-            document.getElementById('hero-try-now').addEventListener('click', function(e) {
-                e.preventDefault();
-                // Will be handled by Streamlit
-            });
-        </script>
         """, unsafe_allow_html=True)
-        
-        # Another hidden button for the hero "Try Now" link
-        if st.button("Try Now", key="herocta", use_container_width=True):
-            st.session_state.auth_view = True
-            st.rerun()
-            
-        # Hide this button too
-        st.markdown('<style>button[kind="secondary"] {display: none;}</style>', unsafe_allow_html=True)
         
         # Features section
         st.markdown("""
@@ -281,30 +252,155 @@ if not is_authenticated():
         </div>
         """, unsafe_allow_html=True)
 else:
-    # User is authenticated - show main app content
+    # User is authenticated - show main app content using the same styling
     st.session_state.landing_page_shown = False
     
-    # Configure sidebar for authenticated users
-    with st.sidebar:
-        # User info and logout
-        user = get_session_user()
+    # Get user info
+    user = get_session_user()
+    user_name = user.get('name', 'User') if user and isinstance(user, dict) else 'User'
+    
+    # Apply the same navbar styling for authenticated users
+    st.markdown(f"""
+    <style>
+    .navbar {{
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem 2rem;
+        background-color: #1a1a1a;
+        border-radius: 8px;
+        margin-bottom: 2rem;
+    }}
+    
+    .navbar .logo {{
+        font-size: 1.5rem;
+        font-weight: bold;
+    }}
+    
+    .navbar ul {{
+        list-style: none;
+        display: flex;
+        gap: 1rem;
+        margin: 0;
+        padding: 0;
+    }}
+    
+    .navbar li {{
+        display: inline-block;
+    }}
+    
+    .navbar a {{
+        color: #ffffff;
+        text-decoration: none;
+        padding: 0.5rem 1rem;
+    }}
+    
+    .navbar .cta {{
+        background-color: #007bff;
+        border-radius: 4px;
+    }}
+    
+    .navbar .welcome {{
+        font-size: 0.9rem;
+        opacity: 0.8;
+    }}
+    
+    .analysis-container {{
+        display: flex;
+        gap: 2rem;
+        margin-bottom: 2rem;
+    }}
+    
+    .search-panel {{
+        background-color: #1a1a1a;
+        padding: 1.5rem;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        min-width: 250px;
+        flex: 0 0 25%;
+    }}
+    
+    .search-panel h3 {{
+        margin-top: 0;
+        font-size: 1.2rem;
+        margin-bottom: 1rem;
+    }}
+    
+    .button-container {{
+        display: flex;
+        gap: 1rem;
+        margin-top: 1.5rem;
+    }}
+    
+    .button-container button {{
+        flex: 1;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        padding: 0.5rem 1rem;
+        border-radius: 4px;
+        cursor: pointer;
+        font-weight: 500;
+    }}
+    
+    .content-panel {{
+        flex: 1;
+        background-color: #1a1a1a;
+        padding: 1.5rem;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }}
+    
+    @media (max-width: 768px) {{
+        .analysis-container {{
+            flex-direction: column;
+        }}
         
-        # User welcome and profile section
-        if user and isinstance(user, dict) and 'name' in user:
-            st.markdown(f"""
-            <div style='background: rgba(30, 40, 60, 0.5); padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem;'>
-                <h3 style='margin-bottom: 0.5rem; font-size: 1.2rem;'>Welcome, {user['name']}</h3>
-            </div>
-            """, unsafe_allow_html=True)
-        else:
-            st.markdown("### Welcome")
-        
-        # Main navigation
-        st.title("Navigation")
-        
-        # Stock search section
-        st.subheader("Stock Analysis")
-        ticker = st.text_input("Enter Stock Ticker (e.g., AAPL)", "").upper()
+        .search-panel {{
+            flex: 1;
+            width: 100%;
+        }}
+    }}
+    </style>
+    
+    <header class="navbar">
+        <div class="logo">Ticker AI</div>
+        <nav>
+            <ul>
+                <li><span class="welcome">Welcome, {user_name}</span></li>
+                <li><a href="#" onclick="document.getElementById('logout-button').click(); return false;">Log Out</a></li>
+            </ul>
+        </nav>
+    </header>
+    """, unsafe_allow_html=True)
+    
+    # Create a hidden logout button
+    logout_clicked = st.button("Log Out", key="logout")
+    st.markdown('<div id="logout-button" style="display:none;"></div>', unsafe_allow_html=True)
+    
+    if logout_clicked:
+        logout_user()
+        st.rerun()
+    
+    # Hide standard Streamlit button
+    st.markdown('<style>button[kind="secondary"] {display: none;}</style>', unsafe_allow_html=True)
+    
+    # Main content area with two panels
+    st.markdown("""
+    <div class="analysis-container">
+        <div class="search-panel">
+            <h3>Stock Analysis</h3>
+            <div id="search-inputs"></div>
+        </div>
+        <div class="content-panel">
+            <div id="content-area"></div>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    # Create stock analysis controls that will be moved into the search panel
+    with st.container():
+        ticker = st.text_input("Enter Stock Ticker (e.g., AAPL)", key="ticker_input").upper()
         
         # Timeframe selector
         timeframe = st.selectbox(
@@ -316,50 +412,54 @@ else:
         # Action buttons
         col1, col2 = st.columns(2)
         with col1:
-            search_button = st.button("Analyze", use_container_width=True)
+            search_button = st.button("Analyze", key="analyze_btn", use_container_width=True)
         with col2:
-            power_plays_button = st.button("Power Plays", use_container_width=True)
+            power_plays_button = st.button("Power Plays", key="power_plays_btn", use_container_width=True)
         
         # Handle Power Plays button
         if power_plays_button:
             st.session_state.power_plays_view = True
             st.session_state.view_mode = "main"  # Ensure we're in main mode
-        
-        # Logout button
-        logout_button()
-        
-        # Admin section
-        if is_admin():
-            st.markdown("---")
-            st.subheader("Admin Controls")
-            
-            # Toggle between main app and admin panel
-            if st.session_state.view_mode == "main":
-                if st.button("Admin Panel", type="primary"):
-                    st.session_state.view_mode = "admin"
-                    st.session_state.power_plays_view = False  # Reset power plays view
-                    st.rerun()
-            else:  # In admin mode
-                if st.button("Return to App", type="primary"):
-                    st.session_state.view_mode = "main"
-                    st.rerun()
-        
-        # Data sources at the bottom
-        st.markdown("---")
-        st.caption("### Data Sources")
-        for source, url in DATA_SOURCES.items():
-            st.markdown(f"<small>- [{source}]({url})</small>", unsafe_allow_html=True)
     
-    # Page header with subtle styling
+    # Admin section
+    if is_admin():
+        admin_btn = st.button("Admin Panel", key="admin_btn", type="primary")
+        if admin_btn:
+            st.session_state.view_mode = "admin"
+            st.session_state.power_plays_view = False
+            st.rerun()
+    
+    # Move the controls into the custom panels
     st.markdown("""
-    <div style='background: rgba(20, 25, 35, 0.4); 
-                padding: 1rem; 
-                border-radius: 8px; 
-                margin-bottom: 1.5rem;
-                box-shadow: 0 2px 4px rgba(0,0,0,0.1);'>
-        <h1 style='margin: 0; font-size: 2rem;'>Ticker AI</h1>
-        <p style='margin: 0; opacity: 0.8;'>AI-Powered Stock Analysis</p>
-    </div>
+    <script>
+        // Move the input elements to the search panel
+        const searchPanel = document.getElementById('search-inputs');
+        const controls = document.querySelectorAll('[data-testid="stVerticalBlock"] > div');
+        
+        if (searchPanel && controls) {
+            for (let i = 0; i < controls.length; i++) {
+                searchPanel.appendChild(controls[i]);
+            }
+        }
+        
+        // Hide the original controls container
+        const controlsContainer = document.querySelector('[data-testid="stVerticalBlock"]');
+        if (controlsContainer) {
+            controlsContainer.style.display = 'none';
+        }
+    </script>
+    """, unsafe_allow_html=True)
+    
+    # Hide Streamlit elements
+    st.markdown("""
+    <style>
+        section.main > div:first-child {
+            display: none;
+        }
+        div[data-testid="stToolbar"] {
+            display: none;
+        }
+    </style>
     """, unsafe_allow_html=True)
     
     # Check view mode to determine what content to display
