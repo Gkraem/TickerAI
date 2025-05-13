@@ -182,10 +182,14 @@ def display_power_plays():
     </div>
     """, unsafe_allow_html=True)
     
-    # Check if we have cached results
+    # Initialize session state for power plays if needed
     if 'power_plays_results' not in st.session_state:
+        st.session_state.power_plays_results = None
+    
+    # Run analysis if no cached results
+    if st.session_state.power_plays_results is None:
         with st.spinner("Analyzing Fortune 500 stocks to find the best opportunities..."):
-            # Get top stocks (limiting to 30 tickers for demo purposes)
+            # Get top stocks (limiting to 30 tickers for demo purposes to speed up execution)
             st.session_state.power_plays_results = get_top_stocks(max_stocks=5, max_tickers=30)
     
     # Display results
