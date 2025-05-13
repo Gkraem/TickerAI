@@ -18,12 +18,12 @@ from auth_components import auth_page, logout_button
 from admin import is_admin, admin_panel
 from power_plays import display_power_plays
 
-# Set page configuration without title to avoid header bar
+# Set page configuration for a modern look
 st.set_page_config(
     page_title="Ticker AI",
     page_icon="📈",
     layout="wide",
-    initial_sidebar_state="expanded"
+    initial_sidebar_state="collapsed"  # Start with sidebar collapsed for cleaner look
 )
 
 # Load and apply custom CSS
@@ -50,41 +50,173 @@ def render_svg(svg_file):
 if "view_mode" not in st.session_state:
     st.session_state.view_mode = "main"  # Options: "main", "admin"
 
-# Check if user is authenticated
+# Initialize state variables for the new UI
+if "landing_page_shown" not in st.session_state:
+    st.session_state.landing_page_shown = True
+    
+if "auth_view" not in st.session_state:
+    st.session_state.auth_view = False
+
+if "power_plays_view" not in st.session_state:
+    st.session_state.power_plays_view = False
+
+# Modern landing page or main content logic
 if not is_authenticated():
-    # Show authentication page when not logged in
-    auth_page()
-else:
-    # Display the user's name in the sidebar
-    user = get_session_user()
-    if user and isinstance(user, dict) and 'name' in user:
-        st.sidebar.markdown(f"### Welcome, {user['name']}")
+    if st.session_state.auth_view:
+        # Show authentication page when user clicks "Try for Free"
+        auth_page()
     else:
-        st.sidebar.markdown("### Welcome")
-    
-    logout_button()
-    
-    # Add admin controls if the user is an admin
-    if is_admin():
-        st.sidebar.markdown("---")
+        # Modern landing page with hero section and CTA
+        col1, col2 = st.columns([2, 1])
         
-        # Toggle between main app and admin panel
-        if st.session_state.view_mode == "main":
-            if st.sidebar.button("Admin Panel", type="primary"):
-                st.session_state.view_mode = "admin"
+        with col1:
+            st.markdown("""
+            <div style='padding: 20px 0; background: rgba(20, 25, 35, 0.2); border-radius: 10px;'>
+                <h1 style='font-size: 3.5rem; margin-bottom: 1rem;'>Ticker AI</h1>
+                <h2 style='font-size: 1.8rem; font-weight: 300; margin-bottom: 2rem;'>
+                    AI-Powered Stock Analysis for Smarter Investing
+                </h2>
+                <p style='font-size: 1.2rem; line-height: 1.6; margin-bottom: 2rem;'>
+                    Unlock the power of AI to analyze stocks, identify investment opportunities, 
+                    and make data-driven decisions with confidence.
+                </p>
+            </div>
+            """, unsafe_allow_html=True)
+            
+            # Feature highlights
+            st.markdown("""
+            <div style='margin-top: 2rem;'>
+                <h3 style='font-size: 1.5rem;'>Advanced Features</h3>
+                <div style='display: flex; gap: 1rem; flex-wrap: wrap;'>
+                    <div style='background: rgba(30, 40, 60, 0.3); padding: 1rem; border-radius: 8px; flex: 1; min-width: 200px;'>
+                        <h4>AI-Powered Analysis</h4>
+                        <p>Get comprehensive buy ratings with detailed explanations</p>
+                    </div>
+                    <div style='background: rgba(30, 40, 60, 0.3); padding: 1rem; border-radius: 8px; flex: 1; min-width: 200px;'>
+                        <h4>Power Plays</h4>
+                        <p>Discover top investment opportunities across major indices</p>
+                    </div>
+                    <div style='background: rgba(30, 40, 60, 0.3); padding: 1rem; border-radius: 8px; flex: 1; min-width: 200px;'>
+                        <h4>Technical Indicators</h4>
+                        <p>View advanced technical analysis and charting</p>
+                    </div>
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+            
+        with col2:
+            # CTA card for sign up/login
+            st.markdown("""
+            <div style='background: rgba(20, 25, 35, 0.6); 
+                        border-radius: 10px; 
+                        padding: 2rem; 
+                        margin-top: 2rem;
+                        box-shadow: 0 4px 6px rgba(0,0,0,0.1);'>
+                <h3 style='text-align: center; margin-bottom: 1.5rem;'>Ready to Get Started?</h3>
+                <p style='text-align: center; margin-bottom: 2rem;'>
+                    Access all features with a free account
+                </p>
+            </div>
+            """, unsafe_allow_html=True)
+            
+            # Button to navigate to auth page
+            if st.button("Try for Free", type="primary", use_container_width=True):
+                st.session_state.auth_view = True
                 st.rerun()
-        else:  # In admin mode
-            if st.sidebar.button("Return to Stock Analyzer", type="primary"):
-                st.session_state.view_mode = "main"
-                st.rerun()
+            
+            # Show total users count
+            user_count = get_total_user_count()
+            st.markdown(f"""
+            <div style='text-align: center; margin-top: 1rem;'>
+                <p>Join our community of {user_count} investors</p>
+            </div>
+            """, unsafe_allow_html=True)
+else:
+    # User is authenticated - show main app content
+    st.session_state.landing_page_shown = False
     
-    # Completely removed all headers and keeping proper spacing
-    st.markdown("<div style='height: 30px;'></div>", unsafe_allow_html=True)
+    # Configure sidebar for authenticated users
+    with st.sidebar:
+        # User info and logout
+        user = get_session_user()
+        
+        # User welcome and profile section
+        if user and isinstance(user, dict) and 'name' in user:
+            st.markdown(f"""
+            <div style='background: rgba(30, 40, 60, 0.5); padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem;'>
+                <h3 style='margin-bottom: 0.5rem; font-size: 1.2rem;'>Welcome, {user['name']}</h3>
+            </div>
+            """, unsafe_allow_html=True)
+        else:
+            st.markdown("### Welcome")
+        
+        # Main navigation
+        st.title("Navigation")
+        
+        # Stock search section
+        st.subheader("Stock Analysis")
+        ticker = st.text_input("Enter Stock Ticker (e.g., AAPL)", "").upper()
+        
+        # Timeframe selector
+        timeframe = st.selectbox(
+            "Select Timeframe",
+            ["1d", "5d", "1mo", "3mo", "6mo", "1y", "2y", "5y", "max"],
+            index=5  # Default to 1 year
+        )
+        
+        # Action buttons
+        col1, col2 = st.columns(2)
+        with col1:
+            search_button = st.button("Analyze", use_container_width=True)
+        with col2:
+            power_plays_button = st.button("Power Plays", use_container_width=True)
+        
+        # Handle Power Plays button
+        if power_plays_button:
+            st.session_state.power_plays_view = True
+            st.session_state.view_mode = "main"  # Ensure we're in main mode
+        
+        # Logout button
+        logout_button()
+        
+        # Admin section
+        if is_admin():
+            st.markdown("---")
+            st.subheader("Admin Controls")
+            
+            # Toggle between main app and admin panel
+            if st.session_state.view_mode == "main":
+                if st.button("Admin Panel", type="primary"):
+                    st.session_state.view_mode = "admin"
+                    st.session_state.power_plays_view = False  # Reset power plays view
+                    st.rerun()
+            else:  # In admin mode
+                if st.button("Return to App", type="primary"):
+                    st.session_state.view_mode = "main"
+                    st.rerun()
+        
+        # Data sources at the bottom
+        st.markdown("---")
+        st.caption("### Data Sources")
+        for source, url in DATA_SOURCES.items():
+            st.markdown(f"<small>- [{source}]({url})</small>", unsafe_allow_html=True)
+    
+    # Page header with subtle styling
+    st.markdown("""
+    <div style='background: rgba(20, 25, 35, 0.4); 
+                padding: 1rem; 
+                border-radius: 8px; 
+                margin-bottom: 1.5rem;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.1);'>
+        <h1 style='margin: 0; font-size: 2rem;'>Ticker AI</h1>
+        <p style='margin: 0; opacity: 0.8;'>AI-Powered Stock Analysis</p>
+    </div>
+    """, unsafe_allow_html=True)
     
     # Check view mode to determine what content to display
     if st.session_state.view_mode == "admin" and is_admin():
         # === ADMIN PANEL CONTENT ===
-        st.title("Ticker AI Admin Panel")
+        st.subheader("Admin Panel")
         
         # Show user info
         user = get_session_user()
@@ -96,42 +228,6 @@ else:
         
         # Display admin panel content
         admin_panel()
-        
-    else:
-        # === MAIN APP CONTENT ===
-        # Set view mode to main (in case coming from admin page or for initial state)
-        st.session_state.view_mode = "main"
-        
-        # Sidebar for ticker input
-        st.sidebar.title("Stock Search")
-        ticker = st.sidebar.text_input("Enter Stock Ticker Symbol (e.g., AAPL)", "").upper()
-        
-        # Timeframe selector
-        timeframe = st.sidebar.selectbox(
-            "Select Timeframe",
-            ["1d", "5d", "1mo", "3mo", "6mo", "1y", "2y", "5y", "max"],
-            index=5  # Default to 1 year
-        )
-        
-        # Search button
-        search_button = st.sidebar.button("Analyze Stock")
-        
-        # Power Plays button
-        power_plays_button = st.sidebar.button("Power Plays", key="power_plays")
-        
-        # Display data sources
-        st.sidebar.markdown("---")
-        st.sidebar.markdown("### Data Sources")
-        for source, url in DATA_SOURCES.items():
-            st.sidebar.markdown(f"- [{source}]({url})")
-        
-        # Initialize view state for Power Plays if not exists
-        if "power_plays_view" not in st.session_state:
-            st.session_state.power_plays_view = False
-            
-        # Handle Power Plays button
-        if power_plays_button:
-            st.session_state.power_plays_view = True
             
         # Main app content
         if st.session_state.power_plays_view:
