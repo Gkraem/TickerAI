@@ -13,459 +13,78 @@ from technical_analysis import TechnicalAnalysis
 from fundamental_analysis import FundamentalAnalysis
 from utils import format_large_number, get_stock_news
 from data_sources import DATA_SOURCES
-from user_management import is_authenticated, get_session_user, get_total_user_count, logout_user
+from user_management import is_authenticated, get_session_user 
 from auth_components import auth_page, logout_button
 from admin import is_admin, admin_panel
 from power_plays import display_power_plays
 
-# Set page configuration for a modern look
+# Set page configuration without title to avoid header bar
 st.set_page_config(
     page_title="Ticker AI",
     page_icon="📈",
     layout="wide",
-    initial_sidebar_state="collapsed"  # Start with sidebar collapsed for cleaner look
+    initial_sidebar_state="expanded"
 )
 
 # Load and apply custom CSS
 def load_css(css_file):
     with open(css_file, "r") as f:
-        st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
+        css = f"<style>{f.read()}</style>"
+        st.markdown(css, unsafe_allow_html=True)
 
-# Try to load custom CSS if it exists
-try:
-    # Try to load CSS from .streamlit/custom.css
-    custom_css_path = os.path.join(".streamlit", "custom.css")
-    if os.path.exists(custom_css_path):
-        load_css(custom_css_path)
-    # Also try assets/custom.css
-    elif os.path.exists("assets/custom.css"):
-        load_css("assets/custom.css")
-except Exception as e:
-    # Just log error, don't display to user
-    print(f"Error loading CSS: {str(e)}")
+load_css("assets/custom.css")
 
-# Function to render SVG files
+# Function to render SVG
 def render_svg(svg_file):
     with open(svg_file, "r") as f:
-        svg_content = f.read()
-        b64 = base64.b64encode(svg_content.encode("utf-8")).decode("utf-8")
-        return f'<img src="data:image/svg+xml;base64,{b64}" alt="SVG Image" style="max-width: 100%;">'
+        svg = f.read()
+        b64 = base64.b64encode(svg.encode("utf-8")).decode("utf-8")
+        html = f'<img src="data:image/svg+xml;base64,{b64}" class="navbar-logo-img" />'
+        return html
+
+# No navbar - completely removing the black header bar
+
+# Remove footer for better mobile experience
 
 # Initialize view mode state if not exists
 if "view_mode" not in st.session_state:
     st.session_state.view_mode = "main"  # Options: "main", "admin"
 
-# Initialize state variables for the new UI
-if "landing_page_shown" not in st.session_state:
-    st.session_state.landing_page_shown = True
-    
-if "auth_view" not in st.session_state:
-    st.session_state.auth_view = False
-
-if "power_plays_view" not in st.session_state:
-    st.session_state.power_plays_view = False
-
-# Modern landing page or main content logic
+# Check if user is authenticated
 if not is_authenticated():
-    if st.session_state.auth_view:
-        # Show authentication page when user clicks "Try for Free"
-        auth_page()
-    else:
-        # IntelIectia.ai-style navigation header
-        st.markdown("""
-        <style>
-        .navbar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 1rem 2rem;
-            background-color: #1a1a1a;
-            border-radius: 8px;
-            margin-bottom: 2rem;
-        }
-        
-        .navbar .logo {
-            font-size: 1.5rem;
-            font-weight: bold;
-        }
-        
-        .navbar ul {
-            list-style: none;
-            display: flex;
-            gap: 1rem;
-            margin: 0;
-            padding: 0;
-        }
-        
-        .navbar li {
-            display: inline-block;
-        }
-        
-        .navbar a {
-            color: #ffffff;
-            text-decoration: none;
-            padding: 0.5rem 1rem;
-        }
-        
-        .navbar .cta {
-            background-color: #007bff;
-            border-radius: 4px;
-        }
-        
-        .hero {
-            text-align: center;
-            padding: 4rem 2rem;
-            background: linear-gradient(135deg, #1a1a1a, #333333);
-            border-radius: 8px;
-            margin-bottom: 2rem;
-        }
-        
-        .hero h1 {
-            font-size: 2.5rem;
-            margin-bottom: 1rem;
-        }
-        
-        .hero p {
-            font-size: 1.2rem;
-            margin-bottom: 2rem;
-            opacity: 0.8;
-        }
-        
-        .hero .cta {
-            background-color: #007bff;
-            color: #ffffff;
-            padding: 0.75rem 1.5rem;
-            border-radius: 4px;
-            text-decoration: none;
-            font-weight: 500;
-            display: inline-block;
-        }
-        
-        .features {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 2rem;
-            padding: 2rem;
-            background-color: #1a1a1a;
-            border-radius: 8px;
-        }
-        
-        .feature {
-            background-color: #2a2a2a;
-            padding: 1.5rem;
-            border-radius: 8px;
-            width: calc(33.333% - 2rem);
-            text-align: center;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-        
-        .feature h2 {
-            margin-bottom: 1rem;
-            font-size: 1.5rem;
-        }
-        
-        .feature p {
-            opacity: 0.8;
-            font-size: 1rem;
-            line-height: 1.5;
-        }
-        
-        @media (max-width: 768px) {
-            .navbar {
-                flex-direction: column;
-                padding: 1rem;
-            }
-            
-            .navbar .logo {
-                margin-bottom: 1rem;
-            }
-            
-            .navbar ul {
-                flex-wrap: wrap;
-                justify-content: center;
-            }
-            
-            .feature {
-                width: 100%;
-            }
-        }
-        </style>
-        
-        <header class="navbar">
-            <div class="logo">Ticker AI</div>
-            <nav>
-                <ul>
-                    <li><a href="#" id="sign-in-btn" onclick="document.getElementById('signin-button').click();">Sign In</a></li>
-                    <li><a class="cta" href="#" id="try-free-btn" onclick="document.getElementById('tryfree-button').click();">Try for Free</a></li>
-                </ul>
-            </nav>
-        </header>
-        """, unsafe_allow_html=True)
-        
-        # Create buttons for auth but make them hidden and give them IDs for the onclick handlers
-        signin_button = st.button("Sign In", key="signin", use_container_width=True)
-        st.markdown('<div id="signin-button" style="display:none;"></div>', unsafe_allow_html=True)
-        
-        tryfree_button = st.button("Try for Free", key="tryfree", use_container_width=True)
-        st.markdown('<div id="tryfree-button" style="display:none;"></div>', unsafe_allow_html=True)
-            
-        if signin_button or tryfree_button:
-            st.session_state.auth_view = True
-            st.rerun()
-        
-        # Hide Streamlit buttons
-        st.markdown('<style>button[kind="secondary"], button[kind="primary"] {display: none;}</style>', unsafe_allow_html=True)
-        
-        # Hero section with Try Now button linked to tryfree button
-        st.markdown("""
-        <section class="hero">
-            <h1>The Most Powerful AI Platform for Smarter Investing</h1>
-            <p>From Wall Street to Main Street, where AI meets your ambition.</p>
-            <a class="cta" href="#" onclick="document.getElementById('tryfree-button').click(); return false;">Try Now</a>
-        </section>
-        """, unsafe_allow_html=True)
-        
-        # Features section
-        st.markdown("""
-        <section class="features">
-            <div class="feature">
-                <h2>AI Stock Picker</h2>
-                <p>Daily top stock picks with over 200% annualized returns based on AI analysis.</p>
-            </div>
-            <div class="feature">
-                <h2>Advanced Analytics</h2>
-                <p>Comprehensive technical and fundamental analysis with AI-powered insights.</p>
-            </div>
-            <div class="feature">
-                <h2>Power Plays</h2>
-                <p>Discover the most promising investment opportunities across major indices.</p>
-            </div>
-        </section>
-        """, unsafe_allow_html=True)
-        
-        # User stats in a modern, subtle footer
-        user_count = get_total_user_count()
-        st.markdown(f"""
-        <div style="text-align: center; padding: 2rem 0; opacity: 0.7; font-size: 0.9rem;">
-            <p>Join our community of {user_count} investors making smarter decisions with AI</p>
-        </div>
-        """, unsafe_allow_html=True)
+    # Show authentication page when not logged in
+    auth_page()
 else:
-    # User is authenticated - show main app content using the same styling
-    st.session_state.landing_page_shown = False
-    
-    # Get user info
+    # Display the user's name in the sidebar
     user = get_session_user()
-    user_name = user.get('name', 'User') if user and isinstance(user, dict) else 'User'
+    if user and isinstance(user, dict) and 'name' in user:
+        st.sidebar.markdown(f"### Welcome, {user['name']}")
+    else:
+        st.sidebar.markdown("### Welcome")
     
-    # Apply the same navbar styling for authenticated users
-    st.markdown(f"""
-    <style>
-    .navbar {{
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 1rem 2rem;
-        background-color: #1a1a1a;
-        border-radius: 8px;
-        margin-bottom: 2rem;
-    }}
+    logout_button()
     
-    .navbar .logo {{
-        font-size: 1.5rem;
-        font-weight: bold;
-    }}
-    
-    .navbar ul {{
-        list-style: none;
-        display: flex;
-        gap: 1rem;
-        margin: 0;
-        padding: 0;
-    }}
-    
-    .navbar li {{
-        display: inline-block;
-    }}
-    
-    .navbar a {{
-        color: #ffffff;
-        text-decoration: none;
-        padding: 0.5rem 1rem;
-    }}
-    
-    .navbar .cta {{
-        background-color: #007bff;
-        border-radius: 4px;
-    }}
-    
-    .navbar .welcome {{
-        font-size: 0.9rem;
-        opacity: 0.8;
-    }}
-    
-    .analysis-container {{
-        display: flex;
-        gap: 2rem;
-        margin-bottom: 2rem;
-    }}
-    
-    .search-panel {{
-        background-color: #1a1a1a;
-        padding: 1.5rem;
-        border-radius: 8px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        min-width: 250px;
-        flex: 0 0 25%;
-    }}
-    
-    .search-panel h3 {{
-        margin-top: 0;
-        font-size: 1.2rem;
-        margin-bottom: 1rem;
-    }}
-    
-    .button-container {{
-        display: flex;
-        gap: 1rem;
-        margin-top: 1.5rem;
-    }}
-    
-    .button-container button {{
-        flex: 1;
-        background-color: #007bff;
-        color: white;
-        border: none;
-        padding: 0.5rem 1rem;
-        border-radius: 4px;
-        cursor: pointer;
-        font-weight: 500;
-    }}
-    
-    .content-panel {{
-        flex: 1;
-        background-color: #1a1a1a;
-        padding: 1.5rem;
-        border-radius: 8px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }}
-    
-    @media (max-width: 768px) {{
-        .analysis-container {{
-            flex-direction: column;
-        }}
-        
-        .search-panel {{
-            flex: 1;
-            width: 100%;
-        }}
-    }}
-    </style>
-    
-    <header class="navbar">
-        <div class="logo">Ticker AI</div>
-        <nav>
-            <ul>
-                <li><span class="welcome">Welcome, {user_name}</span></li>
-                <li><a href="#" onclick="document.getElementById('logout-button').click(); return false;">Log Out</a></li>
-            </ul>
-        </nav>
-    </header>
-    """, unsafe_allow_html=True)
-    
-    # Create a hidden logout button
-    logout_clicked = st.button("Log Out", key="logout")
-    st.markdown('<div id="logout-button" style="display:none;"></div>', unsafe_allow_html=True)
-    
-    if logout_clicked:
-        logout_user()
-        st.rerun()
-    
-    # Hide standard Streamlit button
-    st.markdown('<style>button[kind="secondary"] {display: none;}</style>', unsafe_allow_html=True)
-    
-    # Main content area with two panels
-    st.markdown("""
-    <div class="analysis-container">
-        <div class="search-panel">
-            <h3>Stock Analysis</h3>
-            <div id="search-inputs"></div>
-        </div>
-        <div class="content-panel">
-            <div id="content-area"></div>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
-    
-    # Create stock analysis controls that will be moved into the search panel
-    with st.container():
-        ticker = st.text_input("Enter Stock Ticker (e.g., AAPL)", key="ticker_input").upper()
-        
-        # Timeframe selector
-        timeframe = st.selectbox(
-            "Select Timeframe",
-            ["1d", "5d", "1mo", "3mo", "6mo", "1y", "2y", "5y", "max"],
-            index=5  # Default to 1 year
-        )
-        
-        # Action buttons
-        col1, col2 = st.columns(2)
-        with col1:
-            search_button = st.button("Analyze", key="analyze_btn", use_container_width=True)
-        with col2:
-            power_plays_button = st.button("Power Plays", key="power_plays_btn", use_container_width=True)
-        
-        # Handle Power Plays button
-        if power_plays_button:
-            st.session_state.power_plays_view = True
-            st.session_state.view_mode = "main"  # Ensure we're in main mode
-    
-    # Admin section
+    # Add admin controls if the user is an admin
     if is_admin():
-        admin_btn = st.button("Admin Panel", key="admin_btn", type="primary")
-        if admin_btn:
-            st.session_state.view_mode = "admin"
-            st.session_state.power_plays_view = False
-            st.rerun()
-    
-    # Move the controls into the custom panels
-    st.markdown("""
-    <script>
-        // Move the input elements to the search panel
-        const searchPanel = document.getElementById('search-inputs');
-        const controls = document.querySelectorAll('[data-testid="stVerticalBlock"] > div');
+        st.sidebar.markdown("---")
         
-        if (searchPanel && controls) {
-            for (let i = 0; i < controls.length; i++) {
-                searchPanel.appendChild(controls[i]);
-            }
-        }
-        
-        // Hide the original controls container
-        const controlsContainer = document.querySelector('[data-testid="stVerticalBlock"]');
-        if (controlsContainer) {
-            controlsContainer.style.display = 'none';
-        }
-    </script>
-    """, unsafe_allow_html=True)
+        # Toggle between main app and admin panel
+        if st.session_state.view_mode == "main":
+            if st.sidebar.button("Admin Panel", type="primary"):
+                st.session_state.view_mode = "admin"
+                st.rerun()
+        else:  # In admin mode
+            if st.sidebar.button("Return to Stock Analyzer", type="primary"):
+                st.session_state.view_mode = "main"
+                st.rerun()
     
-    # Hide Streamlit elements
-    st.markdown("""
-    <style>
-        section.main > div:first-child {
-            display: none;
-        }
-        div[data-testid="stToolbar"] {
-            display: none;
-        }
-    </style>
-    """, unsafe_allow_html=True)
+    # Completely removed all headers and keeping proper spacing
+    st.markdown("<div style='height: 30px;'></div>", unsafe_allow_html=True)
     
     # Check view mode to determine what content to display
     if st.session_state.view_mode == "admin" and is_admin():
         # === ADMIN PANEL CONTENT ===
-        st.subheader("Admin Panel")
+        st.title("Ticker AI Admin Panel")
         
         # Show user info
         user = get_session_user()
@@ -477,44 +96,73 @@ else:
         
         # Display admin panel content
         admin_panel()
-    
-    # Main content views based on active state
-    elif st.session_state.power_plays_view:
-        # Display Power Plays page
-        display_power_plays()
-    
-    elif ticker and search_button and st.session_state.view_mode == "main":
-        # Create a placeholder for loading state
-        with st.spinner(f'Analyzing {ticker}...'):
-            try:
-                # Initialize stock analyzer
-                analyzer = StockAnalyzer(ticker)
-                
-                # Get company name and display prominently
-                company_info = analyzer.get_company_info()
-                
-                if company_info and 'shortName' in company_info:
-                    company_name = company_info['shortName']
+        
+    else:
+        # === MAIN APP CONTENT ===
+        # Set view mode to main (in case coming from admin page or for initial state)
+        st.session_state.view_mode = "main"
+        
+        # Sidebar for ticker input
+        st.sidebar.title("Stock Search")
+        ticker = st.sidebar.text_input("Enter Stock Ticker Symbol (e.g., AAPL)", "").upper()
+        
+        # Timeframe selector
+        timeframe = st.sidebar.selectbox(
+            "Select Timeframe",
+            ["1d", "5d", "1mo", "3mo", "6mo", "1y", "2y", "5y", "max"],
+            index=5  # Default to 1 year
+        )
+        
+        # Search button
+        search_button = st.sidebar.button("Analyze Stock")
+        
+        # Power Plays button
+        power_plays_button = st.sidebar.button("Power Plays", key="power_plays")
+        
+        # Display data sources
+        st.sidebar.markdown("---")
+        st.sidebar.markdown("### Data Sources")
+        for source, url in DATA_SOURCES.items():
+            st.sidebar.markdown(f"- [{source}]({url})")
+        
+        # Initialize view state for Power Plays if not exists
+        if "power_plays_view" not in st.session_state:
+            st.session_state.power_plays_view = False
+            
+        # Handle Power Plays button
+        if power_plays_button:
+            st.session_state.power_plays_view = True
+            
+        # Main app content
+        if st.session_state.power_plays_view:
+            # Display Power Plays page
+            display_power_plays()
+            
+            # The back button is now handled in the power_plays.py file
+        elif ticker and search_button:
+            # Create a placeholder for loading state
+            with st.spinner(f'Analyzing {ticker}...'):
+                try:
+                    # Initialize stock analyzer
+                    analyzer = StockAnalyzer(ticker)
                     
-                    # Modern card-style header with company info
-                    st.markdown(f"""
-                    <div style="background: linear-gradient(to right, rgba(30, 40, 60, 0.8), rgba(30, 40, 60, 0.5)); 
-                                padding: 1.5rem; 
-                                border-radius: 10px; 
-                                margin-bottom: 1.5rem;
-                                box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
-                        <h2 style="margin: 0; font-size: 1.8rem;">{company_name}</h2>
-                        <div style="font-size: 1.2rem; opacity: 0.9; margin-top: 0.3rem;">{ticker}</div>
-                    </div>
-                    """, unsafe_allow_html=True)
+                    # Get company name and display prominently
+                    company_info = analyzer.get_company_info()
                     
-                    # Modern metrics display with cards
+                    if company_info and 'shortName' in company_info:
+                        company_name = company_info['shortName']
+                        # Display company name as a header
+                        st.markdown(f"<h1 class='company-name'>{company_name} ({ticker})</h1>", unsafe_allow_html=True)
+                    
+                    # Main metrics using custom styling for better spacing
+                    st.markdown('<div class="data-row">', unsafe_allow_html=True)
+                    
                     # Get current price and daily change
                     current_price = analyzer.get_current_price()
                     price_change, price_change_percent = analyzer.get_price_change()
                     
                     # Display price with up/down indicator
-                    price_color = "rgba(46, 204, 113, 0.9)" if price_change >= 0 else "rgba(231, 76, 60, 0.9)"
+                    price_color = "green" if price_change >= 0 else "red"
                     price_arrow = "↑" if price_change >= 0 else "↓"
                     
                     # Format metrics for display
@@ -522,246 +170,632 @@ else:
                     pe_ratio = analyzer.get_pe_ratio()
                     low_52w, high_52w = analyzer.get_52_week_range()
                     
-                    # Key metrics in a card grid
-                    st.markdown("""
-                    <style>
-                    .metrics-grid {
-                        display: grid;
-                        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-                        gap: 15px;
-                        margin-bottom: 25px;
-                    }
-                    .metric-card {
-                        background: rgba(30, 40, 60, 0.6);
-                        padding: 16px;
-                        border-radius: 8px;
-                        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-                        transition: transform 0.2s;
-                    }
-                    .metric-card:hover {
-                        transform: translateY(-5px);
-                        box-shadow: 0 5px 10px rgba(0,0,0,0.2);
-                    }
-                    .metric-title {
-                        font-size: 0.9rem;
-                        font-weight: 400;
-                        opacity: 0.8;
-                        margin-bottom: 8px;
-                    }
-                    .metric-value {
-                        font-size: 1.3rem;
-                        font-weight: 700;
-                        margin-bottom: 4px;
-                    }
-                    .metric-change {
-                        font-size: 0.9rem;
-                    }
-                    @media (max-width: 768px) {
-                        .metrics-grid {
-                            grid-template-columns: repeat(2, 1fr);
-                        }
-                    }
-                    </style>
-                    """, unsafe_allow_html=True)
+                    # Create columns for metrics
+                    col1, col2, col3, col4 = st.columns(4)
                     
-                    # Start metrics grid
-                    st.markdown(f"""
-                    <div class="metrics-grid">
-                        <div class="metric-card">
-                            <div class="metric-title">Current Price</div>
-                            <div class="metric-value">${current_price:.2f}</div>
-                            <div class="metric-change" style="color: {price_color};">
-                                {price_arrow} ${abs(price_change):.2f} ({abs(price_change_percent):.2f}%)
-                            </div>
-                        </div>
-                        
-                        <div class="metric-card">
-                            <div class="metric-title">Market Cap</div>
-                            <div class="metric-value">{format_large_number(market_cap) if market_cap else "N/A"}</div>
-                        </div>
-                        
-                        <div class="metric-card">
-                            <div class="metric-title">P/E Ratio</div>
-                            <div class="metric-value">{f"{pe_ratio:.2f}" if pe_ratio and pe_ratio > 0 else "N/A"}</div>
-                        </div>
-                        
-                        <div class="metric-card">
-                            <div class="metric-title">52-Week Range</div>
-                            <div class="metric-value">{f"${low_52w:.2f} - ${high_52w:.2f}" if low_52w and high_52w else "N/A"}</div>
-                        </div>
-                    </div>
-                    """, unsafe_allow_html=True)
+                    with col1:
+                        st.metric(
+                            "Current Price",
+                            f"${current_price:.2f}",
+                            f"{price_arrow} {abs(price_change):.2f} ({abs(price_change_percent):.2f}%)",
+                            delta_color="normal" if price_change >= 0 else "inverse"
+                        )
                     
-                    # Company information section with modern card design
-                    st.markdown("""
-                    <div style="background: rgba(30, 40, 60, 0.4); 
-                                border-radius: 10px; 
-                                padding: 1.5rem; 
-                                margin-bottom: 2rem;
-                                box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-                        <h3 style="margin-top: 0; font-size: 1.5rem; margin-bottom: 1rem;">Company Overview</h3>
-                    """, unsafe_allow_html=True)
+                    with col2:
+                        st.metric("Market Cap", format_large_number(market_cap) if market_cap else "N/A")
                     
-                    # Display company description
+                    with col3:
+                        st.metric("P/E Ratio", f"{pe_ratio:.2f}" if pe_ratio and pe_ratio > 0 else "N/A")
+                    
+                    with col4:
+                        st.metric("52-Week Range", f"${low_52w:.2f} - ${high_52w:.2f}" if low_52w and high_52w else "N/A")
+                    
+                    st.markdown('</div>', unsafe_allow_html=True)
+                    
+                    # Company information/business summary
+                    st.subheader("Company Overview")
+                    
                     if company_info:
                         business_summary = company_info.get('longBusinessSummary', None)
                         if business_summary:
-                            st.markdown(f"<p style='line-height: 1.6;'>{business_summary}</p>", unsafe_allow_html=True)
+                            st.markdown(business_summary)
                         else:
                             st.info(f"No business summary available for {ticker}")
-                        
+                            
                         # Additional company details in columns
-                        col1, col2, col3 = st.columns(3)
+                        col1, col2 = st.columns(2)
                         
                         with col1:
-                            if 'industry' in company_info and company_info['industry']:
-                                st.markdown(f"<strong>Industry:</strong> {company_info['industry']}", unsafe_allow_html=True)
-                            if 'sector' in company_info and company_info['sector']:
-                                st.markdown(f"<strong>Sector:</strong> {company_info['sector']}", unsafe_allow_html=True)
-                        
-                        with col2:
-                            if 'country' in company_info and company_info['country']:
-                                st.markdown(f"<strong>Country:</strong> {company_info['country']}", unsafe_allow_html=True)
-                            if 'city' in company_info and company_info['city']:
-                                st.markdown(f"<strong>City:</strong> {company_info['city']}", unsafe_allow_html=True)
-                        
-                        with col3:
+                            st.markdown("**Company Details**")
+                            st.markdown(f"Sector: {company_info.get('sector', 'N/A')}")
+                            st.markdown(f"Industry: {company_info.get('industry', 'N/A')}")
                             if 'website' in company_info and company_info['website']:
-                                st.markdown(f"<strong>Website:</strong> <a href='{company_info['website']}' target='_blank'>{company_info['website']}</a>", unsafe_allow_html=True)
-                            if 'fullTimeEmployees' in company_info and company_info['fullTimeEmployees']:
-                                st.markdown(f"<strong>Employees:</strong> {format_large_number(company_info['fullTimeEmployees'])}", unsafe_allow_html=True)
+                                st.markdown(f"Website: [{company_info['website']}]({company_info['website']})")
+                            st.markdown(f"Full Time Employees: {format_large_number(company_info.get('fullTimeEmployees', 'N/A'))}")
+                            
+                        with col2:
+                            st.markdown("**Financial Details**")
+                            st.markdown(f"Revenue (TTM): {format_large_number(company_info.get('totalRevenue', 'N/A'))}")
+                            st.markdown(f"Gross Profits: {format_large_number(company_info.get('grossProfits', 'N/A'))}")
+                            if 'profitMargins' in company_info and company_info['profitMargins'] is not None:
+                                profit_margin = company_info['profitMargins'] * 100
+                                st.markdown(f"Profit Margin: {profit_margin:.2f}%")
+                            st.markdown(f"Exchange: {company_info.get('exchange', 'N/A')}")
                     
-                    st.markdown("</div>", unsafe_allow_html=True)
+                    # Calculate buy rating
+                    buy_rating, rating_components = analyzer.calculate_buy_rating()
                     
-                    # Buy Rating Section
-                    buy_rating, rating_breakdown = analyzer.calculate_buy_rating()
+                    # Display investment rating with gauge chart
+                    st.subheader("Investment Rating")
                     
-                    # Modern card for buy rating
-                    st.markdown(f"""
-                    <div style="background: linear-gradient(to right, rgba(30, 40, 60, 0.7), rgba(30, 40, 60, 0.4)); 
-                                padding: 1.5rem; 
-                                border-radius: 10px; 
-                                margin-bottom: 2rem;
-                                box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-                        <h3 style="margin-top: 0; margin-bottom: 1.5rem;">AI-Powered Buy Rating</h3>
-                        <div style="display: flex; align-items: center; flex-wrap: wrap; gap: 2rem;">
-                            <div style="flex: 0 0 200px;">
-                                <div style="position: relative; width: 200px; height: 200px;">
-                                    <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center;">
-                                        <div style="font-size: 3rem; font-weight: 700;">{buy_rating:.1f}</div>
-                                        <div style="font-size: 1rem; opacity: 0.8;">out of 10</div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div style="flex: 1; min-width: 300px;">
-                                <h4 style="margin-top: 0;">Rating Breakdown</h4>
-                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-                                    <div>
-                                        <div style="font-weight: 500;">Technical Analysis:</div>
-                                        <div style="font-size: 1.1rem; font-weight: 700;">{rating_breakdown['technical_score']:.1f}/10</div>
-                                    </div>
-                                    <div>
-                                        <div style="font-weight: 500;">Fundamental Analysis:</div>
-                                        <div style="font-size: 1.1rem; font-weight: 700;">{rating_breakdown['fundamental_score']:.1f}/10</div>
-                                    </div>
-                                    <div>
-                                        <div style="font-weight: 500;">Market Sentiment:</div>
-                                        <div style="font-size: 1.1rem; font-weight: 700;">{rating_breakdown['sentiment_score']:.1f}/10</div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    """, unsafe_allow_html=True)
+                    # Determine rating text based on score
+                    if buy_rating >= 7.5:
+                        rating_text = "Strong Buy"
+                    elif buy_rating >= 6:
+                        rating_text = "Buy"
+                    elif buy_rating >= 4:
+                        rating_text = "Hold"
+                    else:
+                        rating_text = "Sell"
                     
-                    # Create tabs for detailed analysis
-                    tab1, tab2, tab3, tab4 = st.tabs(["📈 Technical Analysis", "💼 Fundamentals", "🔮 Market Sentiment", "📰 News"])
+                    # Create gauge chart
+                    fig = go.Figure(go.Indicator(
+                        mode = "gauge+number",
+                        value = buy_rating,
+                        title = {'text': f"Buy Rating ({rating_text})"},
+                        gauge = {
+                            'axis': {'range': [0, 10], 'tickwidth': 1},
+                            'bar': {'color': "rgba(50, 50, 50, 0.8)"},
+                            'steps': [
+                                {'range': [0, 3], 'color': "rgba(255, 0, 0, 0.3)"},
+                                {'range': [3, 5], 'color': "rgba(255, 165, 0, 0.3)"},
+                                {'range': [5, 7], 'color': "rgba(255, 255, 0, 0.3)"},
+                                {'range': [7, 10], 'color': "rgba(0, 128, 0, 0.3)"}
+                            ],
+                            'threshold': {
+                                'line': {'color': "black", 'width': 4},
+                                'thickness': 0.75,
+                                'value': buy_rating
+                            }
+                        }
+                    ))
+                    
+                    # Set labels on the gauge
+                    fig.add_annotation(x=0.15, y=0.8, text="SELL", showarrow=False)
+                    fig.add_annotation(x=0.85, y=0.8, text="BUY", showarrow=False)
+                    fig.add_annotation(x=0.5, y=0.9, text="NEUTRAL", showarrow=False)
+                    
+                    # Update layout
+                    fig.update_layout(
+                        height=250, 
+                        margin=dict(l=20, r=20, t=70, b=20),
+                        paper_bgcolor="rgba(0,0,0,0)",
+                        plot_bgcolor="rgba(0,0,0,0)"
+                    )
+                    
+                    st.plotly_chart(fig, use_container_width=True)
+                    
+                    # Generate a brief explanation of the rating
+                    st.markdown("#### Rating Explanation")
+                    
+                    # Get the component scores from the rating_components dictionary
+                    technical_data = rating_components.get('Technical Analysis', {})
+                    fundamental_data = rating_components.get('Fundamental Analysis', {})
+                    sentiment_data = rating_components.get('Market Sentiment', {})
+                    
+                    # Extract the scores
+                    technical_score = technical_data.get('score', 5.0) if isinstance(technical_data, dict) else 5.0
+                    fundamental_score = fundamental_data.get('score', 5.0) if isinstance(fundamental_data, dict) else 5.0
+                    sentiment_score = sentiment_data.get('score', 5.0) if isinstance(sentiment_data, dict) else 5.0
+                    
+                    # Determine the strength and weakness areas
+                    strengths = []
+                    weaknesses = []
+                    
+                    if technical_score >= 7:
+                        strengths.append("strong technical indicators (bullish chart patterns, positive momentum)")
+                    elif technical_score <= 4:
+                        weaknesses.append("concerning technical signals (bearish patterns, negative momentum)")
+                        
+                    if fundamental_score >= 7:
+                        strengths.append("solid fundamentals (strong earnings growth, healthy balance sheet)")
+                    elif fundamental_score <= 4:
+                        weaknesses.append("weak fundamentals (poor financial health, declining margins)")
+                        
+                    if sentiment_score >= 7:
+                        strengths.append("positive market sentiment (analyst upgrades, institutional buying)")
+                    elif sentiment_score <= 4:
+                        weaknesses.append("negative market sentiment (analyst downgrades, institutional selling)")
+                    
+                    # Create the explanation based on the rating and identified strengths/weaknesses
+                    if buy_rating >= 7.5:
+                        strength_text = ", ".join(strengths) if strengths else "multiple positive factors"
+                        explanation = f"""**Strong Buy ({buy_rating:.1f}/10):** {ticker} presents a compelling investment case based on {strength_text}. 
+                        
+Technical analysis shows favorable chart patterns with strong price momentum. Fundamentally, the company demonstrates solid financial performance with potential for continued growth. Market sentiment toward {ticker} is highly positive, with favorable analyst coverage and institutional interest. This stock is well-positioned for potential significant appreciation in the near to medium term."""
+                    elif buy_rating >= 6:
+                        strength_text = ", ".join(strengths) if strengths else "several positive indicators"
+                        weakness_text = ", ".join(weaknesses) if weaknesses else "some areas requiring monitoring"
+                        explanation = f"""**Buy ({buy_rating:.1f}/10):** {ticker} shows a favorable investment profile highlighted by {strength_text}, despite {weakness_text}. 
+                        
+The technical picture is generally positive with price action indicating upward momentum. Fundamentally, the company has demonstrated reasonable financial stability and competitive positioning. Investor sentiment is moderately to strongly positive, suggesting continued support for the stock price. This security presents a good risk-reward opportunity at current levels."""
+                    elif buy_rating >= 4:
+                        strength_text = ", ".join(strengths) if strengths else "some positive aspects"
+                        weakness_text = ", ".join(weaknesses) if weaknesses else "several concerning factors"
+                        explanation = f"""**Hold ({buy_rating:.1f}/10):** {ticker} shows a mixed profile with {strength_text} balanced against {weakness_text}. 
+                        
+The technical analysis reveals conflicting signals without clear directional bias. Fundamentally, the company shows some strengths but also notable areas of concern that may impact future performance. Market sentiment is lukewarm or inconsistent, suggesting uncertainty among investors and analysts. Existing positions may be maintained, but increasing exposure is not recommended without improved metrics."""
+                    else:
+                        weakness_text = ", ".join(weaknesses) if weaknesses else "multiple concerning indicators"
+                        explanation = f"""**Sell ({buy_rating:.1f}/10):** {ticker} demonstrates significant risk factors driven primarily by {weakness_text}. 
+                        
+Technical analysis reveals bearish patterns with deteriorating price action and negative momentum indicators. Fundamental analysis highlights troubling aspects of the company's financial health or competitive position. Market sentiment has turned negative with downward pressure from analysts or institutional selling. Current shareholders should consider reducing exposure, while new investment is not recommended at this time."""
+                    
+                    st.markdown(explanation)
+                    
+                    # Display rating components
+                    st.markdown("#### Rating Components")
+                    col1, col2, col3 = st.columns(3)
+                    
+                    with col1:
+                        st.metric("Technical Score", f"{technical_score:.1f}/10")
+                        if isinstance(technical_data, dict) and 'reason' in technical_data:
+                            st.caption(technical_data['reason'])
+                        
+                    with col2:
+                        st.metric("Fundamental Score", f"{fundamental_score:.1f}/10")
+                        if isinstance(fundamental_data, dict) and 'reason' in fundamental_data:
+                            st.caption(fundamental_data['reason'])
+                        
+                    with col3:
+                        st.metric("Sentiment Score", f"{sentiment_score:.1f}/10")
+                        if isinstance(sentiment_data, dict) and 'reason' in sentiment_data:
+                            st.caption(sentiment_data['reason'])
+                    
+                    # Create tabs for different analyses
+                    tab1, tab2, tab3, tab4 = st.tabs(["Price History", "Technical Analysis", "Fundamentals", "News"])
                     
                     with tab1:
+                        st.subheader(f"Price History - {timeframe}")
+                        
+                        # Get historical data
+                        hist_data = analyzer.get_historical_data(timeframe)
+                        
+                        if hist_data is not None and not hist_data.empty:
+                            # Create interactive price chart
+                            fig = go.Figure()
+                            
+                            # Add price line
+                            fig.add_trace(
+                                go.Scatter(
+                                    x=hist_data.index, 
+                                    y=hist_data['Close'],
+                                    mode='lines',
+                                    name='Price',
+                                    line=dict(color='#1f77b4', width=2)
+                                )
+                            )
+                            
+                            # Add volume as bar chart
+                            fig.add_trace(
+                                go.Bar(
+                                    x=hist_data.index,
+                                    y=hist_data['Volume'],
+                                    name='Volume',
+                                    marker_color='rgba(200, 200, 200, 0.4)',
+                                    opacity=0.5,
+                                    yaxis='y2'
+                                )
+                            )
+                            
+                            # Add buttons for different time ranges with mobile-friendly layout
+                            fig.update_layout(
+                                title=dict(
+                                    text=f"{ticker} Price History",
+                                    font=dict(size=16)
+                                ),
+                                xaxis=dict(
+                                    title="Date",
+                                    tickfont=dict(size=10)
+                                ),
+                                yaxis=dict(
+                                    title="Price (USD)",
+                                    tickfont=dict(size=10)
+                                ),
+                                yaxis2=dict(
+                                    title="Volume",
+                                    tickfont=dict(size=10),
+                                    overlaying="y",
+                                    side="right",
+                                    showgrid=False
+                                ),
+                                hovermode="x unified",
+                                legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="center", x=0.5),
+                                height=400,  # Reduced height for better mobile view
+                                autosize=True,
+                                margin=dict(l=10, r=10, t=40, b=20)
+                            )
+                            
+                            st.plotly_chart(fig, use_container_width=True)
+                            
+                            # Add summary statistics
+                            st.subheader("Summary Statistics")
+                            
+                            # Calculate stats
+                            price_start = hist_data['Close'].iloc[0]
+                            price_end = hist_data['Close'].iloc[-1]
+                            price_change_total = price_end - price_start
+                            price_change_percent_total = (price_change_total / price_start) * 100
+                            price_min = hist_data['Low'].min()
+                            price_max = hist_data['High'].max()
+                            
+                            # Create columns for stats
+                            col1, col2, col3 = st.columns(3)
+                            
+                            with col1:
+                                st.metric("Starting Price", f"${price_start:.2f}")
+                                st.metric("Total Volume", format_large_number(hist_data['Volume'].sum()))
+                            
+                            with col2:
+                                st.metric("Ending Price", f"${price_end:.2f}")
+                                st.metric("Average Volume", format_large_number(hist_data['Volume'].mean()))
+                            
+                            with col3:
+                                st.metric(
+                                    "Total Change",
+                                    f"${price_end:.2f}",
+                                    f"{price_change_total:.2f} ({price_change_percent_total:.2f}%)",
+                                    delta_color="normal" if price_change_total >= 0 else "inverse"
+                                )
+                                st.metric("Price Range", f"${price_min:.2f} - ${price_max:.2f}")
+                        else:
+                            st.error(f"No historical data available for {ticker}")
+                    
+                    with tab2:
                         st.subheader("Technical Analysis")
                         
                         # Initialize technical analysis
                         tech_analysis = TechnicalAnalysis(ticker)
                         
-                        # Get historical data for charts
-                        hist_data = tech_analysis.get_historical_data(timeframe)
-                        
-                        # Price chart with moving averages
-                        st.markdown("#### Price Chart with Moving Averages")
-                        
-                        # Get moving average data
-                        ma_data = tech_analysis.get_moving_averages(timeframe)
-                        
-                        # Create Plotly figure
-                        fig = go.Figure()
-                        
-                        # Add price line
-                        fig.add_trace(go.Scatter(
-                            x=ma_data.index, 
-                            y=ma_data['Close'],
-                            mode='lines',
-                            name='Price',
-                            line=dict(color='#2E86C1', width=2)
-                        ))
-                        
-                        # Add moving averages
-                        fig.add_trace(go.Scatter(
-                            x=ma_data.index, 
-                            y=ma_data['MA50'],
-                            mode='lines',
-                            name='50-Day MA',
-                            line=dict(color='#F39C12', width=2)
-                        ))
-                        
-                        fig.add_trace(go.Scatter(
-                            x=ma_data.index, 
-                            y=ma_data['MA200'],
-                            mode='lines',
-                            name='200-Day MA',
-                            line=dict(color='#E74C3C', width=2)
-                        ))
-                        
-                        # Update layout for modern look
-                        fig.update_layout(
-                            title=f"{ticker} Price History",
-                            xaxis_title="Date",
-                            yaxis_title="Price (USD)",
-                            template="plotly_dark",
-                            legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
-                            margin=dict(l=0, r=0, t=40, b=0),
-                            height=500,
-                        )
-                        
-                        # Add range selector to chart
-                        fig.update_xaxes(
-                            rangeslider_visible=True,
-                            rangeselector=dict(
-                                buttons=list([
-                                    dict(count=1, label="1m", step="month", stepmode="backward"),
-                                    dict(count=6, label="6m", step="month", stepmode="backward"),
-                                    dict(count=1, label="YTD", step="year", stepmode="todate"),
-                                    dict(count=1, label="1y", step="year", stepmode="backward"),
-                                    dict(step="all")
-                                ])
-                            )
-                        )
-                        
-                        # Display the chart
-                        st.plotly_chart(fig, use_container_width=True)
-                        
-                        # Technical indicators grid
-                        st.markdown("#### Technical Indicators")
-                        
                         # Get technical signals
                         signals = tech_analysis.get_technical_signals()
                         
-                        # Convert to DataFrame for display
+                        # Create columns for different indicators
+                        col1, col2 = st.columns(2)
+                        
+                        with col1:
+                            # Moving Averages
+                            st.markdown("### Moving Averages")
+                            
+                            ma_data = tech_analysis.get_moving_averages(timeframe)
+                            
+                            if ma_data is not None and not ma_data.empty:
+                                # Plot moving averages
+                                fig = go.Figure()
+                                
+                                # Add price line
+                                fig.add_trace(
+                                    go.Scatter(
+                                        x=ma_data.index,
+                                        y=ma_data['Close'],
+                                        mode='lines',
+                                        name='Price',
+                                        line=dict(color='#1f77b4', width=2)
+                                    )
+                                )
+                                
+                                # Add moving averages
+                                fig.add_trace(
+                                    go.Scatter(
+                                        x=ma_data.index,
+                                        y=ma_data['MA50'],
+                                        mode='lines',
+                                        name='50-Day MA',
+                                        line=dict(color='orange', width=1.5)
+                                    )
+                                )
+                                
+                                fig.add_trace(
+                                    go.Scatter(
+                                        x=ma_data.index,
+                                        y=ma_data['MA200'],
+                                        mode='lines',
+                                        name='200-Day MA',
+                                        line=dict(color='red', width=1.5)
+                                    )
+                                )
+                                
+                                fig.update_layout(
+                                    title=dict(
+                                        text="Price with Moving Averages",
+                                        font=dict(size=16)
+                                    ),
+                                    xaxis=dict(
+                                        title="Date",
+                                        tickfont=dict(size=10)
+                                    ),
+                                    yaxis=dict(
+                                        title="Price (USD)",
+                                        tickfont=dict(size=10)
+                                    ),
+                                    hovermode="x unified",
+                                    legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="center", x=0.5),
+                                    height=350,  # Slightly reduced height for mobile
+                                    autosize=True,
+                                    margin=dict(l=10, r=10, t=40, b=20)
+                                )
+                                
+                                st.plotly_chart(fig, use_container_width=True)
+                                
+                                # Moving Average Interpretation
+                                ma_signals = tech_analysis.interpret_moving_averages()
+                                
+                                for signal, interpretation in ma_signals.items():
+                                    signal_color = "green" if "bullish" in interpretation.lower() else "red" if "bearish" in interpretation.lower() else "orange"
+                                    st.markdown(f"**{signal}:** <span style='color:{signal_color}'>{interpretation}</span>", unsafe_allow_html=True)
+                            else:
+                                st.error("Could not calculate moving averages")
+                            
+                            # MACD
+                            st.markdown("### MACD")
+                            
+                            macd_data = tech_analysis.get_macd(timeframe)
+                            
+                            if macd_data is not None and not macd_data.empty:
+                                # Create MACD plot
+                                fig = go.Figure()
+                                
+                                # Add MACD line
+                                fig.add_trace(
+                                    go.Scatter(
+                                        x=macd_data.index,
+                                        y=macd_data['MACD'],
+                                        mode='lines',
+                                        name='MACD',
+                                        line=dict(color='#1f77b4', width=1.5)
+                                    )
+                                )
+                                
+                                # Add signal line
+                                fig.add_trace(
+                                    go.Scatter(
+                                        x=macd_data.index,
+                                        y=macd_data['Signal'],
+                                        mode='lines',
+                                        name='Signal',
+                                        line=dict(color='red', width=1.5)
+                                    )
+                                )
+                                
+                                # Add histogram
+                                colors = ['green' if val >= 0 else 'red' for val in macd_data['Histogram']]
+                                
+                                fig.add_trace(
+                                    go.Bar(
+                                        x=macd_data.index,
+                                        y=macd_data['Histogram'],
+                                        name='Histogram',
+                                        marker_color=colors
+                                    )
+                                )
+                                
+                                fig.update_layout(
+                                    title=dict(
+                                        text="MACD Indicator",
+                                        font=dict(size=16)
+                                    ),
+                                    xaxis=dict(
+                                        title="Date",
+                                        tickfont=dict(size=10)
+                                    ),
+                                    yaxis=dict(
+                                        title="Value",
+                                        tickfont=dict(size=10)
+                                    ),
+                                    hovermode="x unified",
+                                    legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="center", x=0.5),
+                                    height=300,
+                                    autosize=True,
+                                    margin=dict(l=10, r=10, t=40, b=20)
+                                )
+                                
+                                st.plotly_chart(fig, use_container_width=True)
+                                
+                                # MACD Interpretation
+                                macd_signal = tech_analysis.interpret_macd()
+                                signal_color = "green" if "bullish" in macd_signal.lower() else "red" if "bearish" in macd_signal.lower() else "orange"
+                                st.markdown(f"**MACD Signal:** <span style='color:{signal_color}'>{macd_signal}</span>", unsafe_allow_html=True)
+                            else:
+                                st.error("Could not calculate MACD")
+                        
+                        with col2:
+                            # RSI
+                            st.markdown("### RSI")
+                            
+                            rsi_data = tech_analysis.get_rsi(timeframe)
+                            
+                            if rsi_data is not None and not rsi_data.empty:
+                                # Create RSI plot
+                                fig = go.Figure()
+                                
+                                # Add RSI line
+                                fig.add_trace(
+                                    go.Scatter(
+                                        x=rsi_data.index,
+                                        y=rsi_data['RSI'],
+                                        mode='lines',
+                                        name='RSI',
+                                        line=dict(color='purple', width=1.5)
+                                    )
+                                )
+                                
+                                # Add overbought/oversold lines
+                                fig.add_shape(
+                                    type="line",
+                                    x0=rsi_data.index[0],
+                                    y0=70,
+                                    x1=rsi_data.index[-1],
+                                    y1=70,
+                                    line=dict(color="red", width=1, dash="dash")
+                                )
+                                
+                                fig.add_shape(
+                                    type="line",
+                                    x0=rsi_data.index[0],
+                                    y0=30,
+                                    x1=rsi_data.index[-1],
+                                    y1=30,
+                                    line=dict(color="green", width=1, dash="dash")
+                                )
+                                
+                                fig.update_layout(
+                                    title=dict(
+                                        text="RSI (14-Day)",
+                                        font=dict(size=16)
+                                    ),
+                                    yaxis=dict(
+                                        title="RSI Value",
+                                        range=[0, 100],
+                                        tickfont=dict(size=10)
+                                    ),
+                                    xaxis=dict(
+                                        title="Date",
+                                        tickfont=dict(size=10)
+                                    ),
+                                    hovermode="x unified",
+                                    height=300,  # Reduced height for mobile
+                                    autosize=True,
+                                    margin=dict(l=10, r=10, t=40, b=20)
+                                )
+                                
+                                st.plotly_chart(fig, use_container_width=True)
+                                
+                                # RSI Interpretation
+                                current_rsi = rsi_data['RSI'].iloc[-1]
+                                
+                                if current_rsi > 70:
+                                    rsi_signal = "Overbought - Potential sell signal"
+                                    signal_color = "red"
+                                elif current_rsi < 30:
+                                    rsi_signal = "Oversold - Potential buy signal"
+                                    signal_color = "green"
+                                else:
+                                    rsi_signal = "Neutral"
+                                    signal_color = "orange"
+                                
+                                st.markdown(f"**Current RSI:** <span style='color:{signal_color}'>{current_rsi:.2f} - {rsi_signal}</span>", unsafe_allow_html=True)
+                            else:
+                                st.error("Could not calculate RSI")
+                            
+                            # Bollinger Bands
+                            st.markdown("### Bollinger Bands")
+                            
+                            bb_data = tech_analysis.get_bollinger_bands(timeframe)
+                            
+                            if bb_data is not None and not bb_data.empty:
+                                # Create Bollinger Bands plot
+                                fig = go.Figure()
+                                
+                                # Add price line
+                                fig.add_trace(
+                                    go.Scatter(
+                                        x=bb_data.index,
+                                        y=bb_data['Close'],
+                                        mode='lines',
+                                        name='Price',
+                                        line=dict(color='#1f77b4', width=2)
+                                    )
+                                )
+                                
+                                # Add upper band
+                                fig.add_trace(
+                                    go.Scatter(
+                                        x=bb_data.index,
+                                        y=bb_data['Upper Band'],
+                                        mode='lines',
+                                        name='Upper Band',
+                                        line=dict(color='red', width=1, dash='dash')
+                                    )
+                                )
+                                
+                                # Add middle band
+                                fig.add_trace(
+                                    go.Scatter(
+                                        x=bb_data.index,
+                                        y=bb_data['Middle Band'],
+                                        mode='lines',
+                                        name='Middle Band (SMA)',
+                                        line=dict(color='orange', width=1)
+                                    )
+                                )
+                                
+                                # Add lower band
+                                fig.add_trace(
+                                    go.Scatter(
+                                        x=bb_data.index,
+                                        y=bb_data['Lower Band'],
+                                        mode='lines',
+                                        name='Lower Band',
+                                        line=dict(color='green', width=1, dash='dash')
+                                    )
+                                )
+                                
+                                fig.update_layout(
+                                    title=dict(
+                                        text="Bollinger Bands",
+                                        font=dict(size=16)
+                                    ),
+                                    xaxis=dict(
+                                        title="Date",
+                                        tickfont=dict(size=10)
+                                    ),
+                                    yaxis=dict(
+                                        title="Price (USD)",
+                                        tickfont=dict(size=10)
+                                    ),
+                                    hovermode="x unified",
+                                    legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="center", x=0.5),
+                                    height=300,
+                                    autosize=True,
+                                    margin=dict(l=10, r=10, t=40, b=20)
+                                )
+                                
+                                st.plotly_chart(fig, use_container_width=True)
+                                
+                                # Bollinger Bands Interpretation
+                                bb_signal = tech_analysis.interpret_bollinger_bands()
+                                signal_color = "green" if "bullish" in bb_signal.lower() else "red" if "bearish" in bb_signal.lower() else "orange"
+                                st.markdown(f"**Bollinger Bands Signal:** <span style='color:{signal_color}'>{bb_signal}</span>", unsafe_allow_html=True)
+                            else:
+                                st.error("Could not calculate Bollinger Bands")
+                        
+                        # Summary of all technical signals
+                        st.subheader("Technical Signals Summary")
+                        
+                        # Create a DataFrame for display
                         signals_df = pd.DataFrame({
                             'Indicator': list(signals.keys()),
                             'Signal': list(signals.values())
                         })
                         
-                        # Apply mobile-friendly styling
+                        # Count signals by type
+                        buy_count = sum(1 for signal in signals.values() if "buy" in signal.lower())
+                        sell_count = sum(1 for signal in signals.values() if "sell" in signal.lower())
+                        neutral_count = sum(1 for signal in signals.values() if "neutral" in signal.lower())
+                        
+                        # Create columns for the summary
+                        col1, col2, col3 = st.columns(3)
+                        
+                        with col1:
+                            st.markdown(f"<div style='text-align: center; color: green; font-weight: bold; font-size: 24px;'>{buy_count}</div><div style='text-align: center;'>Buy Signals</div>", unsafe_allow_html=True)
+                        
+                        with col2:
+                            st.markdown(f"<div style='text-align: center; color: red; font-weight: bold; font-size: 24px;'>{sell_count}</div><div style='text-align: center;'>Sell Signals</div>", unsafe_allow_html=True)
+                        
+                        with col3:
+                            st.markdown(f"<div style='text-align: center; color: orange; font-weight: bold; font-size: 24px;'>{neutral_count}</div><div style='text-align: center;'>Neutral Signals</div>", unsafe_allow_html=True)
+                        
+                        # Display signals in a mobile-friendly table
                         st.markdown("""
                         <style>
                         .mobile-friendly-table {
@@ -794,328 +828,310 @@ else:
                         styled_df = signals_df.style.applymap(color_signal, subset=['Signal'])
                         
                         # Convert to HTML and wrap with mobile-friendly div
-                        signal_html = styled_df.to_html()
-                        st.markdown(f'<div class="mobile-friendly-table">{signal_html}</div>', unsafe_allow_html=True)
+                        html_table = styled_df.to_html()
+                        st.markdown(f'<div class="mobile-friendly-table">{html_table}</div>', unsafe_allow_html=True)
                     
-                    with tab2:
+                    with tab3:
                         st.subheader("Fundamental Analysis")
                         
                         # Initialize fundamental analysis
-                        fundamental = FundamentalAnalysis(ticker)
+                        fund_analysis = FundamentalAnalysis(ticker)
                         
-                        # Valuation ratios
-                        st.markdown("#### Valuation Metrics")
+                        # Create tabs for different fundamental data
+                        subtab1, subtab2, subtab3, subtab4 = st.tabs(["Key Ratios", "Income Statement", "Balance Sheet", "Recommendations"])
                         
-                        # Create cards for fundamental metrics
-                        try:
-                            valuation_ratios = fundamental.get_valuation_ratios()
-                            if not valuation_ratios.empty:
-                                # Modern card grid
-                                st.markdown("""
-                                <style>
-                                .fundamental-grid {
-                                    display: grid;
-                                    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-                                    gap: 12px;
-                                    margin-bottom: 20px;
-                                }
-                                .fundamental-card {
-                                    background: rgba(30, 40, 60, 0.5);
-                                    padding: 12px;
-                                    border-radius: 8px;
-                                    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-                                }
-                                .fundamental-title {
-                                    font-size: 0.85rem;
-                                    opacity: 0.8;
-                                    margin-bottom: 5px;
-                                }
-                                .fundamental-value {
-                                    font-size: 1.1rem;
-                                    font-weight: 700;
-                                }
-                                </style>
-                                <div class="fundamental-grid">
-                                """, unsafe_allow_html=True)
+                        with subtab1:
+                            st.markdown("### Valuation Ratios")
+                            
+                            # Get valuation ratios
+                            valuation_ratios = fund_analysis.get_valuation_ratios()
+                            
+                            if valuation_ratios is not None and not valuation_ratios.empty:
+                                # Display as a table
+                                st.dataframe(valuation_ratios, use_container_width=True)
                                 
-                                # Convert to dictionary for easier handling
-                                val_dict = valuation_ratios.iloc[-1].to_dict()
-                                
-                                # Display key metrics
-                                key_metrics = ['trailingPE', 'forwardPE', 'priceToBook', 'priceToSales', 'enterpriseToEbitda']
-                                labels = {
-                                    'trailingPE': 'Trailing P/E',
-                                    'forwardPE': 'Forward P/E',
-                                    'priceToBook': 'Price to Book',
-                                    'priceToSales': 'Price to Sales',
-                                    'enterpriseToEbitda': 'EV/EBITDA'
-                                }
-                                
-                                for metric in key_metrics:
-                                    if metric in val_dict and not pd.isna(val_dict[metric]):
-                                        value = val_dict[metric]
-                                        label = labels.get(metric, metric)
-                                        
-                                        st.markdown(f"""
-                                        <div class="fundamental-card">
-                                            <div class="fundamental-title">{label}</div>
-                                            <div class="fundamental-value">{value:.2f}</div>
-                                        </div>
-                                        """, unsafe_allow_html=True)
-                                
-                                st.markdown("</div>", unsafe_allow_html=True)
+                                # Plot P/E ratio if available
+                                if 'trailingPE' in valuation_ratios.columns:
+                                    st.markdown("#### P/E Ratio Comparison")
+                                    
+                                    # Get sector average P/E as a placeholder
+                                    sector_pe = 20.5  # This would ideally come from real data
+                                    
+                                    # Create a bar chart for P/E comparison
+                                    pe_fig = go.Figure()
+                                    
+                                    # Add company P/E
+                                    company_pe = valuation_ratios['trailingPE'].iloc[-1]
+                                    
+                                    pe_data = pd.DataFrame({
+                                        'Category': [f"{ticker} P/E", "Sector Average"],
+                                        'P/E Ratio': [company_pe, sector_pe]
+                                    })
+                                    
+                                    # Plot P/E comparison
+                                    pe_fig = px.bar(
+                                        pe_data,
+                                        x='Category',
+                                        y='P/E Ratio',
+                                        color='Category',
+                                        color_discrete_map={
+                                            f"{ticker} P/E": 'blue',
+                                            "Sector Average": 'gray'
+                                        }
+                                    )
+                                    
+                                    pe_fig.update_layout(
+                                        title="P/E Ratio Comparison",
+                                        showlegend=False,
+                                        height=300
+                                    )
+                                    
+                                    st.plotly_chart(pe_fig, use_container_width=True)
                             else:
-                                st.info(f"No valuation ratios available for {ticker}")
-                        except Exception as e:
-                            st.error(f"Error loading valuation ratios: {str(e)}")
+                                st.info("Valuation ratios not available for this stock")
+                            
+                            st.markdown("### Profitability Ratios")
+                            
+                            # Get profitability ratios
+                            profit_ratios = fund_analysis.get_profitability_ratios()
+                            
+                            if profit_ratios is not None and not profit_ratios.empty:
+                                # Display as a table
+                                st.dataframe(profit_ratios, use_container_width=True)
+                            else:
+                                st.info("Profitability ratios not available for this stock")
                         
-                        # Income Statement
-                        st.markdown("#### Income Statement")
-                        try:
-                            income_stmt = fundamental.get_income_statement()
-                            if not income_stmt.empty:
-                                # Format and display
-                                income_stmt = income_stmt.astype(float).applymap(lambda x: f"${x/1e6:.1f}M" if not pd.isna(x) else "N/A")
+                        with subtab2:
+                            st.markdown("### Income Statement")
+                            
+                            # Get income statement
+                            income_stmt = fund_analysis.get_income_statement()
+                            
+                            if income_stmt is not None and not income_stmt.empty:
+                                # Display as a table
                                 st.dataframe(income_stmt, use_container_width=True)
+                                
+                                # Plot revenue and earnings
+                                if 'totalRevenue' in income_stmt.columns and 'netIncome' in income_stmt.columns:
+                                    st.markdown("#### Revenue and Earnings Trend")
+                                    
+                                    # Create a figure
+                                    fig = go.Figure()
+                                    
+                                    # Add revenue bars
+                                    fig.add_trace(
+                                        go.Bar(
+                                            x=income_stmt.index,
+                                            y=income_stmt['totalRevenue'],
+                                            name='Revenue',
+                                            marker_color='blue'
+                                        )
+                                    )
+                                    
+                                    # Add earnings line
+                                    fig.add_trace(
+                                        go.Scatter(
+                                            x=income_stmt.index,
+                                            y=income_stmt['netIncome'],
+                                            name='Net Income',
+                                            marker_color='green',
+                                            mode='lines+markers'
+                                        )
+                                    )
+                                    
+                                    fig.update_layout(
+                                        title="Revenue and Net Income",
+                                        xaxis_title="Date",
+                                        yaxis_title="USD",
+                                        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
+                                        height=400
+                                    )
+                                    
+                                    st.plotly_chart(fig, use_container_width=True)
                             else:
-                                st.info(f"No income statement available for {ticker}")
-                        except Exception as e:
-                            st.error(f"Error loading income statement: {str(e)}")
+                                st.info("Income statement not available for this stock")
                         
-                        # Analyst Recommendations
-                        st.markdown("#### Analyst Recommendations")
-                        try:
-                            recommendations = fundamental.get_analyst_recommendations()
-                            if not recommendations.empty:
-                                # Create a pie chart of recommendations
-                                rec_counts = recommendations.iloc[0].astype(float)
+                        with subtab3:
+                            st.markdown("### Balance Sheet")
+                            
+                            # Get balance sheet
+                            balance_sheet = fund_analysis.get_balance_sheet()
+                            
+                            if balance_sheet is not None and not balance_sheet.empty:
+                                # Display as a table
+                                st.dataframe(balance_sheet, use_container_width=True)
                                 
-                                # Create custom color scale
-                                colors = {
-                                    'Strong Buy': '#1E8449',
-                                    'Buy': '#58D68D',
-                                    'Hold': '#F7DC6F',
-                                    'Underperform': '#F5B041',
-                                    'Sell': '#E74C3C'
-                                }
+                                # Plot assets and liabilities
+                                if 'totalAssets' in balance_sheet.columns and 'totalLiab' in balance_sheet.columns:
+                                    st.markdown("#### Assets, Liabilities and Equity")
+                                    
+                                    # Calculate equity
+                                    balance_sheet['totalEquity'] = balance_sheet['totalAssets'] - balance_sheet['totalLiab']
+                                    
+                                    # Create a stacked bar chart
+                                    fig = go.Figure()
+                                    
+                                    # Add liabilities
+                                    fig.add_trace(
+                                        go.Bar(
+                                            x=balance_sheet.index,
+                                            y=balance_sheet['totalLiab'],
+                                            name='Liabilities',
+                                            marker_color='red'
+                                        )
+                                    )
+                                    
+                                    # Add equity
+                                    fig.add_trace(
+                                        go.Bar(
+                                            x=balance_sheet.index,
+                                            y=balance_sheet['totalEquity'],
+                                            name='Equity',
+                                            marker_color='green'
+                                        )
+                                    )
+                                    
+                                    # Add total assets line
+                                    fig.add_trace(
+                                        go.Scatter(
+                                            x=balance_sheet.index,
+                                            y=balance_sheet['totalAssets'],
+                                            name='Total Assets',
+                                            marker_color='blue',
+                                            mode='lines+markers'
+                                        )
+                                    )
+                                    
+                                    fig.update_layout(
+                                        title="Assets, Liabilities and Equity",
+                                        xaxis_title="Date",
+                                        yaxis_title="USD",
+                                        barmode='stack',
+                                        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
+                                        height=400
+                                    )
+                                    
+                                    st.plotly_chart(fig, use_container_width=True)
+                            else:
+                                st.info("Balance sheet not available for this stock")
+                        
+                        with subtab4:
+                            st.markdown("### Analyst Recommendations")
+                            
+                            # Get analyst recommendations
+                            recommendations = fund_analysis.get_analyst_recommendations()
+                            
+                            if recommendations is not None and not recommendations.empty:
+                                # Display as a table
+                                st.dataframe(recommendations, use_container_width=True)
                                 
-                                # Create plotly pie chart
-                                fig = px.pie(
-                                    values=rec_counts.values,
-                                    names=rec_counts.index,
-                                    title=f"Analyst Recommendations for {ticker}",
-                                    color=rec_counts.index,
-                                    color_discrete_map=colors,
-                                    hole=0.4
+                                # Create a summary of recent recommendations
+                                recent_recommendations = recommendations.iloc[:5]
+                                
+                                # Plot recommendations
+                                fig = px.bar(
+                                    recent_recommendations,
+                                    x=recent_recommendations.index,
+                                    y=['strongBuy', 'buy', 'hold', 'sell', 'strongSell'],
+                                    title="Recent Analyst Recommendations",
+                                    color_discrete_map={
+                                        'strongBuy': 'darkgreen',
+                                        'buy': 'green',
+                                        'hold': 'orange',
+                                        'sell': 'red',
+                                        'strongSell': 'darkred'
+                                    }
                                 )
                                 
-                                # Update layout for modern look
                                 fig.update_layout(
-                                    template="plotly_dark",
-                                    legend=dict(orientation="h", yanchor="bottom", y=-0.2, xanchor="center", x=0.5),
+                                    barmode='stack',
+                                    yaxis_title="Number of Analysts",
+                                    xaxis_title="Date",
+                                    legend_title="Recommendation",
+                                    height=400
                                 )
                                 
-                                # Display the chart
                                 st.plotly_chart(fig, use_container_width=True)
                             else:
                                 st.info("Analyst recommendations not available for this stock")
-                        except Exception as e:
-                            st.info("Analyst recommendations not available for this stock")
-                    
-                    with tab3:
-                        st.subheader("Market Sentiment")
-                        
-                        # Basic sentiment summary
-                        sentiment_score = rating_breakdown.get('sentiment_score', 0)
-                        
-                        # Sentiment gauge
-                        gauge_color = "#E74C3C" if sentiment_score < 4 else "#F7DC6F" if sentiment_score < 7 else "#58D68D"
-                        
-                        # Create sentiment gauge
-                        fig = go.Figure(go.Indicator(
-                            mode="gauge+number",
-                            value=sentiment_score,
-                            title={'text': f"Market Sentiment Score for {ticker}"},
-                            gauge={
-                                'axis': {'range': [0, 10], 'tickwidth': 1},
-                                'bar': {'color': gauge_color},
-                                'steps': [
-                                    {'range': [0, 4], 'color': 'rgba(231, 76, 60, 0.3)'},
-                                    {'range': [4, 7], 'color': 'rgba(247, 220, 111, 0.3)'},
-                                    {'range': [7, 10], 'color': 'rgba(88, 214, 141, 0.3)'}
-                                ],
-                                'threshold': {
-                                    'line': {'color': "white", 'width': 4},
-                                    'thickness': 0.75,
-                                    'value': sentiment_score
-                                }
-                            }
-                        ))
-                        
-                        # Update layout
-                        fig.update_layout(
-                            template="plotly_dark",
-                            height=300,
-                            margin=dict(l=20, r=20, t=60, b=20),
-                        )
-                        
-                        # Display the gauge
-                        st.plotly_chart(fig, use_container_width=True)
-                        
-                        # Sentiment explanation
-                        sentiment_text = ""
-                        if sentiment_score >= 7:
-                            sentiment_text = f"The market sentiment for {ticker} is highly positive. Analysts and investors are generally bullish on this stock's prospects."
-                        elif sentiment_score >= 4:
-                            sentiment_text = f"The market sentiment for {ticker} is neutral to slightly positive. Opinions are mixed, but there is some optimism about the stock's future."
-                        else:
-                            sentiment_text = f"The market sentiment for {ticker} is currently negative. Investors and analysts are cautious or bearish about this stock's outlook."
-                        
-                        # Display sentiment text
-                        st.markdown(f"""
-                        <div style="background: rgba(30, 40, 60, 0.5); padding: 1rem; border-radius: 8px; margin: 1.5rem 0;">
-                            <h4 style="margin-top: 0;">Sentiment Analysis</h4>
-                            <p>{sentiment_text}</p>
-                        </div>
-                        """, unsafe_allow_html=True)
                     
                     with tab4:
                         st.subheader("Recent News")
                         
                         # Get news articles
-                        try:
-                            news_articles = get_stock_news(ticker)
+                        news_articles = get_stock_news(ticker)
+                        
+                        if news_articles:
+                            # Calculate sentiment scores
+                            sentiment_scores = []
                             
-                            if news_articles:
-                                # Calculate sentiment scores (placeholder)
-                                sentiment_scores = []
+                            for article in news_articles:
+                                # Placeholder for sentiment analysis - would use NLP in a real app
+                                # Here, we'll use a simple random score for demonstration
+                                sentiment = np.random.uniform(-1, 1)
+                                sentiment_scores.append(sentiment)
+                            
+                            # Display articles
+                            for i, article in enumerate(news_articles):
+                                col1, col2 = st.columns([1, 4])
                                 
-                                for article in news_articles:
-                                    # Placeholder for sentiment analysis - would use NLP in a real app
-                                    # Here, we'll use a simple random score for demonstration
-                                    sentiment = np.random.uniform(-1, 1)
-                                    sentiment_scores.append(sentiment)
+                                date_str = article.get('date', 'Unknown date')
                                 
-                                # Display articles with modern card styling
-                                st.markdown("""
-                                <style>
-                                .news-card {
-                                    background: rgba(30, 40, 60, 0.5);
-                                    border-radius: 8px;
-                                    padding: 1rem;
-                                    margin-bottom: 1rem;
-                                    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-                                    transition: transform 0.2s;
-                                }
-                                .news-card:hover {
-                                    transform: translateY(-5px);
-                                    box-shadow: 0 5px 10px rgba(0,0,0,0.2);
-                                }
-                                .news-title {
-                                    font-size: 1.1rem;
-                                    font-weight: 600;
-                                    margin-bottom: 0.5rem;
-                                }
-                                .news-meta {
-                                    display: flex;
-                                    justify-content: space-between;
-                                    margin-bottom: 0.5rem;
-                                    font-size: 0.8rem;
-                                    opacity: 0.8;
-                                }
-                                .news-source {
-                                    font-weight: 500;
-                                }
-                                .news-sentiment {
-                                    padding: 0.2rem 0.5rem;
-                                    border-radius: 4px;
-                                    font-weight: 500;
-                                }
-                                .news-summary {
-                                    margin-top: 0.5rem;
-                                    font-size: 0.9rem;
-                                    line-height: 1.5;
-                                }
-                                </style>
-                                """, unsafe_allow_html=True)
+                                # Determine sentiment icon
+                                sentiment = sentiment_scores[i]
+                                if sentiment > 0.3:
+                                    sentiment_icon = "👍"
+                                elif sentiment < -0.3:
+                                    sentiment_icon = "👎"
+                                else:
+                                    sentiment_icon = "🔄"
                                 
-                                # Display limited number of articles
-                                max_articles = min(5, len(news_articles))
+                                with col1:
+                                    st.markdown(f"**{date_str}**")
+                                    st.markdown(f"**{sentiment_icon}**")
                                 
-                                for i, article in enumerate(news_articles[:max_articles]):
-                                    sentiment = sentiment_scores[i]
-                                    
-                                    # Determine sentiment color and label
-                                    if sentiment > 0.2:
-                                        sentiment_color = "rgba(46, 204, 113, 0.2)"
-                                        sentiment_label = "Positive"
-                                    elif sentiment < -0.2:
-                                        sentiment_color = "rgba(231, 76, 60, 0.2)"
-                                        sentiment_label = "Negative"
-                                    else:
-                                        sentiment_color = "rgba(247, 220, 111, 0.2)"
-                                        sentiment_label = "Neutral"
-                                    
-                                    # Format publish date (assuming it's a standard format)
-                                    try:
-                                        date_str = article.get('publishedDate', 'Unknown')
-                                        if date_str != 'Unknown':
-                                            date_obj = datetime.strptime(date_str, '%Y-%m-%d %H:%M:%S')
-                                            formatted_date = date_obj.strftime('%b %d, %Y')
-                                        else:
-                                            formatted_date = 'Unknown date'
-                                    except:
-                                        formatted_date = 'Unknown date'
-                                    
-                                    # Display article
-                                    st.markdown(f"""
-                                    <div class="news-card">
-                                        <div class="news-title">
-                                            <a href="{article.get('url', '#')}" target="_blank" style="color: inherit; text-decoration: none;">
-                                                {article.get('title', 'No title available')}
-                                            </a>
-                                        </div>
-                                        <div class="news-meta">
-                                            <span class="news-source">{article.get('publisher', 'Unknown source')} • {formatted_date}</span>
-                                            <span class="news-sentiment" style="background: {sentiment_color};">{sentiment_label}</span>
-                                        </div>
-                                        <div class="news-summary">
-                                            {article.get('text', 'No summary available')[:150]}...
-                                        </div>
-                                    </div>
-                                    """, unsafe_allow_html=True)
-                            else:
-                                st.info(f"No recent news found for {ticker}")
-                        except Exception as e:
-                            st.error(f"Error getting news for {ticker}: {str(e)}")
-                            st.info("Unable to fetch news articles at this time.")
+                                with col2:
+                                    st.markdown(f"**[{article.get('title', 'No Title')}]({article.get('link', '#')})**")
+                                    summary = article.get('summary', 'No summary available')
+                                    st.markdown(f"{summary[:200]}..." if len(summary) > 200 else summary)
+                                
+                                st.markdown("---")
+                        
+                        else:
+                            st.info(f"No recent news found for {ticker}")
+                except Exception as e:
+                    st.error(f"Error analyzing {ticker}: {str(e)}")
+                    st.info("Please check if the ticker symbol is correct and try again.")
                     
-                    # Add bottom padding for better spacing with footer
-                    st.markdown("<div style='margin-bottom: 100px;'></div>", unsafe_allow_html=True)
-            except Exception as e:
-                st.error(f"Error analyzing {ticker}: {str(e)}")
-                st.info("Please check if the ticker symbol is correct and try again.")
-    else:
-        # Default welcome screen when no ticker is entered
-        st.markdown("""
-        # Welcome to Ticker AI
+                # Add bottom padding for better spacing with footer
+                st.markdown("<div style='margin-bottom: 100px;'></div>", unsafe_allow_html=True)
         
-        Enter a stock ticker in the sidebar and click "Analyze" to get started.
-        
-        This tool provides:
-        - Comprehensive stock analysis with AI-powered insights
-        - Real-time price and market data
-        - Technical analysis with indicators
-        - Fundamental analysis with financial statements
-        - Recent news about the company
-        - A proprietary buy rating score from 1-10
-        
-        All data comes from reliable financial sources.
-        """)
-        
-        # Clean, modern stock market welcome display with only the logo
-        st.markdown("""
-        <div style="text-align: center; padding: 50px; margin-top: 80px;">
-            <h1 style="color: #3b82f6; font-size: 60px; margin-bottom: 20px;">Ticker AI</h1>
-        </div>
-        """, unsafe_allow_html=True)
+        else:
+            # Display welcome message and stock market image for new users
+            st.markdown("""
+            ## Welcome to the Ticker AI Stock Market Analyzer
+            
+            This tool helps you analyze stocks with comprehensive financial data and visualizations.
+            
+            **To get started:**
+            1. Enter a stock ticker symbol in the sidebar (e.g., AAPL for Apple)
+            2. Select your preferred timeframe
+            3. Click "Analyze Stock" to see the results
+            
+            You'll get detailed information including:
+            - Current price and change
+            - Key financial metrics
+            - Technical analysis with indicators
+            - Fundamental analysis with financial statements
+            - Recent news about the company
+            - A proprietary buy rating score from 1-10
+            
+            All data comes from reliable financial sources.
+            """)
+            
+            # Clean, modern stock market welcome display with only the logo
+            st.markdown("""
+            <div style="text-align: center; padding: 50px; margin-top: 80px;">
+                <h1 style="color: #3b82f6; font-size: 60px; margin-bottom: 20px;">Ticker AI</h1>
+            </div>
+            """, unsafe_allow_html=True)
