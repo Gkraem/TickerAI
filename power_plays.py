@@ -184,14 +184,15 @@ def generate_analysis(ticker, buy_rating, technical_score, fundamental_score, se
         # Format PE ratio analysis
         pe_text = ""
         if metrics.get('pe_ratio') != 'N/A' and metrics.get('forward_pe') != 'N/A':
-            pe_ratio = float(metrics.get('pe_ratio').replace('N/A', '0'))
             try:
+                pe_ratio = float(metrics.get('pe_ratio').replace('N/A', '0'))
                 forward_pe = float(metrics.get('forward_pe').replace('N/A', '0'))
                 if pe_ratio > 0 and forward_pe > 0:
                     if forward_pe < pe_ratio:
-                        pe_text = f"The forward P/E ({metrics['forward_pe']}) is lower than the trailing P/E ({metrics['pe_ratio']}), potentially indicating projected earnings growth. "
+                        pe_text = f"The forward P/E ({metrics['forward_pe']}) is lower than the trailing P/E ({metrics['pe_ratio']}), potentially indicating projected earnings growth."
                     else:
-                        pe_text = f"Current P/E ratio is {metrics['pe_ratio']} with a forward P/E of {metrics['forward_pe']}. "
+                        pe_text = f"Current P/E ratio is {metrics['pe_ratio']} with a forward P/E of {metrics['forward_pe']}."
+                    pe_text += " "
             except:
                 pe_text = f"Current P/E ratio is {metrics['pe_ratio']}. "
         elif metrics.get('pe_ratio') != 'N/A':
@@ -200,11 +201,12 @@ def generate_analysis(ticker, buy_rating, technical_score, fundamental_score, se
         # Format market cap and sector
         cap_sector_text = ""
         if metrics.get('market_cap') != 'N/A':
-            cap_sector_text += f"{ticker} has a market capitalization of {metrics['market_cap']} "
+            cap_sector_text += f"{ticker} has a market capitalization of {metrics['market_cap']}"
             if metrics.get('sector') != 'N/A':
-                cap_sector_text += f"in the {metrics['sector']} sector. "
+                cap_sector_text += f" in the {metrics['sector']} sector."
             else:
-                cap_sector_text += ". "
+                cap_sector_text += "."
+            cap_sector_text += " "
         
         # Format profitability
         profit_text = ""
@@ -212,11 +214,12 @@ def generate_analysis(ticker, buy_rating, technical_score, fundamental_score, se
             try:
                 profit_margin = float(metrics.get('profit_margin').replace('%', '').replace('N/A', '0'))
                 if profit_margin > 15:
-                    profit_text = f"The company shows an impressive profit margin of {metrics['profit_margin']}, indicating strong operational efficiency. "
+                    profit_text = f"The company shows an impressive profit margin of {metrics['profit_margin']}, indicating strong operational efficiency."
                 elif profit_margin > 0:
-                    profit_text = f"With a profit margin of {metrics['profit_margin']}, the company is maintaining positive returns. "
+                    profit_text = f"With a profit margin of {metrics['profit_margin']}, the company is maintaining positive returns."
                 else:
-                    profit_text = f"The company's current profit margin is {metrics['profit_margin']}, indicating profitability challenges. "
+                    profit_text = f"The company's current profit margin is {metrics['profit_margin']}, indicating profitability challenges."
+                profit_text += " "
             except:
                 pass
         
@@ -226,9 +229,10 @@ def generate_analysis(ticker, buy_rating, technical_score, fundamental_score, se
             try:
                 peg = float(metrics.get('peg_ratio').replace('N/A', '0'))
                 if 0 < peg < 1:
-                    valuation_text = f"With a PEG ratio of {metrics['peg_ratio']}, the stock appears potentially undervalued relative to its growth prospects. "
+                    valuation_text = f"With a PEG ratio of {metrics['peg_ratio']}, the stock appears potentially undervalued relative to its growth prospects."
                 elif peg >= 1:
-                    valuation_text = f"The PEG ratio of {metrics['peg_ratio']} suggests the stock may be fairly valued to slightly overvalued. "
+                    valuation_text = f"The PEG ratio of {metrics['peg_ratio']} suggests the stock may be fairly valued to slightly overvalued."
+                valuation_text += " "
             except:
                 pass
         
@@ -240,10 +244,11 @@ def generate_analysis(ticker, buy_rating, technical_score, fundamental_score, se
                 current = float(metrics.get('current_price').replace('$', '').replace('N/A', '0'))
                 if target > current:
                     upside = ((target / current) - 1) * 100
-                    target_text = f"Analysts have a mean price target of {metrics['target_price']}, suggesting a {upside:.1f}% upside potential. "
+                    target_text = f"Analysts have a mean price target of {metrics['target_price']}, suggesting a {upside:.1f}% upside potential."
                 else:
                     downside = ((1 - target / current)) * 100
-                    target_text = f"The mean analyst price target of {metrics['target_price']} indicates a potential {downside:.1f}% downside from the current price. "
+                    target_text = f"The mean analyst price target of {metrics['target_price']} indicates a potential {downside:.1f}% downside from the current price."
+                target_text += " "
             except:
                 pass
                 
@@ -364,7 +369,7 @@ def display_power_plays():
     st.write("")
     
     # Option to refresh analysis
-    if st.button("Refresh Analysis"):
+    if st.button("Refresh Analysis", key="refresh_power_plays_button"):
         with st.spinner(f"Refreshing analysis for {selected_index}..."):
             st.session_state.power_plays_results = get_top_stocks(
                 max_stocks=5, 
@@ -401,13 +406,16 @@ def display_power_plays():
         </div>
         """
         
-        # Display header with rank
+        # Display ticker separately from company name for better rendering
         st.markdown(f"""
         <div style="display: flex; align-items: center; margin-bottom: 10px;">
             {rank_badge}
-            <div style="font-size: 22px; font-weight: bold; margin: 0;">{ticker}: {company_name}</div>
+            <span style="font-size: 22px; font-weight: bold; margin: 0;">{ticker}</span>
         </div>
         """, unsafe_allow_html=True)
+        
+        # Display company name as regular text (not HTML)
+        st.subheader(company_name)
         
         # Display buy rating
         color = ""
@@ -453,7 +461,7 @@ def display_power_plays():
     
     # Add a button to go back to stock search
     st.write("")  # Add some spacing
-    if st.button("Back to Stock Search"):
+    if st.button("Back to Stock Search", key="back_to_search_button"):
         # Clear power_plays_results and go back to the stock search page
         st.session_state.power_plays_results = None
         st.session_state.current_page = "stock_search"
