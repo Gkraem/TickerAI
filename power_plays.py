@@ -30,64 +30,6 @@ STOCK_INDICES = {
         "SBUX", "PLD", "NOW", "ZTS", "AON", "MMC", "LRCX", "CI", "MO", "BSX",
         "CME", "SO", "PANW", "FI", "DUK", "ITW", "UNP", "APD", "EOG", "CSX",
         "AMT", "PGR", "MPC", "MU", "ICE", "KLAC", "HCA", "EQIX", "PYPL", "FCX",
-        "SNPS", "CDNS", "PXD", "GD", "CCI", "SLB", "MCK", "TFC", "NSC", "BDX"
-    ],
-    "Dow Jones": [
-        "AAPL", "MSFT", "UNH", "GS", "HD", "MCD", "CAT", "V", "TRV", "JPM",
-        "AMGN", "BA", "CRM", "HON", "JNJ", "PG", "AXP", "IBM", "MRK", "WMT",
-        "DIS", "MMM", "CVX", "KO", "CSCO", "DOW", "NKE", "INTC", "VZ", "WBA"
-    ],
-    "NASDAQ-100": [
-        "AAPL", "MSFT", "AMZN", "NVDA", "META", "TSLA", "GOOGL", "GOOG", "AVGO", "ADBE",
-        "COST", "PEP", "CSCO", "AMD", "CMCSA", "TMUS", "NFLX", "INTC", "TXN", "QCOM", 
-        "HON", "INTU", "AMAT", "ISRG", "BKNG", "SBUX", "MDLZ", "AMGN", "ADI", "PYPL",
-        "REGN", "VRTX", "PANW", "KLAC", "LRCX", "MRNA", "SNPS", "CDNS", "ADP", "MU",
-        "MELI", "ORLY", "MNST", "CRWD", "ASML", "CTAS", "FTNT", "MRVL", "MAR", "ABNB",
-        "PCAR", "PAYX", "DXCM", "CPRT", "WDAY", "CTSH", "ODFL", "CHTR", "AEP", "BIIB",
-        "KDP", "EXC", "KHC", "ROST", "NXPI", "SGEN", "FAST", "EA", "XEL", "DLTR",
-        "IDXX", "GEHC", "BKR", "DASH", "VRSK", "FANG", "ANSS", "CSGP", "CEG", "TEAM",
-        "ILMN", "WBD", "ADSK", "ALGN", "ON", "ZS", "ZM", "JD", "LCID", "RIVN",
-        "CSX", "STLD", "WBA", "CDW", "ENPH", "DDOG", "TTWO", "EBAY", "SWKS", "SPLK"
-    ],
-    "Tech Giants": [
-        "AAPL", "MSFT", "GOOGL", "AMZN", "META", "NVDA", "TSLA", "AVGO", "ADBE", "CRM",
-        "ORCL", "CSCO", "IBM", "INTC", "AMD", "QCOM", "TXN", "NFLX", "PYPL", "AMAT",
-        "MU", "NOW", "INTU", "SNPS", "CDNS", "PANW", "WDAY", "ADSK", "NET", "ZS"
-    ],
-    "Russell 3000": [
-        "AAPL", "MSFT", "AMZN", "NVDA", "GOOGL", "META", "GOOG", "TSLA", "BRK-B", "LLY", 
-        "AVGO", "UNH", "JPM", "V", "XOM", "JNJ", "PG", "MA", "HD", "MRK",
-        "COST", "ABBV", "CVX", "PEP", "ADBE", "WMT", "CRM", "KO", "BAC", "TMO",
-        "MCD", "ACN", "CSCO", "LIN", "AMD", "DIS", "WFC", "ABT", "CMCSA", "NFLX",
-        "TXN", "COP", "INTC", "PM", "ORCL", "TMUS", "DHR", "CAT", "NKE", "VZ",
-        "MS", "SPGI", "CB", "AMAT", "RTX", "INTU", "GE", "HON", "CL", "BMY",
-        "AMGN", "AXP", "LOW", "UPS", "DE", "BKNG", "MDLZ", "SCHW", "ADP", "GILD",
-        "SYK", "BLK", "GS", "ISRG", "ELV", "ADI", "REGN", "TJX", "VRTX", "ETN",
-        "SBUX", "PLD", "NOW", "ZTS", "AON", "MMC", "LRCX", "CI", "MO", "BSX",
-        "CME", "SO", "PANW", "FI", "DUK", "ITW", "UNP", "APD", "EOG", "CSX",
-        "AMT", "PGR", "MPC", "MU", "ICE", "KLAC", "HCA", "EQIX", "PYPL", "FCX",
-        "SNPS", "CDNS", "PXD", "GD", "CCI", "SLB", "MCK", "TFC", "NSC", "BDX",
-        "USB", "EMR", "WM", "F", "MTD", "ORLY", "PSA", "PCAR", "AJG", "ROP",
-        "IDXX", "PSX", "BX", "APH", "DXCM", "MNST", "CTAS", "CHTR", "ALL", "CMG",
-        "YUM", "EXC", "AZO", "MRNA", "GIS", "O", "ADSK", "TT", "HSY", "AEP",
-        "GM", "HUM", "VLO", "TDG", "GWW", "D", "MSCI", "MSI", "UBER", "DOW",
-        "GPN", "SRE", "KMB", "VICI", "PAYX", "ABNB", "AIG", "ECL", "IT", "OXY",
-        "A", "PH", "PPG", "CEG", "PCG", "WELL", "NDAQ", "NEM", "CPRT", "ODFL",
-        "BIIB", "WDAY", "HES", "ILMN", "CTSH", "RMD", "PNC", "ROST", "MET", "MCHP",
-        "IQV", "NUE", "COF", "HLT", "FDX", "STZ", "GEHC", "HCL", "NXPI", "FAST"
-    ],
-    "Wilshire 5000": [
-        "AAPL", "MSFT", "AMZN", "NVDA", "GOOGL", "META", "GOOG", "TSLA", "BRK-B", "LLY", 
-        "AVGO", "UNH", "JPM", "V", "XOM", "JNJ", "PG", "MA", "HD", "MRK",
-        "COST", "ABBV", "CVX", "PEP", "ADBE", "WMT", "CRM", "KO", "BAC", "TMO",
-        "MCD", "ACN", "CSCO", "LIN", "AMD", "DIS", "WFC", "ABT", "CMCSA", "NFLX",
-        "TXN", "COP", "INTC", "PM", "ORCL", "TMUS", "DHR", "CAT", "NKE", "VZ",
-        "MS", "SPGI", "CB", "AMAT", "RTX", "INTU", "GE", "HON", "CL", "BMY",
-        "AMGN", "AXP", "LOW", "UPS", "DE", "BKNG", "MDLZ", "SCHW", "ADP", "GILD",
-        "SYK", "BLK", "GS", "ISRG", "ELV", "ADI", "REGN", "TJX", "VRTX", "ETN",
-        "SBUX", "PLD", "NOW", "ZTS", "AON", "MMC", "LRCX", "CI", "MO", "BSX",
-        "CME", "SO", "PANW", "FI", "DUK", "ITW", "UNP", "APD", "EOG", "CSX",
-        "AMT", "PGR", "MPC", "MU", "ICE", "KLAC", "HCA", "EQIX", "PYPL", "FCX",
         "SNPS", "CDNS", "PXD", "GD", "CCI", "SLB", "MCK", "TFC", "NSC", "BDX",
         "USB", "EMR", "WM", "F", "MTD", "ORLY", "PSA", "PCAR", "AJG", "ROP",
         "IDXX", "PSX", "BX", "APH", "DXCM", "MNST", "CTAS", "CHTR", "ALL", "CMG",
@@ -108,7 +50,53 @@ STOCK_INDICES = {
         "CTRA", "ANSS", "CMS", "VMC", "EXR", "STT", "EBAY", "DLTR", "CVS", "TAP",
         "WAB", "WRB", "AWK", "LW", "PATH", "FE", "AMP", "SMCI", "HAL", "EPAM",
         "STX", "WAT", "TYL", "VTR", "ARE", "KHC", "FITB", "WMB", "NVR", "LPLA",
-        "WCN", "ZBH", "PINS", "GL", "LULU", "BRO", "SIVB", "SEE", "MTB", "BAX"
+        "WCN", "ZBH", "PINS", "GL", "LULU", "BRO", "SIVB", "SEE", "MTB", "BAX",
+        "ENPH", "PFG", "AKAM", "AVY", "FMC", "DECK", "SWK", "BG", "HBAN", "K",
+        "DPZ", "BR", "L", "NTAP", "EL", "VTRS", "LUV", "NDSN", "PEAK", "TDY",
+        "CPT", "GRMN", "MAS", "ALB", "JCI", "EXPD", "ABC", "MOS", "FANG", "LHX",
+        "NWS", "NWSA", "LYB", "UAL", "SJM", "MKC", "JKHY", "CNP", "GPC", "RL",
+        "CTLT", "IPG", "ZBRA", "QRVO", "WDC", "PKG", "IP", "PTC", "ETSY", "BBY",
+        "HRL", "RE", "XYL", "EXPE", "PARA", "RJF", "CAH", "CF", "AIZ", "CLX"
+    ],
+    "Dow Jones": [
+        "AAPL", "MSFT", "UNH", "GS", "HD", "MCD", "CAT", "V", "TRV", "JPM",
+        "AMGN", "BA", "CRM", "HON", "JNJ", "PG", "AXP", "IBM", "MRK", "WMT",
+        "DIS", "MMM", "CVX", "KO", "CSCO", "DOW", "NKE", "INTC", "VZ", "WBA"
+    ],
+    "NASDAQ-100": [
+        "AAPL", "MSFT", "AMZN", "NVDA", "META", "TSLA", "GOOGL", "GOOG", "AVGO", "ADBE",
+        "COST", "PEP", "CSCO", "AMD", "CMCSA", "TMUS", "NFLX", "INTC", "TXN", "QCOM", 
+        "HON", "INTU", "AMAT", "ISRG", "BKNG", "SBUX", "MDLZ", "AMGN", "ADI", "PYPL",
+        "REGN", "VRTX", "PANW", "KLAC", "LRCX", "MRNA", "SNPS", "CDNS", "ADP", "MU",
+        "MELI", "ORLY", "MNST", "CRWD", "ASML", "CTAS", "FTNT", "MRVL", "MAR", "ABNB",
+        "PCAR", "PAYX", "DXCM", "CPRT", "WDAY", "CTSH", "ODFL", "CHTR", "AEP", "BIIB",
+        "KDP", "EXC", "KHC", "ROST", "NXPI", "SGEN", "FAST", "EA", "XEL", "DLTR",
+        "IDXX", "GEHC", "BKR", "DASH", "VRSK", "FANG", "ANSS", "CSGP", "CEG", "TEAM",
+        "ILMN", "WBD", "ADSK", "ALGN", "ON", "ZS", "ZM", "JD", "LCID", "RIVN",
+        "CSX", "STLD", "WBA", "CDW", "ENPH", "DDOG", "TTWO", "EBAY", "SWKS", "SPLK",
+        "PDD", "ATVI", "GILD", "MCHP", "CSGP", "DDOG", "TEAM", "VRSK", "GFS", "ROP", 
+        "AZN", "PCAR", "VRTX", "DLTR", "NDAQ", "KHC", "EXC", "KDP", "ROST", "FANG", 
+        "MRVL", "FTNT", "CTSH", "NXPI", "CHTR", "AEP", "ADSK", "CDNS", "MU", "CTAS", 
+        "CRWD", "SNPS", "VRSN", "CPRT", "ODFL", "SIRI", "BKR", "ILMN", "LULU", "DXCM", 
+        "MNST", "GEHC", "WDAY", "PAYX", "DASH", "ORLY", "BIIB", "MELI", "CEG", "FISV", 
+        "MTCH", "ANSS", "ALGN", "SGEN", "FAST", "CCEP", "RYAAY", "EA", "XEL", "OKTA", 
+        "SPLK", "DOCU", "CTXS", "WBD", "SWKS", "NTES", "ZS", "IDXX", "ZM", "ON", 
+        "ADP", "BMRN", "CSX", "VRSK", "AMAT", "ABNB", "LCID", "DDOG", "MELI", "CTAS"
+    ],
+    "Tech Giants": [
+        "AAPL", "MSFT", "GOOGL", "AMZN", "META", "NVDA", "TSLA", "AVGO", "ADBE", "CRM",
+        "ORCL", "CSCO", "IBM", "INTC", "AMD", "QCOM", "TXN", "NFLX", "PYPL", "AMAT",
+        "MU", "NOW", "INTU", "SNPS", "CDNS", "PANW", "WDAY", "ADSK", "NET", "ZS"
+    ],
+    "Nikkei 225": [
+        "7203", "9984", "6758", "8306", "6501", "7974", "7267", "8035", "4543", "9433",
+        "8411", "6752", "4689", "6861", "4452", "6367", "8801", "6954", "8058", "4568",
+        "9983", "7741", "6098", "7762", "6273", "6902", "8031", "6503", "6702", "3110",
+        "6971", "8053", "7733", "6301", "6326", "6841", "4502", "1963", "4519", "3402",
+        "3407", "7751", "8591", "8630", "4507", "7911", "8267", "2503", "4755", "4523",
+        "9602", "3086", "8316", "6724", "8001", "1925", "5108", "8304", "8002", "8766",
+        "8604", "6902", "6857", "6472", "5401", "4901", "6869", "6645", "9735", "6976",
+        "6770", "1802", "4578", "9532", "4324", "7270", "8331", "6701", "7911", "5711"
     ]
 }
 
@@ -330,7 +318,7 @@ def generate_analysis(ticker, buy_rating, technical_score, fundamental_score, se
     
     return full_analysis
 
-def get_top_stocks(max_stocks=5, max_tickers=None, progress_callback=None, index_name="Fortune 500"):
+def get_top_stocks(max_stocks=5, max_tickers=500, progress_callback=None, index_name="Fortune 500"):
     """
     Analyze stocks from the selected index and return the top stocks with highest buy ratings
     
@@ -339,7 +327,7 @@ def get_top_stocks(max_stocks=5, max_tickers=None, progress_callback=None, index
     max_stocks : int
         Maximum number of top stocks to return
     max_tickers : int
-        Maximum number of tickers to analyze (for testing/demo purposes)
+        Maximum number of tickers to analyze (default is 500 for complete scan)
     progress_callback : function
         Callback function to update progress
     index_name : str
@@ -354,10 +342,6 @@ def get_top_stocks(max_stocks=5, max_tickers=None, progress_callback=None, index
     
     # Get tickers for the selected index (fallback to Fortune 500 if the index doesn't exist)
     tickers_to_analyze = STOCK_INDICES.get(index_name, STOCK_INDICES["Fortune 500"])
-    
-    # Use a subset of tickers for testing if specified
-    if max_tickers:
-        tickers_to_analyze = tickers_to_analyze[:max_tickers]
     
     # Show a progress bar
     progress_container = st.empty()
@@ -443,17 +427,17 @@ def display_power_plays():
         with st.spinner(f"Refreshing analysis for {selected_index}..."):
             st.session_state.power_plays_results = get_top_stocks(
                 max_stocks=5, 
-                max_tickers=30, 
+                max_tickers=500, 
                 index_name=selected_index
             )
     
     # Run analysis if no cached results
     if st.session_state.power_plays_results is None:
         with st.spinner(f"Analyzing {selected_index} stocks to find the best opportunities..."):
-            # Get top stocks (limiting to 30 tickers for demo purposes to speed up execution)
+            # Get top stocks - scanning the entire index with no limits
             st.session_state.power_plays_results = get_top_stocks(
                 max_stocks=5, 
-                max_tickers=30,
+                max_tickers=500,
                 index_name=selected_index
             )
     
