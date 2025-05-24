@@ -53,6 +53,28 @@ STOCK_INDICES = {
         "AAPL", "MSFT", "GOOGL", "AMZN", "META", "NVDA", "TSLA", "AVGO", "ADBE", "CRM",
         "ORCL", "CSCO", "IBM", "INTC", "AMD", "QCOM", "TXN", "NFLX", "PYPL", "AMAT",
         "MU", "NOW", "INTU", "SNPS", "CDNS", "PANW", "WDAY", "ADSK", "NET", "ZS"
+    ],
+    "Russell 3000": [
+        "AAPL", "MSFT", "AMZN", "NVDA", "GOOGL", "META", "GOOG", "TSLA", "BRK-B", "LLY", 
+        "AVGO", "UNH", "JPM", "V", "XOM", "JNJ", "PG", "MA", "HD", "MRK",
+        "COST", "ABBV", "CVX", "PEP", "ADBE", "WMT", "CRM", "KO", "BAC", "TMO",
+        "MCD", "ACN", "CSCO", "LIN", "AMD", "DIS", "WFC", "ABT", "CMCSA", "NFLX",
+        "TXN", "COP", "INTC", "PM", "ORCL", "TMUS", "DHR", "CAT", "NKE", "VZ",
+        "MS", "SPGI", "CB", "AMAT", "RTX", "INTU", "GE", "HON", "CL", "BMY",
+        "AMGN", "AXP", "LOW", "UPS", "DE", "BKNG", "MDLZ", "SCHW", "ADP", "GILD",
+        "SYK", "BLK", "GS", "ISRG", "ELV", "ADI", "REGN", "TJX", "VRTX", "ETN",
+        "SBUX", "PLD", "NOW", "ZTS", "AON", "MMC", "LRCX", "CI", "MO", "BSX",
+        "CME", "SO", "PANW", "FI", "DUK", "ITW", "UNP", "APD", "EOG", "CSX",
+        "AMT", "PGR", "MPC", "MU", "ICE", "KLAC", "HCA", "EQIX", "PYPL", "FCX",
+        "SNPS", "CDNS", "PXD", "GD", "CCI", "SLB", "MCK", "TFC", "NSC", "BDX",
+        "USB", "EMR", "WM", "F", "MTD", "ORLY", "PSA", "PCAR", "AJG", "ROP",
+        "IDXX", "PSX", "BX", "APH", "DXCM", "MNST", "CTAS", "CHTR", "ALL", "CMG",
+        "YUM", "EXC", "AZO", "MRNA", "GIS", "O", "ADSK", "TT", "HSY", "AEP",
+        "GM", "HUM", "VLO", "TDG", "GWW", "D", "MSCI", "MSI", "UBER", "DOW",
+        "GPN", "SRE", "KMB", "VICI", "PAYX", "ABNB", "AIG", "ECL", "IT", "OXY",
+        "A", "PH", "PPG", "CEG", "PCG", "WELL", "NDAQ", "NEM", "CPRT", "ODFL",
+        "BIIB", "WDAY", "HES", "ILMN", "CTSH", "RMD", "PNC", "ROST", "MET", "MCHP",
+        "IQV", "NUE", "COF", "HLT", "FDX", "STZ", "GEHC", "HCL", "NXPI", "FAST"
     ]
 }
 
