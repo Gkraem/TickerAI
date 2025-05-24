@@ -381,8 +381,22 @@ def get_top_stocks(max_stocks=5, max_tickers=500, progress_callback=None, index_
     # Remove the progress bar when done
     progress_container.empty()
     
-    # Sort by buy rating and get top N
-    top_stocks = sorted(analyzed_stocks, key=lambda x: x['buy_rating'], reverse=True)[:max_stocks]
+    # Sort by buy rating
+    sorted_stocks = sorted(analyzed_stocks, key=lambda x: x['buy_rating'], reverse=True)
+    
+    # Get top N unique stocks (prevent duplicates)
+    top_stocks = []
+    seen_tickers = set()
+    
+    for stock in sorted_stocks:
+        ticker = stock['ticker']
+        if ticker not in seen_tickers:
+            top_stocks.append(stock)
+            seen_tickers.add(ticker)
+            
+            # Stop when we have enough unique stocks
+            if len(top_stocks) >= max_stocks:
+                break
     
     return top_stocks
 
