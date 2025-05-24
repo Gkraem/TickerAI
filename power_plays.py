@@ -16,7 +16,24 @@ STOCK_INDICES = {
         "JPM", "V", "PG", "MA", "HD", "ABBV", "MRK", "XOM", "BAC", "CVX", 
         "LLY", "PFE", "KO", "PEP", "TMO", "COST", "AVGO", "DIS", "WMT", "CSCO",
         "ABT", "ACN", "MCD", "VZ", "CRM", "NKE", "CMCSA", "ADBE", "ORCL", "DHR",
-        "IBM", "PM", "UPS", "AMD", "TXN", "INTC", "QCOM", "COP", "T", "AMGN"
+        "IBM", "PM", "UPS", "AMD", "TXN", "INTC", "QCOM", "COP", "T", "AMGN",
+        "USB", "EMR", "WM", "F", "MTD", "ORLY", "PSA", "PCAR", "AJG", "ROP",
+        "IDXX", "PSX", "BX", "APH", "DXCM", "MNST", "CTAS", "CHTR", "ALL", "CMG",
+        "YUM", "EXC", "AZO", "MRNA", "GIS", "O", "ADSK", "TT", "HSY", "AEP",
+        "GM", "HUM", "VLO", "TDG", "GWW", "D", "MSCI", "MSI", "UBER", "DOW",
+        "GPN", "SRE", "KMB", "VICI", "PAYX", "ABNB", "AIG", "ECL", "IT", "OXY",
+        "A", "PH", "PPG", "CEG", "PCG", "WELL", "NDAQ", "NEM", "CPRT", "ODFL",
+        "BIIB", "WDAY", "HES", "ILMN", "CTSH", "RMD", "PNC", "ROST", "MET", "MCHP",
+        "IQV", "NUE", "COF", "HLT", "FDX", "STZ", "GEHC", "HCL", "NXPI", "FAST",
+        "RCL", "DAL", "HOLX", "KR", "DG", "DHI", "LEN", "WST", "URI", "ULTA",
+        "TSCO", "IR", "PODD", "XYL", "JBHT", "TRGP", "FSLR", "EG", "FICO", "DRI",
+        "ACGL", "FIS", "INVH", "ED", "MOH", "STE", "ROK", "DLR", "IFF", "TSN",
+        "ES", "AXON", "NOC", "TTWO", "GFS", "HIG", "STLD", "RF", "AVB", "BLDR",
+        "EQR", "CHD", "MLM", "HPE", "KMI", "CNC", "OKE", "WBD", "SBAC", "PRU",
+        "TRV", "WTW", "HBAN", "DVN", "BKR", "ALGN", "CDW", "MAA", "CFG", "EFX",
+        "FERG", "ETR", "DOV", "APTV", "MPWR", "PPL", "DFS", "TER", "HWM", "SYY",
+        "EIX", "WY", "KDP", "LH", "VMW", "OMC", "COO", "KEYS", "NTRS", "BALL",
+        "CTRA", "ANSS", "CMS", "VMC", "EXR", "STT", "EBAY", "DLTR", "CVS", "TAP"
     ],
     "S&P 500": [
         "AAPL", "MSFT", "AMZN", "NVDA", "GOOGL", "META", "GOOG", "TSLA", "BRK-B", "LLY",
@@ -70,33 +87,18 @@ STOCK_INDICES = {
         "REGN", "VRTX", "PANW", "KLAC", "LRCX", "MRNA", "SNPS", "CDNS", "ADP", "MU",
         "MELI", "ORLY", "MNST", "CRWD", "ASML", "CTAS", "FTNT", "MRVL", "MAR", "ABNB",
         "PCAR", "PAYX", "DXCM", "CPRT", "WDAY", "CTSH", "ODFL", "CHTR", "AEP", "BIIB",
-        "KDP", "EXC", "KHC", "ROST", "NXPI", "SGEN", "FAST", "EA", "XEL", "DLTR",
+        "KDP", "EXC", "KHC", "ROST", "NXPI", "FAST", "EA", "XEL", "DLTR",
         "IDXX", "GEHC", "BKR", "DASH", "VRSK", "FANG", "ANSS", "CSGP", "CEG", "TEAM",
         "ILMN", "WBD", "ADSK", "ALGN", "ON", "ZS", "ZM", "JD", "LCID", "RIVN",
-        "CSX", "STLD", "WBA", "CDW", "ENPH", "DDOG", "TTWO", "EBAY", "SWKS", "SPLK",
-        "PDD", "ATVI", "GILD", "MCHP", "CSGP", "DDOG", "TEAM", "VRSK", "GFS", "ROP", 
+        "CSX", "STLD", "WBA", "CDW", "ENPH", "DDOG", "TTWO", "EBAY", "SWKS",
+        "PDD", "GILD", "MCHP", "CSGP", "DDOG", "TEAM", "VRSK", "GFS", "ROP", 
         "AZN", "PCAR", "VRTX", "DLTR", "NDAQ", "KHC", "EXC", "KDP", "ROST", "FANG", 
         "MRVL", "FTNT", "CTSH", "NXPI", "CHTR", "AEP", "ADSK", "CDNS", "MU", "CTAS", 
         "CRWD", "SNPS", "VRSN", "CPRT", "ODFL", "SIRI", "BKR", "ILMN", "LULU", "DXCM", 
-        "MNST", "GEHC", "WDAY", "PAYX", "DASH", "ORLY", "BIIB", "MELI", "CEG", "FISV", 
-        "MTCH", "ANSS", "ALGN", "SGEN", "FAST", "CCEP", "RYAAY", "EA", "XEL", "OKTA", 
-        "SPLK", "DOCU", "CTXS", "WBD", "SWKS", "NTES", "ZS", "IDXX", "ZM", "ON", 
+        "MNST", "GEHC", "WDAY", "PAYX", "DASH", "ORLY", "BIIB", "MELI", "CEG",  
+        "MTCH", "ANSS", "ALGN", "FAST", "CCEP", "RYAAY", "EA", "XEL", "OKTA", 
+        "DOCU", "SWKS", "NTES", "ZS", "IDXX", "ZM", "ON", 
         "ADP", "BMRN", "CSX", "VRSK", "AMAT", "ABNB", "LCID", "DDOG", "MELI", "CTAS"
-    ],
-    "Tech Giants": [
-        "AAPL", "MSFT", "GOOGL", "AMZN", "META", "NVDA", "TSLA", "AVGO", "ADBE", "CRM",
-        "ORCL", "CSCO", "IBM", "INTC", "AMD", "QCOM", "TXN", "NFLX", "PYPL", "AMAT",
-        "MU", "NOW", "INTU", "SNPS", "CDNS", "PANW", "WDAY", "ADSK", "NET", "ZS"
-    ],
-    "Nikkei 225": [
-        "7203", "9984", "6758", "8306", "6501", "7974", "7267", "8035", "4543", "9433",
-        "8411", "6752", "4689", "6861", "4452", "6367", "8801", "6954", "8058", "4568",
-        "9983", "7741", "6098", "7762", "6273", "6902", "8031", "6503", "6702", "3110",
-        "6971", "8053", "7733", "6301", "6326", "6841", "4502", "1963", "4519", "3402",
-        "3407", "7751", "8591", "8630", "4507", "7911", "8267", "2503", "4755", "4523",
-        "9602", "3086", "8316", "6724", "8001", "1925", "5108", "8304", "8002", "8766",
-        "8604", "6902", "6857", "6472", "5401", "4901", "6869", "6645", "9735", "6976",
-        "6770", "1802", "4578", "9532", "4324", "7270", "8331", "6701", "7911", "5711"
     ]
 }
 
