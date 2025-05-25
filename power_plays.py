@@ -301,16 +301,24 @@ def generate_analysis(ticker, buy_rating, technical_score, fundamental_score, se
         pe_text = ""
         if metrics.get('pe_ratio') != 'N/A' and metrics.get('forward_pe') != 'N/A':
             try:
-                pe_ratio = float(metrics.get('pe_ratio').replace('N/A', '0'))
-                forward_pe = float(metrics.get('forward_pe').replace('N/A', '0'))
-                if pe_ratio > 0 and forward_pe > 0:
-                    if forward_pe < pe_ratio:
-                        pe_text = f"The forward P/E ({metrics['forward_pe']}) is lower than the trailing P/E ({metrics['pe_ratio']}), potentially indicating projected earnings growth."
-                    else:
-                        pe_text = f"Current P/E ratio is {metrics['pe_ratio']} with a forward P/E of {metrics['forward_pe']}."
-                    pe_text += " "
-            except:
-                pe_text = f"Current P/E ratio is {metrics['pe_ratio']}. "
+                pe_ratio_str = str(metrics.get('pe_ratio'))
+                forward_pe_str = str(metrics.get('forward_pe'))
+                
+                if 'N/A' not in pe_ratio_str and 'N/A' not in forward_pe_str:
+                    pe_ratio = float(pe_ratio_str.replace('%', ''))
+                    forward_pe = float(forward_pe_str.replace('%', ''))
+                    
+                    if pe_ratio > 0 and forward_pe > 0:
+                        if forward_pe < pe_ratio:
+                            pe_text = f"The forward P/E ({metrics['forward_pe']}) is lower than the trailing P/E ({metrics['pe_ratio']}), potentially indicating projected earnings growth."
+                        else:
+                            pe_text = f"Current P/E ratio is {metrics['pe_ratio']} with a forward P/E of {metrics['forward_pe']}."
+                        pe_text += " "
+                else:
+                    pe_text = "P/E ratio data available. "
+            except Exception as e:
+                print(f"Error formatting PE ratios: {e}")
+                pe_text = ""
         elif metrics.get('pe_ratio') != 'N/A':
             pe_text = f"Current P/E ratio is {metrics['pe_ratio']}. "
         
@@ -328,44 +336,55 @@ def generate_analysis(ticker, buy_rating, technical_score, fundamental_score, se
         profit_text = ""
         if metrics.get('profit_margin') != 'N/A':
             try:
-                profit_margin = float(metrics.get('profit_margin').replace('%', '').replace('N/A', '0'))
-                if profit_margin > 15:
-                    profit_text = f"The company shows an impressive profit margin of {metrics['profit_margin']}, indicating strong operational efficiency."
-                elif profit_margin > 0:
-                    profit_text = f"With a profit margin of {metrics['profit_margin']}, the company is maintaining positive returns."
-                else:
-                    profit_text = f"The company's current profit margin is {metrics['profit_margin']}, indicating profitability challenges."
-                profit_text += " "
-            except:
+                profit_margin_str = str(metrics.get('profit_margin'))
+                if 'N/A' not in profit_margin_str:
+                    profit_margin = float(profit_margin_str.replace('%', ''))
+                    if profit_margin > 15:
+                        profit_text = f"The company shows an impressive profit margin of {metrics['profit_margin']}, indicating strong operational efficiency."
+                    elif profit_margin > 0:
+                        profit_text = f"With a profit margin of {metrics['profit_margin']}, the company is maintaining positive returns."
+                    else:
+                        profit_text = f"The company's current profit margin is {metrics['profit_margin']}, indicating profitability challenges."
+                    profit_text += " "
+            except Exception as e:
+                print(f"Error formatting profit margin: {e}")
                 pass
         
         # Format valuation
         valuation_text = ""
         if metrics.get('peg_ratio') != 'N/A':
             try:
-                peg = float(metrics.get('peg_ratio').replace('N/A', '0'))
-                if 0 < peg < 1:
-                    valuation_text = f"With a PEG ratio of {metrics['peg_ratio']}, the stock appears potentially undervalued relative to its growth prospects."
-                elif peg >= 1:
-                    valuation_text = f"The PEG ratio of {metrics['peg_ratio']} suggests the stock may be fairly valued to slightly overvalued."
-                valuation_text += " "
-            except:
+                peg_ratio_str = str(metrics.get('peg_ratio'))
+                if 'N/A' not in peg_ratio_str:
+                    peg = float(peg_ratio_str)
+                    if 0 < peg < 1:
+                        valuation_text = f"With a PEG ratio of {metrics['peg_ratio']}, the stock appears potentially undervalued relative to its growth prospects."
+                    elif peg >= 1:
+                        valuation_text = f"The PEG ratio of {metrics['peg_ratio']} suggests the stock may be fairly valued to slightly overvalued."
+            except Exception as e:
+                print(f"Error formatting PEG ratio: {e}")
                 pass
         
         # Format price target
         target_text = ""
         if metrics.get('target_price') != 'N/A' and metrics.get('current_price') != 'N/A':
             try:
-                target = float(metrics.get('target_price').replace('$', '').replace('N/A', '0'))
-                current = float(metrics.get('current_price').replace('$', '').replace('N/A', '0'))
-                if target > current:
-                    upside = ((target / current) - 1) * 100
-                    target_text = f"Analysts have a mean price target of {metrics['target_price']}, suggesting a {upside:.1f}% upside potential."
-                else:
-                    downside = ((1 - target / current)) * 100
-                    target_text = f"The mean analyst price target of {metrics['target_price']} indicates a potential {downside:.1f}% downside from the current price."
-                target_text += " "
-            except:
+                target_price_str = str(metrics.get('target_price'))
+                current_price_str = str(metrics.get('current_price'))
+                
+                if 'N/A' not in target_price_str and 'N/A' not in current_price_str:
+                    target = float(target_price_str.replace('$', ''))
+                    current = float(current_price_str.replace('$', ''))
+                    
+                    if target > current:
+                        upside = ((target / current) - 1) * 100
+                        target_text = f"Analysts have a mean price target of {metrics['target_price']}, suggesting a {upside:.1f}% upside potential."
+                    else:
+                        downside = ((1 - target / current)) * 100
+                        target_text = f"The mean analyst price target of {metrics['target_price']} indicates a potential {downside:.1f}% downside from the current price."
+                    target_text += " "
+            except Exception as e:
+                print(f"Error formatting price target: {e}")
                 pass
         
         # Format dividend info (enhanced)
@@ -381,7 +400,8 @@ def generate_analysis(ticker, buy_rating, technical_score, fundamental_score, se
                         div_growth = float(div_growth_str.replace('%', ''))
                         if div_growth > 0:
                             dividend_text += f" with a {metrics['dividend_growth']} year-over-year growth"
-                except:
+                except Exception as e:
+                    print(f"Error formatting dividend growth: {e}")
                     pass
             
             # Add payout ratio if available
