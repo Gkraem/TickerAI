@@ -109,6 +109,40 @@ POPULAR_STOCKS = [
     {"ticker": "MMM", "name": "3M Company"},
     {"ticker": "HON", "name": "Honeywell International Inc."},
     {"ticker": "GE", "name": "General Electric Company"},
+    # Defense and Aerospace companies
+    {"ticker": "NOC", "name": "Northrop Grumman Corporation"},
+    {"ticker": "GD", "name": "General Dynamics Corporation"},
+    {"ticker": "HII", "name": "Huntington Ingalls Industries Inc."},
+    {"ticker": "TDG", "name": "TransDigm Group Inc."},
+    {"ticker": "TXT", "name": "Textron Inc."},
+    {"ticker": "SPR", "name": "Spirit AeroSystems Holdings Inc."},
+    # Tech companies
+    {"ticker": "ORCL", "name": "Oracle Corporation"},
+    {"ticker": "CRM", "name": "Salesforce Inc."},
+    {"ticker": "SAP", "name": "SAP SE"},
+    {"ticker": "IBM", "name": "International Business Machines Corp."},
+    {"ticker": "NOW", "name": "ServiceNow Inc."},
+    {"ticker": "TEAM", "name": "Atlassian Corporation"},
+    {"ticker": "WDAY", "name": "Workday Inc."},
+    {"ticker": "ZS", "name": "Zscaler Inc."},
+    {"ticker": "OKTA", "name": "Okta Inc."},
+    {"ticker": "NET", "name": "Cloudflare Inc."},
+    {"ticker": "CRWD", "name": "CrowdStrike Holdings Inc."},
+    {"ticker": "SNOW", "name": "Snowflake Inc."},
+    {"ticker": "DDOG", "name": "Datadog Inc."},
+    {"ticker": "TWLO", "name": "Twilio Inc."},
+    {"ticker": "MDB", "name": "MongoDB Inc."},
+    # Energy sector
+    {"ticker": "CVX", "name": "Chevron Corporation"},
+    {"ticker": "XOM", "name": "Exxon Mobil Corporation"},
+    {"ticker": "COP", "name": "ConocoPhillips"},
+    {"ticker": "SLB", "name": "Schlumberger Limited"},
+    {"ticker": "EOG", "name": "EOG Resources Inc."},
+    {"ticker": "OXY", "name": "Occidental Petroleum Corporation"},
+    {"ticker": "HAL", "name": "Halliburton Company"},
+    {"ticker": "MPC", "name": "Marathon Petroleum Corporation"},
+    {"ticker": "PSX", "name": "Phillips 66"},
+    {"ticker": "VLO", "name": "Valero Energy Corporation"},
 ]
 
 # Function to search for stocks by partial ticker or name match using Yahoo Finance
@@ -153,6 +187,52 @@ def search_stocks(query):
     # If we already have enough local matches, return them
     if len(local_matches) >= 10:
         return local_matches[:10]
+    
+    # If not enough local matches, try a more direct approach for specific companies
+    if query_lower in ["northrop", "grumman", "northrop grumman"]:
+        # Ensure Northrop Grumman is in results
+        if not any(stock['ticker'] == "NOC" for stock in local_matches):
+            local_matches.append({
+                "ticker": "NOC",
+                "name": "Northrop Grumman Corporation"
+            })
+    
+    # Try common variations and abbreviations
+    ticker_mappings = {
+        "citi": "C",
+        "citigroup": "C",
+        "coke": "KO",
+        "coca cola": "KO",
+        "cocacola": "KO",
+        "coca-cola": "KO",
+        "boeing": "BA",
+        "lockheed": "LMT",
+        "raytheon": "RTX",
+        "defense": ["NOC", "LMT", "GD", "RTX", "HII"],  # Defense contractors
+        "airlines": ["AAL", "DAL", "UAL", "LUV"],  # Major airlines
+        "tech": ["AAPL", "MSFT", "GOOGL", "META", "AMZN", "NVDA"],  # Big tech
+        "semiconductors": ["NVDA", "AMD", "INTC", "MU", "TSM", "AVGO"],  # Semiconductor companies
+        "banks": ["JPM", "BAC", "WFC", "C", "GS", "MS"],  # Major banks
+        "energy": ["XOM", "CVX", "COP", "SLB", "BP", "OXY"],  # Energy companies
+        "retail": ["WMT", "TGT", "COST", "AMZN", "HD", "LOW"],  # Retail companies
+    }
+    
+    for key, value in ticker_mappings.items():
+        if query_lower in key or key in query_lower:
+            if isinstance(value, list):
+                # Add all related companies for category searches
+                for ticker in value:
+                    # Find the company name in our database
+                    for stock in POPULAR_STOCKS:
+                        if stock["ticker"] == ticker and not any(m["ticker"] == ticker for m in local_matches):
+                            local_matches.append(stock)
+                            break
+            else:
+                # Add the specific company
+                for stock in POPULAR_STOCKS:
+                    if stock["ticker"] == value and not any(m["ticker"] == value for m in local_matches):
+                        local_matches.append(stock)
+                        break
     
     # Try to get additional matches from Yahoo Finance API
     try:
