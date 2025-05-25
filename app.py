@@ -197,57 +197,60 @@ else:
         # Sidebar for ticker input
         st.sidebar.title("Stock Search")
         
-        # Initialize session state for search input if not exists
-        if "search_input" not in st.session_state:
-            st.session_state.search_input = ""
+        # Initialize session states if they don't exist
+        if "search_query" not in st.session_state:
+            st.session_state.search_query = ""
+        if "selected_ticker" not in st.session_state:
+            st.session_state.selected_ticker = ""
+            
+        # Function to update selected ticker when dropdown changes
+        def on_stock_select():
+            selected_option = st.session_state.stock_selector
+            if selected_option != "Search for a stock...":
+                # Extract ticker from selection
+                st.session_state.selected_ticker = selected_option.split(" - ")[0]
+            else:
+                st.session_state.selected_ticker = ""
         
-        # Initialize session state for selected stock
-        if "selected_stock" not in st.session_state:
-            st.session_state.selected_stock = None
+        # Get current search query value
+        search_query = st.session_state.search_query
         
-        # Search input field
-        search_query = st.sidebar.text_input(
+        # The integrated search field with dropdown
+        ticker = ""  # Default empty ticker
+        
+        # Show search box with current query
+        search_input = st.sidebar.text_input(
             "Search by ticker or company name",
-            value=st.session_state.search_input
+            value=search_query,
+            key="search_input_field"
         )
         
-        # Store the search query in session state
-        st.session_state.search_input = search_query
+        # Update session state when search changes
+        st.session_state.search_query = search_input
         
-        # Show search results dropdown if query is provided
-        ticker = ""  # Default value
-        if search_query:
-            # Get matches based on the search query
-            matches = search_stocks(search_query)
-            
+        # Generate options for dropdown based on search
+        options = ["Search for a stock..."]
+        
+        if search_input:
+            matches = search_stocks(search_input)
             if matches:
-                # Create options for the selectbox with formatted display names
-                options = [f"{stock['ticker']} - {stock['name']}" for stock in matches]
-                
-                # Add a "None" option at the beginning
-                options.insert(0, "Select a stock...")
-                
-                # Create a mapping from display option to ticker
-                option_to_ticker = {f"{stock['ticker']} - {stock['name']}": stock["ticker"] for stock in matches}
-                
-                # Show dropdown with matches
-                selected_option = st.sidebar.selectbox(
-                    "Matching stocks:",
-                    options,
-                    index=0  # Default to the "Select a stock..." option
-                )
-                
-                # Set ticker based on selection
-                if selected_option != "Select a stock...":
-                    ticker = option_to_ticker[selected_option]
-                    st.sidebar.write(f"Selected: **{ticker}**")
-            else:
-                st.sidebar.write("No matching stocks found.")
+                # Add formatted options
+                for stock in matches:
+                    options.append(f"{stock['ticker']} - {stock['name']}")
         
-        # Direct ticker input (optional)
-        direct_ticker = st.sidebar.text_input("Or enter ticker directly (e.g., AAPL)", "").upper()
-        if direct_ticker:
-            ticker = direct_ticker
+        # Select box for choosing from matching stocks
+        st.sidebar.selectbox(
+            "Select stock",
+            options=options,
+            index=0,
+            key="stock_selector",
+            on_change=on_stock_select
+        )
+        
+        # If ticker is selected from dropdown, use it
+        if st.session_state.selected_ticker:
+            ticker = st.session_state.selected_ticker
+            st.sidebar.success(f"Selected: **{ticker}**")
         
         # Timeframe selector
         timeframe = st.sidebar.selectbox(
