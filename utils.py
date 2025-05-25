@@ -5,34 +5,6 @@ from datetime import datetime, timedelta
 import requests
 from bs4 import BeautifulSoup
 
-def safe_float_convert(value, default=None):
-    """
-    Safely convert a value to float, handling 'N/A' strings and other non-numeric values
-    
-    Parameters:
-    -----------
-    value : any
-        The value to convert to float
-    default : float or None
-        Default value to return if conversion fails
-        
-    Returns:
-    --------
-    float or default value
-        Converted float or default value if conversion fails
-    """
-    if value is None:
-        return default
-        
-    if isinstance(value, str) and (value == 'N/A' or value.strip() == ''):
-        return default
-        
-    try:
-        return float(value)
-    except (ValueError, TypeError):
-        return default
-
-
 def format_large_number(number):
     """
     Format large numbers into readable format with K, M, B, T suffixes
@@ -50,13 +22,8 @@ def format_large_number(number):
     if number is None:
         return "N/A"
     
-    # Convert to float safely
-    try:
-        number = safe_float_convert(number)
-        if number is None:
-            return "N/A"
-    except Exception:
-        return "N/A"
+    # Convert to float for safety
+    number = float(number)
     
     # Define suffixes
     suffixes = ["", "K", "M", "B", "T"]

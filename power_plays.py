@@ -107,8 +107,6 @@ def analyze_ticker(ticker):
     Analyze a single ticker and return its buy rating and details
     """
     try:
-        from utils import safe_float_convert
-        
         # Initialize stock analyzer for the ticker
         analyzer = StockAnalyzer(ticker)
         
@@ -116,29 +114,15 @@ def analyze_ticker(ticker):
         info = analyzer.get_company_info()
         company_name = info.get('shortName', ticker)
         
-        # Get key financial metrics with safe conversion
+        # Get key financial metrics
         market_cap = info.get('marketCap', None)
-        pe_ratio = safe_float_convert(info.get('trailingPE', None))
-        eps = safe_float_convert(info.get('trailingEps', None))
-        revenue = safe_float_convert(info.get('totalRevenue', None))
-        dividend_yield = safe_float_convert(info.get('dividendYield', None))
-        target_price = safe_float_convert(info.get('targetMeanPrice', None))
-        
-        # Get current price with error handling
-        try:
-            current_price = analyzer.get_current_price()
-            if current_price is None:
-                current_price = 0
-        except:
-            current_price = 0
-            
-        # Get price change with error handling
-        try:
-            price_change = analyzer.get_price_change()
-            if price_change is None:
-                price_change = (0, 0)
-        except:
-            price_change = (0, 0)
+        pe_ratio = info.get('trailingPE', None)
+        eps = info.get('trailingEps', None)
+        revenue = info.get('totalRevenue', None)
+        dividend_yield = info.get('dividendYield', None)
+        target_price = info.get('targetMeanPrice', None)
+        current_price = analyzer.get_current_price()
+        price_change = analyzer.get_price_change()
         
         # Additional data for detailed analysis
         sector = info.get('sector', 'N/A')
@@ -146,11 +130,6 @@ def analyze_ticker(ticker):
         forward_pe = info.get('forwardPE', None)
         peg_ratio = info.get('pegRatio', None)
         profit_margin = info.get('profitMargins', None)
-        
-        # Get new metrics for enhanced analysis
-        sector_data = analyzer.get_sector_performance()
-        dividend_info = analyzer.get_dividend_info()
-        earnings_info = analyzer.get_earnings_info()
         
         # Format metrics
         formatted_metrics = {
@@ -168,101 +147,18 @@ def analyze_ticker(ticker):
             'profit_margin': f"{profit_margin*100:.2f}%" if profit_margin else 'N/A'
         }
         
-        # Add new metrics to the formatted metrics dictionary
-        if sector_data:
-            formatted_metrics['sector_rank'] = f"{sector_data.get('sector_rank')} of {sector_data.get('total_peers')}" if sector_data.get('sector_rank') and sector_data.get('total_peers') else 'N/A'
-            
-            # Apply safe float conversion to sector metrics
-            sector_perf = safe_float_convert(sector_data.get('sector_performance_1y', 0))
-            formatted_metrics['sector_performance_1y'] = f"{sector_perf:.2f}%" if sector_perf is not None else 'N/A'
-            
-            stock_perf = safe_float_convert(sector_data.get('stock_performance_1y', 0))
-            formatted_metrics['stock_performance_1y'] = f"{stock_perf:.2f}%" if stock_perf is not None else 'N/A'
-            
-            market_outperf = safe_float_convert(sector_data.get('market_outperformance', 0))
-            formatted_metrics['market_outperformance'] = f"{market_outperf:.2f}%" if market_outperf is not None else 'N/A'
+        # Calculate buy rating
+        buy_rating, rating_components = analyzer.calculate_buy_rating()
         
-        if dividend_info:
-            # Apply safe float conversion to dividend metrics
-            dividend_rate = safe_float_convert(dividend_info.get('dividend_rate', 0))
-            formatted_metrics['dividend_rate'] = f"${dividend_rate:.2f}" if dividend_rate is not None else 'N/A'
-            
-            payout_ratio = safe_float_convert(dividend_info.get('payout_ratio', 0))
-            formatted_metrics['payout_ratio'] = f"{payout_ratio:.2f}%" if payout_ratio is not None else 'N/A'
-            
-            dividend_growth = safe_float_convert(dividend_info.get('dividend_growth', 0))
-            formatted_metrics['dividend_growth'] = f"{dividend_growth:.2f}%" if dividend_growth is not None else 'N/A'
+        # Get the score breakdown from components
+        technical_data = rating_components.get('Technical Analysis', {})
+        fundamental_data = rating_components.get('Fundamental Analysis', {})
+        sentiment_data = rating_components.get('Market Sentiment', {})
         
-        if earnings_info:
-            # Format revenue for earnings info with safe conversion
-            total_revenue = safe_float_convert(earnings_info.get('total_revenue'))
-            if total_revenue is not None:
-                try:
-                    if abs(total_revenue) >= 1e9:
-                        formatted_metrics['total_revenue'] = f"${total_revenue/1e9:.2f}B"
-                    elif abs(total_revenue) >= 1e6:
-                        formatted_metrics['total_revenue'] = f"${total_revenue/1e6:.2f}M"
-                    else:
-                        formatted_metrics['total_revenue'] = f"${total_revenue:.2f}"
-                except Exception:
-                    formatted_metrics['total_revenue'] = "N/A"
-            else:
-                formatted_metrics['total_revenue'] = "N/A"
-            
-            # Format net income for earnings info with safe conversion
-            net_income = safe_float_convert(earnings_info.get('net_income'))
-            if net_income is not None:
-                try:
-                    if abs(net_income) >= 1e9:
-                        formatted_metrics['net_income'] = f"${net_income/1e9:.2f}B"
-                    elif abs(net_income) >= 1e6:
-                        formatted_metrics['net_income'] = f"${net_income/1e6:.2f}M"
-                    else:
-                        formatted_metrics['net_income'] = f"${net_income:.2f}"
-                except Exception:
-                    formatted_metrics['net_income'] = "N/A"
-            else:
-                formatted_metrics['net_income'] = "N/A"
-            
-            net_margin = safe_float_convert(earnings_info.get('net_margin', 0))
-            formatted_metrics['net_margin'] = f"{net_margin:.2f}%" if net_margin is not None else 'N/A'
-            formatted_metrics['next_earnings_date'] = earnings_info.get('next_earnings_date', 'N/A')
-            formatted_metrics['sec_filings_url'] = earnings_info.get('sec_filings_url', 'N/A')
-        
-        # Calculate buy rating with error handling
-        try:
-            buy_rating, rating_components = analyzer.calculate_buy_rating()
-            
-            # Handle None results
-            if buy_rating is None:
-                buy_rating = 5.0
-            if rating_components is None:
-                rating_components = {
-                    'Technical Analysis': {'score': 5.0, 'reason': 'Data not available'},
-                    'Fundamental Analysis': {'score': 5.0, 'reason': 'Data not available'},
-                    'Market Sentiment': {'score': 5.0, 'reason': 'Data not available'}
-                }
-                
-            # Get the score breakdown from components
-            technical_data = rating_components.get('Technical Analysis', {})
-            fundamental_data = rating_components.get('Fundamental Analysis', {})
-            sentiment_data = rating_components.get('Market Sentiment', {})
-            
-            # Extract individual scores
-            technical_score = technical_data.get('score', 5.0) if isinstance(technical_data, dict) else 5.0
-            fundamental_score = fundamental_data.get('score', 5.0) if isinstance(fundamental_data, dict) else 5.0
-            sentiment_score = sentiment_data.get('score', 5.0) if isinstance(sentiment_data, dict) else 5.0
-        except Exception as e:
-            print(f"Error calculating buy rating for {ticker}: {e}")
-            buy_rating = 5.0
-            rating_components = {
-                'Technical Analysis': {'score': 5.0, 'reason': 'Error in calculation'},
-                'Fundamental Analysis': {'score': 5.0, 'reason': 'Error in calculation'},
-                'Market Sentiment': {'score': 5.0, 'reason': 'Error in calculation'}
-            }
-            technical_score = 5.0
-            fundamental_score = 5.0
-            sentiment_score = 5.0
+        # Extract individual scores
+        technical_score = technical_data.get('score', 5.0) if isinstance(technical_data, dict) else 5.0
+        fundamental_score = fundamental_data.get('score', 5.0) if isinstance(fundamental_data, dict) else 5.0
+        sentiment_score = sentiment_data.get('score', 5.0) if isinstance(sentiment_data, dict) else 5.0
         
         # Generate analysis
         analysis = generate_analysis(ticker, buy_rating, technical_score, fundamental_score, sentiment_score, formatted_metrics)
@@ -349,24 +245,16 @@ def generate_analysis(ticker, buy_rating, technical_score, fundamental_score, se
         pe_text = ""
         if metrics.get('pe_ratio') != 'N/A' and metrics.get('forward_pe') != 'N/A':
             try:
-                pe_ratio_str = str(metrics.get('pe_ratio'))
-                forward_pe_str = str(metrics.get('forward_pe'))
-                
-                if 'N/A' not in pe_ratio_str and 'N/A' not in forward_pe_str:
-                    pe_ratio = float(pe_ratio_str.replace('%', ''))
-                    forward_pe = float(forward_pe_str.replace('%', ''))
-                    
-                    if pe_ratio > 0 and forward_pe > 0:
-                        if forward_pe < pe_ratio:
-                            pe_text = f"The forward P/E ({metrics['forward_pe']}) is lower than the trailing P/E ({metrics['pe_ratio']}), potentially indicating projected earnings growth."
-                        else:
-                            pe_text = f"Current P/E ratio is {metrics['pe_ratio']} with a forward P/E of {metrics['forward_pe']}."
-                        pe_text += " "
-                else:
-                    pe_text = "P/E ratio data available. "
-            except Exception as e:
-                print(f"Error formatting PE ratios: {e}")
-                pe_text = ""
+                pe_ratio = float(metrics.get('pe_ratio').replace('N/A', '0'))
+                forward_pe = float(metrics.get('forward_pe').replace('N/A', '0'))
+                if pe_ratio > 0 and forward_pe > 0:
+                    if forward_pe < pe_ratio:
+                        pe_text = f"The forward P/E ({metrics['forward_pe']}) is lower than the trailing P/E ({metrics['pe_ratio']}), potentially indicating projected earnings growth."
+                    else:
+                        pe_text = f"Current P/E ratio is {metrics['pe_ratio']} with a forward P/E of {metrics['forward_pe']}."
+                    pe_text += " "
+            except:
+                pe_text = f"Current P/E ratio is {metrics['pe_ratio']}. "
         elif metrics.get('pe_ratio') != 'N/A':
             pe_text = f"Current P/E ratio is {metrics['pe_ratio']}. "
         
@@ -384,133 +272,48 @@ def generate_analysis(ticker, buy_rating, technical_score, fundamental_score, se
         profit_text = ""
         if metrics.get('profit_margin') != 'N/A':
             try:
-                profit_margin_str = str(metrics.get('profit_margin'))
-                if 'N/A' not in profit_margin_str:
-                    profit_margin = float(profit_margin_str.replace('%', ''))
-                    if profit_margin > 15:
-                        profit_text = f"The company shows an impressive profit margin of {metrics['profit_margin']}, indicating strong operational efficiency."
-                    elif profit_margin > 0:
-                        profit_text = f"With a profit margin of {metrics['profit_margin']}, the company is maintaining positive returns."
-                    else:
-                        profit_text = f"The company's current profit margin is {metrics['profit_margin']}, indicating profitability challenges."
-                    profit_text += " "
-            except Exception as e:
-                print(f"Error formatting profit margin: {e}")
+                profit_margin = float(metrics.get('profit_margin').replace('%', '').replace('N/A', '0'))
+                if profit_margin > 15:
+                    profit_text = f"The company shows an impressive profit margin of {metrics['profit_margin']}, indicating strong operational efficiency."
+                elif profit_margin > 0:
+                    profit_text = f"With a profit margin of {metrics['profit_margin']}, the company is maintaining positive returns."
+                else:
+                    profit_text = f"The company's current profit margin is {metrics['profit_margin']}, indicating profitability challenges."
+                profit_text += " "
+            except:
                 pass
         
         # Format valuation
         valuation_text = ""
         if metrics.get('peg_ratio') != 'N/A':
             try:
-                peg_ratio_str = str(metrics.get('peg_ratio'))
-                if 'N/A' not in peg_ratio_str:
-                    peg = float(peg_ratio_str)
-                    if 0 < peg < 1:
-                        valuation_text = f"With a PEG ratio of {metrics['peg_ratio']}, the stock appears potentially undervalued relative to its growth prospects."
-                    elif peg >= 1:
-                        valuation_text = f"The PEG ratio of {metrics['peg_ratio']} suggests the stock may be fairly valued to slightly overvalued."
-            except Exception as e:
-                print(f"Error formatting PEG ratio: {e}")
+                peg = float(metrics.get('peg_ratio').replace('N/A', '0'))
+                if 0 < peg < 1:
+                    valuation_text = f"With a PEG ratio of {metrics['peg_ratio']}, the stock appears potentially undervalued relative to its growth prospects."
+                elif peg >= 1:
+                    valuation_text = f"The PEG ratio of {metrics['peg_ratio']} suggests the stock may be fairly valued to slightly overvalued."
+                valuation_text += " "
+            except:
                 pass
         
         # Format price target
         target_text = ""
         if metrics.get('target_price') != 'N/A' and metrics.get('current_price') != 'N/A':
             try:
-                target_price_str = str(metrics.get('target_price'))
-                current_price_str = str(metrics.get('current_price'))
-                
-                if 'N/A' not in target_price_str and 'N/A' not in current_price_str:
-                    target = float(target_price_str.replace('$', ''))
-                    current = float(current_price_str.replace('$', ''))
-                    
-                    if target > current:
-                        upside = ((target / current) - 1) * 100
-                        target_text = f"Analysts have a mean price target of {metrics['target_price']}, suggesting a {upside:.1f}% upside potential."
-                    else:
-                        downside = ((1 - target / current)) * 100
-                        target_text = f"The mean analyst price target of {metrics['target_price']} indicates a potential {downside:.1f}% downside from the current price."
-                    target_text += " "
-            except Exception as e:
-                print(f"Error formatting price target: {e}")
+                target = float(metrics.get('target_price').replace('$', '').replace('N/A', '0'))
+                current = float(metrics.get('current_price').replace('$', '').replace('N/A', '0'))
+                if target > current:
+                    upside = ((target / current) - 1) * 100
+                    target_text = f"Analysts have a mean price target of {metrics['target_price']}, suggesting a {upside:.1f}% upside potential."
+                else:
+                    downside = ((1 - target / current)) * 100
+                    target_text = f"The mean analyst price target of {metrics['target_price']} indicates a potential {downside:.1f}% downside from the current price."
+                target_text += " "
+            except:
                 pass
-        
-        # Format dividend info (enhanced)
-        dividend_text = ""
-        if metrics.get('dividend_yield') != 'N/A' and metrics.get('dividend_yield') != '0.00%':
-            dividend_text = f"The stock offers a dividend yield of {metrics['dividend_yield']}"
-            
-            # Add dividend growth if available
-            if metrics.get('dividend_growth', 'N/A') != 'N/A' and metrics.get('dividend_growth') != '0.00%':
-                try:
-                    div_growth_str = str(metrics.get('dividend_growth', '0'))
-                    if div_growth_str != 'N/A':
-                        div_growth = float(div_growth_str.replace('%', ''))
-                        if div_growth > 0:
-                            dividend_text += f" with a {metrics['dividend_growth']} year-over-year growth"
-                except Exception as e:
-                    print(f"Error formatting dividend growth: {e}")
-                    pass
-            
-            # Add payout ratio if available
-            if metrics.get('payout_ratio', 'N/A') != 'N/A' and metrics.get('payout_ratio') != '0.00%':
-                dividend_text += f" and a payout ratio of {metrics['payout_ratio']}"
-            
-            dividend_text += ". "
-        
-        # Format sector performance comparison (new)
-        sector_text = ""
-        if metrics.get('sector_rank', 'N/A') != 'N/A':
-            sector_text = f"The stock ranks {metrics['sector_rank']} in its sector. "
-        
-        if metrics.get('market_outperformance', 'N/A') != 'N/A':
-            try:
-                outperf_str = str(metrics.get('market_outperformance', '0'))
-                if outperf_str != 'N/A' and 'N/A' not in outperf_str:
-                    outperf = float(outperf_str.replace('%', ''))
-                    if outperf > 10:
-                        sector_text += f"It has significantly outperformed the market by {metrics['market_outperformance']}. "
-                    elif outperf > 0:
-                        sector_text += f"It has outperformed the market by {metrics['market_outperformance']}. "
-                    elif outperf > -10:
-                        sector_text += f"It has underperformed the market by {abs(outperf):.2f}%. "
-                    else:
-                        sector_text += f"It has significantly underperformed the market by {abs(outperf):.2f}%. "
-            except Exception as e:
-                print(f"Error formatting market outperformance: {e}")
-                pass
-        
-        # Format revenue and income (new)
-        financial_text = ""
-        if metrics.get('total_revenue', 'N/A') != 'N/A' and metrics.get('net_income', 'N/A') != 'N/A':
-            financial_text = f"Recent financials show revenue of {metrics['total_revenue']} with net income of {metrics['net_income']}. "
-        elif metrics.get('total_revenue', 'N/A') != 'N/A':
-            financial_text = f"Recent revenue reported at {metrics['total_revenue']}. "
-        
-        if metrics.get('net_margin', 'N/A') != 'N/A' and metrics.get('net_margin') != '0.00%':
-            try:
-                margin_str = str(metrics.get('net_margin', '0'))
-                if margin_str != 'N/A' and 'N/A' not in margin_str:
-                    margin = float(margin_str.replace('%', ''))
-                    if margin > 15:
-                        financial_text += f"The company maintains an excellent net margin of {metrics['net_margin']}. "
-                    elif margin > 5:
-                        financial_text += f"The company shows a solid net margin of {metrics['net_margin']}. "
-                    elif margin > 0:
-                        financial_text += f"The company has a modest net margin of {metrics['net_margin']}. "
-                    else:
-                        financial_text += f"The company currently shows a negative net margin of {metrics['net_margin']}. "
-            except Exception as e:
-                print(f"Error formatting net margin: {e}")
-                pass
-        
-        # Format next earnings date (new)
-        earnings_text = ""
-        if metrics.get('next_earnings_date', 'N/A') != 'N/A':
-            earnings_text = f"Next earnings report expected on {metrics['next_earnings_date']}. "
                 
         # Combine all analysis components
-        detailed_analysis = f"\n\n{cap_sector_text}{pe_text}{profit_text}{valuation_text}{target_text}{dividend_text}{sector_text}{financial_text}{earnings_text}"
+        detailed_analysis = f"\n\n{cap_sector_text}{pe_text}{profit_text}{valuation_text}{target_text}"
         
     # Combine rating text with detailed analysis
     full_analysis = rating_text + detailed_analysis
