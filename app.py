@@ -1309,31 +1309,53 @@ Technical analysis reveals bearish patterns with deteriorating price action and 
                                     
                                     with col1:
                                         if earnings_info.get('total_revenue') is not None:
-                                            revenue = earnings_info.get('total_revenue')
-                                            # Format large numbers
-                                            if abs(revenue) >= 1e9:
-                                                revenue_str = f"${revenue/1e9:.2f}B"
-                                            elif abs(revenue) >= 1e6:
-                                                revenue_str = f"${revenue/1e6:.2f}M"
-                                            else:
-                                                revenue_str = f"${revenue:.2f}"
-                                            st.metric("Total Revenue", revenue_str)
+                                            try:
+                                                revenue = earnings_info.get('total_revenue')
+                                                if isinstance(revenue, (int, float)):
+                                                    # Format large numbers
+                                                    if abs(revenue) >= 1e9:
+                                                        revenue_str = f"${revenue/1e9:.2f}B"
+                                                    elif abs(revenue) >= 1e6:
+                                                        revenue_str = f"${revenue/1e6:.2f}M"
+                                                    else:
+                                                        revenue_str = f"${revenue:.2f}"
+                                                    st.metric("Total Revenue", revenue_str)
+                                                else:
+                                                    st.metric("Total Revenue", "N/A")
+                                            except Exception as e:
+                                                print(f"Error formatting revenue: {e}")
+                                                st.metric("Total Revenue", "N/A")
                                     
                                     with col2:
                                         if earnings_info.get('net_income') is not None:
-                                            income = earnings_info.get('net_income')
-                                            # Format large numbers
-                                            if abs(income) >= 1e9:
-                                                income_str = f"${income/1e9:.2f}B"
-                                            elif abs(income) >= 1e6:
-                                                income_str = f"${income/1e6:.2f}M"
-                                            else:
-                                                income_str = f"${income:.2f}"
-                                            st.metric("Net Income", income_str)
+                                            try:
+                                                income = earnings_info.get('net_income')
+                                                if isinstance(income, (int, float)):
+                                                    # Format large numbers
+                                                    if abs(income) >= 1e9:
+                                                        income_str = f"${income/1e9:.2f}B"
+                                                    elif abs(income) >= 1e6:
+                                                        income_str = f"${income/1e6:.2f}M"
+                                                    else:
+                                                        income_str = f"${income:.2f}"
+                                                    st.metric("Net Income", income_str)
+                                                else:
+                                                    st.metric("Net Income", "N/A")
+                                            except Exception as e:
+                                                print(f"Error formatting net income: {e}")
+                                                st.metric("Net Income", "N/A")
                                     
                                     with col3:
                                         if earnings_info.get('net_margin') is not None:
-                                            st.metric("Net Margin", f"{earnings_info.get('net_margin', 0):.2f}%")
+                                            try:
+                                                margin = earnings_info.get('net_margin')
+                                                if isinstance(margin, (int, float)):
+                                                    st.metric("Net Margin", f"{margin:.2f}%")
+                                                else:
+                                                    st.metric("Net Margin", "N/A")
+                                            except Exception as e:
+                                                print(f"Error formatting net margin: {e}")
+                                                st.metric("Net Margin", "N/A")
                                 
                                 # Display quarterly results
                                 if earnings_info.get('quarterly_results'):
