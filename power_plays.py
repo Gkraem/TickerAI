@@ -462,88 +462,89 @@ def display_power_plays():
                         index_name=selected_index
                     )
     
-    # Display results
+    # Display results only if we have them
     top_stocks = st.session_state.power_plays_results
     
-    # Display each top stock
-    for i, stock in enumerate(top_stocks):
-        ticker = stock['ticker']
-        company_name = stock['company_name']
-        buy_rating = stock['buy_rating']
-        analysis = stock['analysis']
-        
-        # Create rank badge
-        rank_badge = f"""
-        <div style="display: inline-block; background-color: rgba(59, 130, 246, 0.8); 
-                    color: white; border-radius: 50%; width: 30px; height: 30px; 
-                    text-align: center; line-height: 30px; font-weight: bold; margin-right: 10px;">
-            #{i+1}
-        </div>
-        """
-        
-        # Display ticker and company name separately without HTML
-        col1, col2 = st.columns([1, 11])
-        with col1:
-            st.markdown(rank_badge, unsafe_allow_html=True)
-        with col2:
-            st.markdown(f"**{ticker}**")
-            st.markdown(f"### {company_name}")
-        
-        # Display buy rating
-        color = ""
-        if buy_rating >= 7:
-            color = "green"
-            rating_text = "BUY"
-        elif buy_rating >= 4:
-            color = "orange"
-            rating_text = "HOLD"
-        else:
-            color = "red"
-            rating_text = "SELL"
-        
-        # Rating display
-        st.markdown(f"""
-        <div style="display: flex; justify-content: center; margin: 20px 0;">
-            <div style="display: flex; flex-direction: column; align-items: center; 
-                       background-color: rgba(17, 24, 39, 0.7); border-radius: 12px; 
-                       padding: 20px 30px; box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2); 
-                       border: 3px solid {color}; width: 180px;">
-                <div style="font-size: 42px; font-weight: bold; margin-bottom: 5px; 
-                           text-shadow: 0 2px 5px rgba(0, 0, 0, 0.3); color: white;">
-                    {buy_rating:.1f}
-                </div>
-                <div style="font-size: 14px; color: #e5e7eb; text-transform: uppercase; 
-                           letter-spacing: 1px; margin-bottom: 10px;">
-                    BUY RATING
-                </div>
-                <div style="font-size: 22px; font-weight: bold; text-shadow: 0 2px 5px rgba(0, 0, 0, 0.3); 
-                           color: {color};">
-                    {rating_text}
+    if top_stocks is not None:
+        # Display each top stock
+        for i, stock in enumerate(top_stocks):
+            ticker = stock['ticker']
+            company_name = stock['company_name']
+            buy_rating = stock['buy_rating']
+            analysis = stock['analysis']
+            
+            # Create rank badge
+            rank_badge = f"""
+            <div style="display: inline-block; background-color: rgba(59, 130, 246, 0.8); 
+                        color: white; border-radius: 50%; width: 30px; height: 30px; 
+                        text-align: center; line-height: 30px; font-weight: bold; margin-right: 10px;">
+                #{i+1}
+            </div>
+            """
+            
+            # Display ticker and company name separately without HTML
+            col1, col2 = st.columns([1, 11])
+            with col1:
+                st.markdown(rank_badge, unsafe_allow_html=True)
+            with col2:
+                st.markdown(f"**{ticker}**")
+                st.markdown(f"### {company_name}")
+            
+            # Display buy rating
+            color = ""
+            if buy_rating >= 7:
+                color = "green"
+                rating_text = "BUY"
+            elif buy_rating >= 4:
+                color = "orange"
+                rating_text = "HOLD"
+            else:
+                color = "red"
+                rating_text = "SELL"
+            
+            # Rating display
+            st.markdown(f"""
+            <div style="display: flex; justify-content: center; margin: 20px 0;">
+                <div style="display: flex; flex-direction: column; align-items: center; 
+                           background-color: rgba(17, 24, 39, 0.7); border-radius: 12px; 
+                           padding: 20px 30px; box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2); 
+                           border: 3px solid {color}; width: 180px;">
+                    <div style="font-size: 42px; font-weight: bold; margin-bottom: 5px; 
+                               text-shadow: 0 2px 5px rgba(0, 0, 0, 0.3); color: white;">
+                        {buy_rating:.1f}
+                    </div>
+                    <div style="font-size: 14px; color: #e5e7eb; text-transform: uppercase; 
+                               letter-spacing: 1px; margin-bottom: 10px;">
+                        BUY RATING
+                    </div>
+                    <div style="font-size: 22px; font-weight: bold; text-shadow: 0 2px 5px rgba(0, 0, 0, 0.3); 
+                               color: {color};">
+                        {rating_text}
+                    </div>
                 </div>
             </div>
-        </div>
-        """, unsafe_allow_html=True)
-        
-        # Split the analysis into rating and detailed analysis
-        if "\n\n" in analysis:
-            rating_part, detailed_part = analysis.split("\n\n", 1)
-            # Display rating part
-            st.markdown(rating_part, unsafe_allow_html=True)
+            """, unsafe_allow_html=True)
             
-            # Display detailed analysis
-            if detailed_part:
-                st.markdown("### Financial Details")
-                detailed_parts = detailed_part.split(". ")
-                for part in detailed_parts:
-                    if part.strip():  # Only add non-empty parts
-                        st.markdown(f"• {part.strip()}.")
-        else:
-            # Fallback if analysis doesn't have the expected format
-            st.markdown(analysis, unsafe_allow_html=True)
-        
-        # Add horizontal separator except for the last item
-        if i < len(top_stocks) - 1:
-            st.markdown("<hr style='margin-top: 30px; margin-bottom: 30px; border-color: rgba(59, 130, 246, 0.2);'>", unsafe_allow_html=True)
+            # Split the analysis into rating and detailed analysis
+            if "\n\n" in analysis:
+                rating_part, detailed_part = analysis.split("\n\n", 1)
+                # Display rating part
+                st.markdown(rating_part, unsafe_allow_html=True)
+                
+                # Display detailed analysis
+                if detailed_part:
+                    st.markdown("### Financial Details")
+                    detailed_parts = detailed_part.split(". ")
+                    for part in detailed_parts:
+                        if part.strip():  # Only add non-empty parts
+                            st.markdown(f"• {part.strip()}.")
+            else:
+                # Fallback if analysis doesn't have the expected format
+                st.markdown(analysis, unsafe_allow_html=True)
+            
+            # Add horizontal separator except for the last item
+            if i < len(top_stocks) - 1:
+                st.markdown("<hr style='margin-top: 30px; margin-bottom: 30px; border-color: rgba(59, 130, 246, 0.2);'>", unsafe_allow_html=True)
     
     # Add a button to go back to stock search
     st.write("")  # Add some spacing
