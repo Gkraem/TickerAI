@@ -407,6 +407,13 @@ def display_power_plays():
     # Header and introduction
     st.title("Power Plays 🚀")
     
+    # Initialize session state variables if needed
+    if 'power_plays_results' not in st.session_state:
+        st.session_state.power_plays_results = None
+    
+    if 'power_plays_index' not in st.session_state:
+        st.session_state.power_plays_index = "Fortune 500"
+    
     # Conditional description based on whether we have results
     if st.session_state.power_plays_results is None:
         st.markdown("""
@@ -426,13 +433,6 @@ def display_power_plays():
         </p>
         </div>
         """, unsafe_allow_html=True)
-    
-    # Initialize session state variables if needed
-    if 'power_plays_results' not in st.session_state:
-        st.session_state.power_plays_results = None
-    
-    if 'power_plays_index' not in st.session_state:
-        st.session_state.power_plays_index = "Fortune 500"
     
     # Dropdown for selecting stock index
     selected_index = st.selectbox(
