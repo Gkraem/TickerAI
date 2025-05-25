@@ -111,10 +111,11 @@ POPULAR_STOCKS = [
     {"ticker": "GE", "name": "General Electric Company"},
 ]
 
-# Function to search for stocks by partial ticker or name match
+# Function to search for stocks by partial ticker or name match using Yahoo Finance
 def search_stocks(query):
     """
     Search for stocks by partial ticker or company name match
+    Uses both local database and Yahoo Finance search API
     
     Parameters:
     -----------
@@ -129,25 +130,59 @@ def search_stocks(query):
     if not query:
         return []
     
-    query = query.upper()
-    matches = []
+    # First search local database for faster results
+    query_upper = query.upper()
+    query_lower = query.lower()
+    local_matches = []
     
     for stock in POPULAR_STOCKS:
         # Match on ticker (exact or starting with)
-        if stock["ticker"] == query or stock["ticker"].startswith(query):
-            matches.append(stock)
+        if stock["ticker"] == query_upper or stock["ticker"].startswith(query_upper):
+            local_matches.append(stock)
         # Match on name (case-insensitive partial match)
-        elif query.lower() in stock["name"].lower():
-            matches.append(stock)
+        elif query_lower in stock["name"].lower():
+            local_matches.append(stock)
     
     # Sort matches: exact ticker matches first, then starts-with ticker matches, then name matches
-    matches.sort(key=lambda x: (
-        0 if x["ticker"] == query else 
-        1 if x["ticker"].startswith(query) else 
+    local_matches.sort(key=lambda x: (
+        0 if x["ticker"] == query_upper else 
+        1 if x["ticker"].startswith(query_upper) else 
         2
     ))
     
-    return matches[:10]  # Limit to top 10 matches
+    # If we already have enough local matches, return them
+    if len(local_matches) >= 10:
+        return local_matches[:10]
+    
+    # Try to get additional matches from Yahoo Finance API
+    try:
+        import yfinance as yf
+        import requests
+        
+        # Yahoo Finance search API
+        url = f"https://query2.finance.yahoo.com/v1/finance/search?q={query}&quotesCount=10&newsCount=0"
+        headers = {'User-Agent': 'Mozilla/5.0'}
+        
+        response = requests.get(url, headers=headers)
+        if response.status_code == 200:
+            data = response.json()
+            if 'quotes' in data:
+                for quote in data['quotes']:
+                    if 'symbol' in quote and 'shortname' in quote:
+                        # Skip if already in local matches
+                        if any(stock['ticker'] == quote['symbol'] for stock in local_matches):
+                            continue
+                        
+                        local_matches.append({
+                            "ticker": quote['symbol'],
+                            "name": quote['shortname']
+                        })
+    except Exception as e:
+        # If API call fails, just continue with local matches
+        print(f"Error fetching data from Yahoo Finance: {e}")
+    
+    # Return combined results (limit to 10)
+    return local_matches[:10]
 
 # Set page configuration without title to avoid header bar
 st.set_page_config(
