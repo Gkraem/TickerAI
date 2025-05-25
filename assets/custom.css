@@ -1,5 +1,22 @@
 /* Custom CSS for Stock Market Analyzer */
 
+/* Fix dropdown menu styling */
+div[data-baseweb="select"] ul {
+    z-index: 999 !important;
+}
+
+div[data-baseweb="select"] li {
+    padding: 10px !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    max-width: 100% !important;
+}
+
+div[data-baseweb="select"] li:hover {
+    background-color: rgba(59, 130, 246, 0.2) !important;
+}
+
 /* Modern gradient background */
 .stApp {
     background: linear-gradient(135deg, #111827 0%, #1e3a8a 100%);
