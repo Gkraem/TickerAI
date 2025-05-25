@@ -418,7 +418,7 @@ def generate_analysis(ticker, buy_rating, technical_score, fundamental_score, se
         if metrics.get('market_outperformance', 'N/A') != 'N/A':
             try:
                 outperf_str = str(metrics.get('market_outperformance', '0'))
-                if outperf_str != 'N/A':
+                if outperf_str != 'N/A' and 'N/A' not in outperf_str:
                     outperf = float(outperf_str.replace('%', ''))
                     if outperf > 10:
                         sector_text += f"It has significantly outperformed the market by {metrics['market_outperformance']}. "
@@ -428,7 +428,8 @@ def generate_analysis(ticker, buy_rating, technical_score, fundamental_score, se
                         sector_text += f"It has underperformed the market by {abs(outperf):.2f}%. "
                     else:
                         sector_text += f"It has significantly underperformed the market by {abs(outperf):.2f}%. "
-            except:
+            except Exception as e:
+                print(f"Error formatting market outperformance: {e}")
                 pass
         
         # Format revenue and income (new)
@@ -441,7 +442,7 @@ def generate_analysis(ticker, buy_rating, technical_score, fundamental_score, se
         if metrics.get('net_margin', 'N/A') != 'N/A' and metrics.get('net_margin') != '0.00%':
             try:
                 margin_str = str(metrics.get('net_margin', '0'))
-                if margin_str != 'N/A':
+                if margin_str != 'N/A' and 'N/A' not in margin_str:
                     margin = float(margin_str.replace('%', ''))
                     if margin > 15:
                         financial_text += f"The company maintains an excellent net margin of {metrics['net_margin']}. "
@@ -451,7 +452,8 @@ def generate_analysis(ticker, buy_rating, technical_score, fundamental_score, se
                         financial_text += f"The company has a modest net margin of {metrics['net_margin']}. "
                     else:
                         financial_text += f"The company currently shows a negative net margin of {metrics['net_margin']}. "
-            except:
+            except Exception as e:
+                print(f"Error formatting net margin: {e}")
                 pass
         
         # Format next earnings date (new)
