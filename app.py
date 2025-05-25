@@ -218,39 +218,36 @@ else:
         # The integrated search field with dropdown
         ticker = ""  # Default empty ticker
         
-        # Add a text input for searching
-        search_text = st.sidebar.text_input(
-            "Search by ticker or company name",
-            value=search_query,
-            key="search_text_input"
+        # Function to update stock search results
+        def update_stock_results():
+            # Empty string as default
+            if not st.session_state.stock_search or st.session_state.stock_search == "":
+                st.session_state.selected_ticker = ""
+                return
+            
+            # Handle selection (format: "TICKER - Company Name")
+            if " - " in st.session_state.stock_search:
+                ticker_part = st.session_state.stock_search.split(" - ")[0]
+                st.session_state.selected_ticker = ticker_part
+        
+        # Generate all stock options for the dropdown
+        all_options = []
+        for stock in POPULAR_STOCKS:
+            all_options.append(f"{stock['ticker']} - {stock['name']}")
+        
+        # Single combined dropdown
+        selected_option = st.sidebar.selectbox(
+            "Search stocks by typing",
+            options=[""] + all_options,
+            index=0,
+            key="stock_search",
+            on_change=update_stock_results
         )
         
-        # Update search query in session state
-        st.session_state.search_query = search_text
-        
-        # Generate options for dropdown based on search text
-        options = []
-        if search_text:
-            # Search for stocks matching the input
-            matches = search_stocks(search_text)
-            
-            if matches:
-                # Show dropdown with matching options
-                stock_options = [f"{stock['ticker']} - {stock['name']}" for stock in matches]
-                
-                selected_stock = st.sidebar.selectbox(
-                    "Select a stock:",
-                    options=stock_options,
-                    index=0,
-                    key="stock_selector"
-                )
-                
-                # Extract ticker from selection
-                if selected_stock:
-                    ticker = selected_stock.split(" - ")[0]
-                    st.session_state.selected_ticker = ticker
-            else:
-                st.sidebar.info("No matching stocks found. Try a different search term.")
+        # Extract ticker from selection if available
+        if selected_option and " - " in selected_option:
+            ticker = selected_option.split(" - ")[0]
+            st.session_state.selected_ticker = ticker
         
         # Use selected ticker if available
         if "selected_ticker" in st.session_state and st.session_state.selected_ticker:
