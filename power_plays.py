@@ -353,9 +353,74 @@ def generate_analysis(ticker, buy_rating, technical_score, fundamental_score, se
                 target_text += " "
             except:
                 pass
+        
+        # Format dividend info (enhanced)
+        dividend_text = ""
+        if metrics.get('dividend_yield') != 'N/A' and metrics.get('dividend_yield') != '0.00%':
+            dividend_text = f"The stock offers a dividend yield of {metrics['dividend_yield']}"
+            
+            # Add dividend growth if available
+            if metrics.get('dividend_growth', 'N/A') != 'N/A' and metrics.get('dividend_growth') != '0.00%':
+                try:
+                    div_growth = float(metrics.get('dividend_growth', '0').replace('%', '').replace('N/A', '0'))
+                    if div_growth > 0:
+                        dividend_text += f" with a {metrics['dividend_growth']} year-over-year growth"
+                except:
+                    pass
+            
+            # Add payout ratio if available
+            if metrics.get('payout_ratio', 'N/A') != 'N/A' and metrics.get('payout_ratio') != '0.00%':
+                dividend_text += f" and a payout ratio of {metrics['payout_ratio']}"
+            
+            dividend_text += ". "
+        
+        # Format sector performance comparison (new)
+        sector_text = ""
+        if metrics.get('sector_rank', 'N/A') != 'N/A':
+            sector_text = f"The stock ranks {metrics['sector_rank']} in its sector. "
+        
+        if metrics.get('market_outperformance', 'N/A') != 'N/A':
+            try:
+                outperf = float(metrics.get('market_outperformance', '0').replace('%', '').replace('N/A', '0'))
+                if outperf > 10:
+                    sector_text += f"It has significantly outperformed the market by {metrics['market_outperformance']}. "
+                elif outperf > 0:
+                    sector_text += f"It has outperformed the market by {metrics['market_outperformance']}. "
+                elif outperf > -10:
+                    sector_text += f"It has underperformed the market by {abs(outperf):.2f}%. "
+                else:
+                    sector_text += f"It has significantly underperformed the market by {abs(outperf):.2f}%. "
+            except:
+                pass
+        
+        # Format revenue and income (new)
+        financial_text = ""
+        if metrics.get('total_revenue', 'N/A') != 'N/A' and metrics.get('net_income', 'N/A') != 'N/A':
+            financial_text = f"Recent financials show revenue of {metrics['total_revenue']} with net income of {metrics['net_income']}. "
+        elif metrics.get('total_revenue', 'N/A') != 'N/A':
+            financial_text = f"Recent revenue reported at {metrics['total_revenue']}. "
+        
+        if metrics.get('net_margin', 'N/A') != 'N/A' and metrics.get('net_margin') != '0.00%':
+            try:
+                margin = float(metrics.get('net_margin', '0').replace('%', '').replace('N/A', '0'))
+                if margin > 15:
+                    financial_text += f"The company maintains an excellent net margin of {metrics['net_margin']}. "
+                elif margin > 5:
+                    financial_text += f"The company shows a solid net margin of {metrics['net_margin']}. "
+                elif margin > 0:
+                    financial_text += f"The company has a modest net margin of {metrics['net_margin']}. "
+                else:
+                    financial_text += f"The company currently shows a negative net margin of {metrics['net_margin']}. "
+            except:
+                pass
+        
+        # Format next earnings date (new)
+        earnings_text = ""
+        if metrics.get('next_earnings_date', 'N/A') != 'N/A':
+            earnings_text = f"Next earnings report expected on {metrics['next_earnings_date']}. "
                 
         # Combine all analysis components
-        detailed_analysis = f"\n\n{cap_sector_text}{pe_text}{profit_text}{valuation_text}{target_text}"
+        detailed_analysis = f"\n\n{cap_sector_text}{pe_text}{profit_text}{valuation_text}{target_text}{dividend_text}{sector_text}{financial_text}{earnings_text}"
         
     # Combine rating text with detailed analysis
     full_analysis = rating_text + detailed_analysis
