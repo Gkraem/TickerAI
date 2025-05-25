@@ -19,7 +19,11 @@ class FundamentalAnalysis:
         """
         self.ticker = ticker
         self.stock = yf.Ticker(ticker)
-        self.info = self.stock.info
+        
+        try:
+            self.info = self.stock.info if hasattr(self.stock, 'info') else {}
+        except (AttributeError, TypeError):
+            self.info = {}
     
     def get_valuation_ratios(self):
         """

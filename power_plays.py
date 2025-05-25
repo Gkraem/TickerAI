@@ -203,18 +203,40 @@ def analyze_ticker(ticker):
             formatted_metrics['next_earnings_date'] = earnings_info.get('next_earnings_date', 'N/A')
             formatted_metrics['sec_filings_url'] = earnings_info.get('sec_filings_url', 'N/A')
         
-        # Calculate buy rating
-        buy_rating, rating_components = analyzer.calculate_buy_rating()
-        
-        # Get the score breakdown from components
-        technical_data = rating_components.get('Technical Analysis', {})
-        fundamental_data = rating_components.get('Fundamental Analysis', {})
-        sentiment_data = rating_components.get('Market Sentiment', {})
-        
-        # Extract individual scores
-        technical_score = technical_data.get('score', 5.0) if isinstance(technical_data, dict) else 5.0
-        fundamental_score = fundamental_data.get('score', 5.0) if isinstance(fundamental_data, dict) else 5.0
-        sentiment_score = sentiment_data.get('score', 5.0) if isinstance(sentiment_data, dict) else 5.0
+        # Calculate buy rating with error handling
+        try:
+            buy_rating, rating_components = analyzer.calculate_buy_rating()
+            
+            # Handle None results
+            if buy_rating is None:
+                buy_rating = 5.0
+            if rating_components is None:
+                rating_components = {
+                    'Technical Analysis': {'score': 5.0, 'reason': 'Data not available'},
+                    'Fundamental Analysis': {'score': 5.0, 'reason': 'Data not available'},
+                    'Market Sentiment': {'score': 5.0, 'reason': 'Data not available'}
+                }
+                
+            # Get the score breakdown from components
+            technical_data = rating_components.get('Technical Analysis', {})
+            fundamental_data = rating_components.get('Fundamental Analysis', {})
+            sentiment_data = rating_components.get('Market Sentiment', {})
+            
+            # Extract individual scores
+            technical_score = technical_data.get('score', 5.0) if isinstance(technical_data, dict) else 5.0
+            fundamental_score = fundamental_data.get('score', 5.0) if isinstance(fundamental_data, dict) else 5.0
+            sentiment_score = sentiment_data.get('score', 5.0) if isinstance(sentiment_data, dict) else 5.0
+        except Exception as e:
+            print(f"Error calculating buy rating for {ticker}: {e}")
+            buy_rating = 5.0
+            rating_components = {
+                'Technical Analysis': {'score': 5.0, 'reason': 'Error in calculation'},
+                'Fundamental Analysis': {'score': 5.0, 'reason': 'Error in calculation'},
+                'Market Sentiment': {'score': 5.0, 'reason': 'Error in calculation'}
+            }
+            technical_score = 5.0
+            fundamental_score = 5.0
+            sentiment_score = 5.0
         
         # Generate analysis
         analysis = generate_analysis(ticker, buy_rating, technical_score, fundamental_score, sentiment_score, formatted_metrics)

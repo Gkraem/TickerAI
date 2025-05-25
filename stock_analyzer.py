@@ -502,50 +502,59 @@ class StockAnalyzer:
     
     def _calculate_fundamental_score(self):
         """Calculate fundamental analysis score component"""
-        # Get key fundamental ratios
-        pe_ratio = self.get_pe_ratio()
-        company_info = self.get_company_info()
-        
-        # Initialize parameters for scoring
-        score_factors = []
-        reasons = []
-        
-        # 1. P/E Ratio Assessment
-        if pe_ratio is not None:
-            # Compare to industry average (simplified)
-            industry_avg_pe = company_info.get('forwardPE', 20)  # Default to 20 if not available
+        try:
+            # Get key fundamental ratios
+            pe_ratio = self.get_pe_ratio()
+            company_info = self.get_company_info()
             
-            if pe_ratio < industry_avg_pe * 0.7:  # Significantly undervalued
-                score_factors.append(9)
-                reasons.append("P/E ratio significantly below industry average (potentially undervalued)")
-            elif pe_ratio < industry_avg_pe:  # Moderately undervalued
-                score_factors.append(7)
-                reasons.append("P/E ratio below industry average")
-            elif pe_ratio < industry_avg_pe * 1.3:  # Fair value
-                score_factors.append(5)
-                reasons.append("P/E ratio near industry average")
-            else:  # Overvalued
-                score_factors.append(3)
-                reasons.append("P/E ratio above industry average (potentially overvalued)")
-        
-        # 2. Profit Margins
-        profit_margin = company_info.get('profitMargins', None)
-        if profit_margin is not None:
-            if profit_margin > 0.2:  # Very high margins
-                score_factors.append(9)
-                reasons.append("Excellent profit margins")
-            elif profit_margin > 0.1:  # Good margins
-                score_factors.append(7)
-                reasons.append("Good profit margins")
-            elif profit_margin > 0.05:  # Average margins
-                score_factors.append(5)
-                reasons.append("Average profit margins")
-            elif profit_margin > 0:  # Low but positive margins
-                score_factors.append(3)
-                reasons.append("Below-average profit margins")
-            else:  # Negative margins
-                score_factors.append(1)
-                reasons.append("Negative profit margins")
+            # Initialize parameters for scoring
+            score_factors = []
+            reasons = []
+            
+            # 1. P/E Ratio Assessment
+            if pe_ratio is not None and isinstance(pe_ratio, (int, float)):
+                # Compare to industry average (simplified)
+                industry_avg_pe = company_info.get('forwardPE', 20)  # Default to 20 if not available
+                
+                # Make sure industry_avg_pe is a numeric value
+                if not isinstance(industry_avg_pe, (int, float)) or industry_avg_pe == 'N/A':
+                    industry_avg_pe = 20  # Default if not a valid number
+                
+                if pe_ratio < industry_avg_pe * 0.7:  # Significantly undervalued
+                    score_factors.append(9)
+                    reasons.append("P/E ratio significantly below industry average (potentially undervalued)")
+                elif pe_ratio < industry_avg_pe:  # Moderately undervalued
+                    score_factors.append(7)
+                    reasons.append("P/E ratio below industry average")
+                elif pe_ratio < industry_avg_pe * 1.3:  # Fair value
+                    score_factors.append(5)
+                    reasons.append("P/E ratio near industry average")
+                else:  # Overvalued
+                    score_factors.append(3)
+                    reasons.append("P/E ratio above industry average (potentially overvalued)")
+            
+            # 2. Profit Margins
+            profit_margin = company_info.get('profitMargins', None)
+            if profit_margin is not None and isinstance(profit_margin, (int, float)):
+                if profit_margin > 0.2:  # Very high margins
+                    score_factors.append(9)
+                    reasons.append("Excellent profit margins")
+                elif profit_margin > 0.1:  # Good margins
+                    score_factors.append(7)
+                    reasons.append("Good profit margins")
+                elif profit_margin > 0.05:  # Average margins
+                    score_factors.append(5)
+                    reasons.append("Average profit margins")
+                elif profit_margin > 0:  # Low but positive margins
+                    score_factors.append(3)
+                    reasons.append("Below-average profit margins")
+                else:  # Negative margins
+                    score_factors.append(1)
+                    reasons.append("Negative profit margins")
+        except Exception as e:
+            print(f"Error in fundamental score calculation: {e}")
+            # Return default values if an error occurs
+            return {'score': 5.0, 'reason': 'Limited fundamental data available'}
         
         # 3. Revenue Growth
         revenue_growth = company_info.get('revenueGrowth', None)
