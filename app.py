@@ -18,6 +18,98 @@ from auth_components import auth_page, logout_button
 from admin import is_admin, admin_panel
 from power_plays import display_power_plays
 
+# Popular companies and tickers mapping for search functionality
+POPULAR_STOCKS = [
+    {"ticker": "AAPL", "name": "Apple Inc."},
+    {"ticker": "MSFT", "name": "Microsoft Corporation"},
+    {"ticker": "AMZN", "name": "Amazon.com Inc."},
+    {"ticker": "GOOGL", "name": "Alphabet Inc. (Google)"},
+    {"ticker": "META", "name": "Meta Platforms Inc. (Facebook)"},
+    {"ticker": "TSLA", "name": "Tesla Inc."},
+    {"ticker": "NVDA", "name": "NVIDIA Corporation"},
+    {"ticker": "JPM", "name": "JPMorgan Chase & Co."},
+    {"ticker": "V", "name": "Visa Inc."},
+    {"ticker": "JNJ", "name": "Johnson & Johnson"},
+    {"ticker": "WMT", "name": "Walmart Inc."},
+    {"ticker": "PG", "name": "Procter & Gamble Co."},
+    {"ticker": "MA", "name": "Mastercard Inc."},
+    {"ticker": "UNH", "name": "UnitedHealth Group Inc."},
+    {"ticker": "HD", "name": "Home Depot Inc."},
+    {"ticker": "BAC", "name": "Bank of America Corp."},
+    {"ticker": "XOM", "name": "Exxon Mobil Corporation"},
+    {"ticker": "PFE", "name": "Pfizer Inc."},
+    {"ticker": "CSCO", "name": "Cisco Systems Inc."},
+    {"ticker": "NFLX", "name": "Netflix Inc."},
+    {"ticker": "INTC", "name": "Intel Corporation"},
+    {"ticker": "PYPL", "name": "PayPal Holdings Inc."},
+    {"ticker": "ADBE", "name": "Adobe Inc."},
+    {"ticker": "CRM", "name": "Salesforce Inc."},
+    {"ticker": "KO", "name": "Coca-Cola Company"},
+    {"ticker": "DIS", "name": "Walt Disney Company"},
+    {"ticker": "CMCSA", "name": "Comcast Corporation"},
+    {"ticker": "VZ", "name": "Verizon Communications Inc."},
+    {"ticker": "ABT", "name": "Abbott Laboratories"},
+    {"ticker": "PEP", "name": "PepsiCo Inc."},
+    {"ticker": "NKE", "name": "Nike Inc."},
+    {"ticker": "MRK", "name": "Merck & Co. Inc."},
+    {"ticker": "T", "name": "AT&T Inc."},
+    {"ticker": "CVX", "name": "Chevron Corporation"},
+    {"ticker": "MCD", "name": "McDonald's Corporation"},
+    {"ticker": "ORCL", "name": "Oracle Corporation"},
+    {"ticker": "IBM", "name": "International Business Machines"},
+    {"ticker": "AMD", "name": "Advanced Micro Devices Inc."},
+    {"ticker": "QCOM", "name": "Qualcomm Inc."},
+    {"ticker": "SBUX", "name": "Starbucks Corporation"},
+    {"ticker": "COST", "name": "Costco Wholesale Corporation"},
+    {"ticker": "GOOG", "name": "Alphabet Inc. (Google) Class C"},
+    {"ticker": "TXN", "name": "Texas Instruments Incorporated"},
+    {"ticker": "AMGN", "name": "Amgen Inc."},
+    {"ticker": "LLY", "name": "Eli Lilly and Company"},
+    {"ticker": "TMO", "name": "Thermo Fisher Scientific Inc."},
+    {"ticker": "ACN", "name": "Accenture plc"},
+    {"ticker": "AVGO", "name": "Broadcom Inc."},
+    {"ticker": "MDT", "name": "Medtronic plc"},
+    {"ticker": "PM", "name": "Philip Morris International"},
+]
+
+# Function to search for stocks by partial ticker or name match
+def search_stocks(query):
+    """
+    Search for stocks by partial ticker or company name match
+    
+    Parameters:
+    -----------
+    query : str
+        Search query (can be ticker or company name)
+    
+    Returns:
+    --------
+    list
+        List of matching stock dictionaries with ticker and name
+    """
+    if not query:
+        return []
+    
+    query = query.upper()
+    matches = []
+    
+    for stock in POPULAR_STOCKS:
+        # Match on ticker (exact or starting with)
+        if stock["ticker"] == query or stock["ticker"].startswith(query):
+            matches.append(stock)
+        # Match on name (case-insensitive partial match)
+        elif query.lower() in stock["name"].lower():
+            matches.append(stock)
+    
+    # Sort matches: exact ticker matches first, then starts-with ticker matches, then name matches
+    matches.sort(key=lambda x: (
+        0 if x["ticker"] == query else 
+        1 if x["ticker"].startswith(query) else 
+        2
+    ))
+    
+    return matches[:10]  # Limit to top 10 matches
+
 # Set page configuration without title to avoid header bar
 st.set_page_config(
     page_title="Ticker AI",
@@ -104,7 +196,58 @@ else:
         
         # Sidebar for ticker input
         st.sidebar.title("Stock Search")
-        ticker = st.sidebar.text_input("Enter Stock Ticker Symbol (e.g., AAPL)", "").upper()
+        
+        # Initialize session state for search input if not exists
+        if "search_input" not in st.session_state:
+            st.session_state.search_input = ""
+        
+        # Initialize session state for selected stock
+        if "selected_stock" not in st.session_state:
+            st.session_state.selected_stock = None
+        
+        # Search input field
+        search_query = st.sidebar.text_input(
+            "Search by ticker or company name",
+            value=st.session_state.search_input
+        )
+        
+        # Store the search query in session state
+        st.session_state.search_input = search_query
+        
+        # Show search results dropdown if query is provided
+        ticker = ""  # Default value
+        if search_query:
+            # Get matches based on the search query
+            matches = search_stocks(search_query)
+            
+            if matches:
+                # Create options for the selectbox with formatted display names
+                options = [f"{stock['ticker']} - {stock['name']}" for stock in matches]
+                
+                # Add a "None" option at the beginning
+                options.insert(0, "Select a stock...")
+                
+                # Create a mapping from display option to ticker
+                option_to_ticker = {f"{stock['ticker']} - {stock['name']}": stock["ticker"] for stock in matches}
+                
+                # Show dropdown with matches
+                selected_option = st.sidebar.selectbox(
+                    "Matching stocks:",
+                    options,
+                    index=0  # Default to the "Select a stock..." option
+                )
+                
+                # Set ticker based on selection
+                if selected_option != "Select a stock...":
+                    ticker = option_to_ticker[selected_option]
+                    st.sidebar.write(f"Selected: **{ticker}**")
+            else:
+                st.sidebar.write("No matching stocks found.")
+        
+        # Direct ticker input (optional)
+        direct_ticker = st.sidebar.text_input("Or enter ticker directly (e.g., AAPL)", "").upper()
+        if direct_ticker:
+            ticker = direct_ticker
         
         # Timeframe selector
         timeframe = st.sidebar.selectbox(
