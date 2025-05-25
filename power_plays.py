@@ -107,6 +107,8 @@ def analyze_ticker(ticker):
     Analyze a single ticker and return its buy rating and details
     """
     try:
+        from utils import safe_float_convert
+        
         # Initialize stock analyzer for the ticker
         analyzer = StockAnalyzer(ticker)
         
@@ -114,13 +116,13 @@ def analyze_ticker(ticker):
         info = analyzer.get_company_info()
         company_name = info.get('shortName', ticker)
         
-        # Get key financial metrics
+        # Get key financial metrics with safe conversion
         market_cap = info.get('marketCap', None)
-        pe_ratio = info.get('trailingPE', None)
-        eps = info.get('trailingEps', None)
-        revenue = info.get('totalRevenue', None)
-        dividend_yield = info.get('dividendYield', None)
-        target_price = info.get('targetMeanPrice', None)
+        pe_ratio = safe_float_convert(info.get('trailingPE', None))
+        eps = safe_float_convert(info.get('trailingEps', None))
+        revenue = safe_float_convert(info.get('totalRevenue', None))
+        dividend_yield = safe_float_convert(info.get('dividendYield', None))
+        target_price = safe_float_convert(info.get('targetMeanPrice', None))
         
         # Get current price with error handling
         try:

@@ -11,6 +11,7 @@ from datetime import datetime, timedelta
 from stock_analyzer import StockAnalyzer
 from technical_analysis import TechnicalAnalysis
 from fundamental_analysis import FundamentalAnalysis
+import utils
 from utils import format_large_number, get_stock_news
 from data_sources import DATA_SOURCES
 from user_management import is_authenticated, get_session_user 
@@ -1214,6 +1215,10 @@ Technical analysis reveals bearish patterns with deteriorating price action and 
                                 if peer_data:
                                     # Create dataframe for peer comparison
                                     peer_df = pd.DataFrame(peer_data, columns=['Ticker', 'Performance (%)'])
+                                    
+                                    # Handle conversion safely
+                                    peer_df['Performance (%)'] = peer_df['Performance (%)'].apply(lambda x: 
+                                        utils.safe_float_convert(x, 0) if utils.safe_float_convert(x) is not None else 0)
                                     peer_df['Performance (%)'] = peer_df['Performance (%)'].round(2)
                                     
                                     # Add current stock to comparison
