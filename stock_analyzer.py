@@ -558,7 +558,7 @@ class StockAnalyzer:
         
         # 3. Revenue Growth
         revenue_growth = company_info.get('revenueGrowth', None)
-        if revenue_growth is not None:
+        if revenue_growth is not None and isinstance(revenue_growth, (int, float)) and revenue_growth != 'N/A':
             if revenue_growth > 0.25:  # Excellent growth
                 score_factors.append(10)
                 reasons.append("Exceptional revenue growth")
@@ -577,7 +577,7 @@ class StockAnalyzer:
         
         # 4. Debt-to-Equity
         debt_to_equity = company_info.get('debtToEquity', None)
-        if debt_to_equity is not None:
+        if debt_to_equity is not None and isinstance(debt_to_equity, (int, float)) and debt_to_equity != 'N/A':
             if debt_to_equity < 50:  # Very low debt
                 score_factors.append(9)
                 reasons.append("Very low debt-to-equity ratio")
@@ -612,29 +612,35 @@ class StockAnalyzer:
     
     def _calculate_sentiment_score(self):
         """Calculate market sentiment score component"""
-        company_info = self.get_company_info()
-        
-        # Analyst recommendations
-        rec = company_info.get('recommendationMean', None)
-        
-        if rec is not None:
-            # Convert 1-5 scale (where 1 is Strong Buy and 5 is Strong Sell) to 10-1 scale
-            sentiment_score = ((5 - rec) / 4) * 9 + 1
+        try:
+            company_info = self.get_company_info()
             
-            # Determine reason based on recommendation level
-            if rec <= 1.5:
-                reason = "Strong analyst buy recommendations"
-            elif rec <= 2.5:
-                reason = "Moderate analyst buy recommendations"
-            elif rec <= 3.5:
-                reason = "Hold recommendations from analysts"
-            elif rec <= 4.5:
-                reason = "Moderate analyst sell recommendations"
+            # Analyst recommendations
+            rec = company_info.get('recommendationMean', None)
+            
+            # Make sure rec is a numeric value and not 'N/A'
+            if rec is not None and isinstance(rec, (int, float)) and rec != 'N/A':
+                # Convert 1-5 scale (where 1 is Strong Buy and 5 is Strong Sell) to 10-1 scale
+                sentiment_score = ((5 - rec) / 4) * 9 + 1
+                
+                # Determine reason based on recommendation level
+                if rec <= 1.5:
+                    reason = "Strong analyst buy recommendations"
+                elif rec <= 2.5:
+                    reason = "Moderate analyst buy recommendations"
+                elif rec <= 3.5:
+                    reason = "Hold recommendations from analysts"
+                elif rec <= 4.5:
+                    reason = "Moderate analyst sell recommendations"
+                else:
+                    reason = "Strong analyst sell recommendations"
             else:
-                reason = "Strong analyst sell recommendations"
-        else:
-            # Default to neutral if no analyst recommendations
+                # Default neutral score if no valid recommendation data
+                sentiment_score = 5.0
+                reason = "Limited analyst recommendation data available"
+        except Exception as e:
+            print(f"Error in sentiment score calculation: {e}")
             sentiment_score = 5.0
-            reason = "No analyst recommendations available"
-        
+            reason = "Error processing sentiment data"
+            
         return {'score': sentiment_score, 'reason': reason}
