@@ -131,6 +131,11 @@ def analyze_ticker(ticker):
         peg_ratio = info.get('pegRatio', None)
         profit_margin = info.get('profitMargins', None)
         
+        # Get new metrics for enhanced analysis
+        sector_data = analyzer.get_sector_performance()
+        dividend_info = analyzer.get_dividend_info()
+        earnings_info = analyzer.get_earnings_info()
+        
         # Format metrics
         formatted_metrics = {
             'market_cap': format_large_number(market_cap) if market_cap else 'N/A',
@@ -146,6 +151,43 @@ def analyze_ticker(ticker):
             'peg_ratio': f"{peg_ratio:.2f}" if peg_ratio else 'N/A',
             'profit_margin': f"{profit_margin*100:.2f}%" if profit_margin else 'N/A'
         }
+        
+        # Add new metrics to the formatted metrics dictionary
+        if sector_data:
+            formatted_metrics['sector_rank'] = f"{sector_data.get('sector_rank')} of {sector_data.get('total_peers')}" if sector_data.get('sector_rank') and sector_data.get('total_peers') else 'N/A'
+            formatted_metrics['sector_performance_1y'] = f"{sector_data.get('sector_performance_1y', 0):.2f}%" if sector_data.get('sector_performance_1y') is not None else 'N/A'
+            formatted_metrics['stock_performance_1y'] = f"{sector_data.get('stock_performance_1y', 0):.2f}%" if sector_data.get('stock_performance_1y') is not None else 'N/A'
+            formatted_metrics['market_outperformance'] = f"{sector_data.get('market_outperformance', 0):.2f}%" if sector_data.get('market_outperformance') is not None else 'N/A'
+        
+        if dividend_info:
+            formatted_metrics['dividend_rate'] = f"${dividend_info.get('dividend_rate', 0):.2f}" if dividend_info.get('dividend_rate') else 'N/A'
+            formatted_metrics['payout_ratio'] = f"{dividend_info.get('payout_ratio', 0):.2f}%" if dividend_info.get('payout_ratio') is not None else 'N/A'
+            formatted_metrics['dividend_growth'] = f"{dividend_info.get('dividend_growth', 0):.2f}%" if dividend_info.get('dividend_growth') is not None else 'N/A'
+        
+        if earnings_info:
+            # Format revenue for earnings info
+            total_revenue = earnings_info.get('total_revenue')
+            if total_revenue is not None:
+                if abs(total_revenue) >= 1e9:
+                    formatted_metrics['total_revenue'] = f"${total_revenue/1e9:.2f}B"
+                elif abs(total_revenue) >= 1e6:
+                    formatted_metrics['total_revenue'] = f"${total_revenue/1e6:.2f}M"
+                else:
+                    formatted_metrics['total_revenue'] = f"${total_revenue:.2f}"
+            
+            # Format net income for earnings info
+            net_income = earnings_info.get('net_income')
+            if net_income is not None:
+                if abs(net_income) >= 1e9:
+                    formatted_metrics['net_income'] = f"${net_income/1e9:.2f}B"
+                elif abs(net_income) >= 1e6:
+                    formatted_metrics['net_income'] = f"${net_income/1e6:.2f}M"
+                else:
+                    formatted_metrics['net_income'] = f"${net_income:.2f}"
+            
+            formatted_metrics['net_margin'] = f"{earnings_info.get('net_margin', 0):.2f}%" if earnings_info.get('net_margin') is not None else 'N/A'
+            formatted_metrics['next_earnings_date'] = earnings_info.get('next_earnings_date', 'N/A')
+            formatted_metrics['sec_filings_url'] = earnings_info.get('sec_filings_url', 'N/A')
         
         # Calculate buy rating
         buy_rating, rating_components = analyzer.calculate_buy_rating()
