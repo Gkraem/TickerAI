@@ -171,37 +171,61 @@ def analyze_ticker(ticker):
         # Add new metrics to the formatted metrics dictionary
         if sector_data:
             formatted_metrics['sector_rank'] = f"{sector_data.get('sector_rank')} of {sector_data.get('total_peers')}" if sector_data.get('sector_rank') and sector_data.get('total_peers') else 'N/A'
-            formatted_metrics['sector_performance_1y'] = f"{sector_data.get('sector_performance_1y', 0):.2f}%" if sector_data.get('sector_performance_1y') is not None else 'N/A'
-            formatted_metrics['stock_performance_1y'] = f"{sector_data.get('stock_performance_1y', 0):.2f}%" if sector_data.get('stock_performance_1y') is not None else 'N/A'
-            formatted_metrics['market_outperformance'] = f"{sector_data.get('market_outperformance', 0):.2f}%" if sector_data.get('market_outperformance') is not None else 'N/A'
+            
+            # Apply safe float conversion to sector metrics
+            sector_perf = safe_float_convert(sector_data.get('sector_performance_1y', 0))
+            formatted_metrics['sector_performance_1y'] = f"{sector_perf:.2f}%" if sector_perf is not None else 'N/A'
+            
+            stock_perf = safe_float_convert(sector_data.get('stock_performance_1y', 0))
+            formatted_metrics['stock_performance_1y'] = f"{stock_perf:.2f}%" if stock_perf is not None else 'N/A'
+            
+            market_outperf = safe_float_convert(sector_data.get('market_outperformance', 0))
+            formatted_metrics['market_outperformance'] = f"{market_outperf:.2f}%" if market_outperf is not None else 'N/A'
         
         if dividend_info:
-            formatted_metrics['dividend_rate'] = f"${dividend_info.get('dividend_rate', 0):.2f}" if dividend_info.get('dividend_rate') else 'N/A'
-            formatted_metrics['payout_ratio'] = f"{dividend_info.get('payout_ratio', 0):.2f}%" if dividend_info.get('payout_ratio') is not None else 'N/A'
-            formatted_metrics['dividend_growth'] = f"{dividend_info.get('dividend_growth', 0):.2f}%" if dividend_info.get('dividend_growth') is not None else 'N/A'
+            # Apply safe float conversion to dividend metrics
+            dividend_rate = safe_float_convert(dividend_info.get('dividend_rate', 0))
+            formatted_metrics['dividend_rate'] = f"${dividend_rate:.2f}" if dividend_rate is not None else 'N/A'
+            
+            payout_ratio = safe_float_convert(dividend_info.get('payout_ratio', 0))
+            formatted_metrics['payout_ratio'] = f"{payout_ratio:.2f}%" if payout_ratio is not None else 'N/A'
+            
+            dividend_growth = safe_float_convert(dividend_info.get('dividend_growth', 0))
+            formatted_metrics['dividend_growth'] = f"{dividend_growth:.2f}%" if dividend_growth is not None else 'N/A'
         
         if earnings_info:
-            # Format revenue for earnings info
-            total_revenue = earnings_info.get('total_revenue')
+            # Format revenue for earnings info with safe conversion
+            total_revenue = safe_float_convert(earnings_info.get('total_revenue'))
             if total_revenue is not None:
-                if abs(total_revenue) >= 1e9:
-                    formatted_metrics['total_revenue'] = f"${total_revenue/1e9:.2f}B"
-                elif abs(total_revenue) >= 1e6:
-                    formatted_metrics['total_revenue'] = f"${total_revenue/1e6:.2f}M"
-                else:
-                    formatted_metrics['total_revenue'] = f"${total_revenue:.2f}"
+                try:
+                    if abs(total_revenue) >= 1e9:
+                        formatted_metrics['total_revenue'] = f"${total_revenue/1e9:.2f}B"
+                    elif abs(total_revenue) >= 1e6:
+                        formatted_metrics['total_revenue'] = f"${total_revenue/1e6:.2f}M"
+                    else:
+                        formatted_metrics['total_revenue'] = f"${total_revenue:.2f}"
+                except Exception:
+                    formatted_metrics['total_revenue'] = "N/A"
+            else:
+                formatted_metrics['total_revenue'] = "N/A"
             
-            # Format net income for earnings info
-            net_income = earnings_info.get('net_income')
+            # Format net income for earnings info with safe conversion
+            net_income = safe_float_convert(earnings_info.get('net_income'))
             if net_income is not None:
-                if abs(net_income) >= 1e9:
-                    formatted_metrics['net_income'] = f"${net_income/1e9:.2f}B"
-                elif abs(net_income) >= 1e6:
-                    formatted_metrics['net_income'] = f"${net_income/1e6:.2f}M"
-                else:
-                    formatted_metrics['net_income'] = f"${net_income:.2f}"
+                try:
+                    if abs(net_income) >= 1e9:
+                        formatted_metrics['net_income'] = f"${net_income/1e9:.2f}B"
+                    elif abs(net_income) >= 1e6:
+                        formatted_metrics['net_income'] = f"${net_income/1e6:.2f}M"
+                    else:
+                        formatted_metrics['net_income'] = f"${net_income:.2f}"
+                except Exception:
+                    formatted_metrics['net_income'] = "N/A"
+            else:
+                formatted_metrics['net_income'] = "N/A"
             
-            formatted_metrics['net_margin'] = f"{earnings_info.get('net_margin', 0):.2f}%" if earnings_info.get('net_margin') is not None else 'N/A'
+            net_margin = safe_float_convert(earnings_info.get('net_margin', 0))
+            formatted_metrics['net_margin'] = f"{net_margin:.2f}%" if net_margin is not None else 'N/A'
             formatted_metrics['next_earnings_date'] = earnings_info.get('next_earnings_date', 'N/A')
             formatted_metrics['sec_filings_url'] = earnings_info.get('sec_filings_url', 'N/A')
         
