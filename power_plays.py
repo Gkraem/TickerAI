@@ -407,14 +407,25 @@ def display_power_plays():
     # Header and introduction
     st.title("Power Plays 🚀")
     
-    st.markdown("""
-    <div style="background-color: rgba(17, 24, 39, 0.7); padding: 20px; border-radius: 10px; margin-bottom: 30px;">
-    <p style="font-size: 18px; line-height: 1.6;">
-    Power Plays delivers the five most compelling stock opportunities, ranked by AI-driven buy ratings. 
-    Updated in real time, these picks offer a snapshot of where the strongest buying signals are—so you can act fast, with confidence.
-    </p>
-    </div>
-    """, unsafe_allow_html=True)
+    # Conditional description based on whether we have results
+    if st.session_state.power_plays_results is None:
+        st.markdown("""
+        <div style="background-color: rgba(17, 24, 39, 0.7); padding: 20px; border-radius: 10px; margin-bottom: 30px;">
+        <p style="font-size: 18px; line-height: 1.6;">
+        Power Plays delivers the five most compelling stock opportunities, ranked by AI-driven buy ratings. 
+        Scanning hundreds of companies to find the best investment opportunities right now.
+        </p>
+        </div>
+        """, unsafe_allow_html=True)
+    else:
+        st.markdown("""
+        <div style="background-color: rgba(17, 24, 39, 0.7); padding: 20px; border-radius: 10px; margin-bottom: 30px;">
+        <p style="font-size: 18px; line-height: 1.6;">
+        Power Plays delivers the five most compelling stock opportunities, ranked by AI-driven buy ratings.
+        These top picks offer a snapshot of where the strongest buying signals are—so you can act fast, with confidence.
+        </p>
+        </div>
+        """, unsafe_allow_html=True)
     
     # Initialize session state variables if needed
     if 'power_plays_results' not in st.session_state:
@@ -438,11 +449,9 @@ def display_power_plays():
     # Add some space
     st.write("")
     
-    # Add buttons in columns for better layout
-    col1, col2 = st.columns(2)
-    
-    # Run Analysis button - only run when clicked
-    with col1:
+    # Button for analysis - show Run or Refresh based on state
+    if st.session_state.power_plays_results is None:
+        # Show Run Analysis button
         if st.button("Run Analysis", key="run_power_plays_button"):
             with st.spinner(f"Analyzing {selected_index} stocks to find the best opportunities..."):
                 st.session_state.power_plays_results = get_top_stocks(
@@ -450,17 +459,15 @@ def display_power_plays():
                     max_tickers=500,
                     index_name=selected_index
                 )
-    
-    # Refresh Analysis button - only show if results exist
-    with col2:
-        if st.session_state.power_plays_results is not None:
-            if st.button("Refresh Analysis", key="refresh_power_plays_button"):
-                with st.spinner(f"Refreshing analysis for {selected_index}..."):
-                    st.session_state.power_plays_results = get_top_stocks(
-                        max_stocks=5, 
-                        max_tickers=500, 
-                        index_name=selected_index
-                    )
+    else:
+        # Show Refresh Analysis button
+        if st.button("Refresh Analysis", key="refresh_power_plays_button"):
+            with st.spinner(f"Refreshing analysis for {selected_index}..."):
+                st.session_state.power_plays_results = get_top_stocks(
+                    max_stocks=5, 
+                    max_tickers=500, 
+                    index_name=selected_index
+                )
     
     # Display results only if we have them
     top_stocks = st.session_state.power_plays_results
