@@ -121,8 +121,22 @@ def analyze_ticker(ticker):
         revenue = info.get('totalRevenue', None)
         dividend_yield = info.get('dividendYield', None)
         target_price = info.get('targetMeanPrice', None)
-        current_price = analyzer.get_current_price()
-        price_change = analyzer.get_price_change()
+        
+        # Get current price with error handling
+        try:
+            current_price = analyzer.get_current_price()
+            if current_price is None:
+                current_price = 0
+        except:
+            current_price = 0
+            
+        # Get price change with error handling
+        try:
+            price_change = analyzer.get_price_change()
+            if price_change is None:
+                price_change = (0, 0)
+        except:
+            price_change = (0, 0)
         
         # Additional data for detailed analysis
         sector = info.get('sector', 'N/A')
