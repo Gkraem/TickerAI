@@ -362,9 +362,11 @@ def generate_analysis(ticker, buy_rating, technical_score, fundamental_score, se
             # Add dividend growth if available
             if metrics.get('dividend_growth', 'N/A') != 'N/A' and metrics.get('dividend_growth') != '0.00%':
                 try:
-                    div_growth = float(metrics.get('dividend_growth', '0').replace('%', '').replace('N/A', '0'))
-                    if div_growth > 0:
-                        dividend_text += f" with a {metrics['dividend_growth']} year-over-year growth"
+                    div_growth_str = str(metrics.get('dividend_growth', '0'))
+                    if div_growth_str != 'N/A':
+                        div_growth = float(div_growth_str.replace('%', ''))
+                        if div_growth > 0:
+                            dividend_text += f" with a {metrics['dividend_growth']} year-over-year growth"
                 except:
                     pass
             
@@ -381,15 +383,17 @@ def generate_analysis(ticker, buy_rating, technical_score, fundamental_score, se
         
         if metrics.get('market_outperformance', 'N/A') != 'N/A':
             try:
-                outperf = float(metrics.get('market_outperformance', '0').replace('%', '').replace('N/A', '0'))
-                if outperf > 10:
-                    sector_text += f"It has significantly outperformed the market by {metrics['market_outperformance']}. "
-                elif outperf > 0:
-                    sector_text += f"It has outperformed the market by {metrics['market_outperformance']}. "
-                elif outperf > -10:
-                    sector_text += f"It has underperformed the market by {abs(outperf):.2f}%. "
-                else:
-                    sector_text += f"It has significantly underperformed the market by {abs(outperf):.2f}%. "
+                outperf_str = str(metrics.get('market_outperformance', '0'))
+                if outperf_str != 'N/A':
+                    outperf = float(outperf_str.replace('%', ''))
+                    if outperf > 10:
+                        sector_text += f"It has significantly outperformed the market by {metrics['market_outperformance']}. "
+                    elif outperf > 0:
+                        sector_text += f"It has outperformed the market by {metrics['market_outperformance']}. "
+                    elif outperf > -10:
+                        sector_text += f"It has underperformed the market by {abs(outperf):.2f}%. "
+                    else:
+                        sector_text += f"It has significantly underperformed the market by {abs(outperf):.2f}%. "
             except:
                 pass
         
@@ -402,15 +406,17 @@ def generate_analysis(ticker, buy_rating, technical_score, fundamental_score, se
         
         if metrics.get('net_margin', 'N/A') != 'N/A' and metrics.get('net_margin') != '0.00%':
             try:
-                margin = float(metrics.get('net_margin', '0').replace('%', '').replace('N/A', '0'))
-                if margin > 15:
-                    financial_text += f"The company maintains an excellent net margin of {metrics['net_margin']}. "
-                elif margin > 5:
-                    financial_text += f"The company shows a solid net margin of {metrics['net_margin']}. "
-                elif margin > 0:
-                    financial_text += f"The company has a modest net margin of {metrics['net_margin']}. "
-                else:
-                    financial_text += f"The company currently shows a negative net margin of {metrics['net_margin']}. "
+                margin_str = str(metrics.get('net_margin', '0'))
+                if margin_str != 'N/A':
+                    margin = float(margin_str.replace('%', ''))
+                    if margin > 15:
+                        financial_text += f"The company maintains an excellent net margin of {metrics['net_margin']}. "
+                    elif margin > 5:
+                        financial_text += f"The company shows a solid net margin of {metrics['net_margin']}. "
+                    elif margin > 0:
+                        financial_text += f"The company has a modest net margin of {metrics['net_margin']}. "
+                    else:
+                        financial_text += f"The company currently shows a negative net margin of {metrics['net_margin']}. "
             except:
                 pass
         
