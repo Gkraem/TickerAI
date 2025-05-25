@@ -438,24 +438,29 @@ def display_power_plays():
     # Add some space
     st.write("")
     
-    # Option to refresh analysis
-    if st.button("Refresh Analysis", key="refresh_power_plays_button"):
-        with st.spinner(f"Refreshing analysis for {selected_index}..."):
-            st.session_state.power_plays_results = get_top_stocks(
-                max_stocks=5, 
-                max_tickers=500, 
-                index_name=selected_index
-            )
+    # Add buttons in columns for better layout
+    col1, col2 = st.columns(2)
     
-    # Run analysis if no cached results
-    if st.session_state.power_plays_results is None:
-        with st.spinner(f"Analyzing {selected_index} stocks to find the best opportunities..."):
-            # Get top stocks - scanning the entire index with no limits
-            st.session_state.power_plays_results = get_top_stocks(
-                max_stocks=5, 
-                max_tickers=500,
-                index_name=selected_index
-            )
+    # Run Analysis button - only run when clicked
+    with col1:
+        if st.button("Run Analysis", key="run_power_plays_button"):
+            with st.spinner(f"Analyzing {selected_index} stocks to find the best opportunities..."):
+                st.session_state.power_plays_results = get_top_stocks(
+                    max_stocks=5, 
+                    max_tickers=500,
+                    index_name=selected_index
+                )
+    
+    # Refresh Analysis button - only show if results exist
+    with col2:
+        if st.session_state.power_plays_results is not None:
+            if st.button("Refresh Analysis", key="refresh_power_plays_button"):
+                with st.spinner(f"Refreshing analysis for {selected_index}..."):
+                    st.session_state.power_plays_results = get_top_stocks(
+                        max_stocks=5, 
+                        max_tickers=500, 
+                        index_name=selected_index
+                    )
     
     # Display results
     top_stocks = st.session_state.power_plays_results
