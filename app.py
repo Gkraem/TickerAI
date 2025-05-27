@@ -321,8 +321,8 @@ def main():
         admin_nav_item = ""
         admin_nav_dropdown = ""
         if is_admin():
-            admin_nav_item = '<a href="javascript:void(0)" onclick="document.getElementById(\'admin_panel_trigger\').click()" style="color: #10B981;">Admin Panel</a>'
-            admin_nav_dropdown = '<a href="javascript:void(0)" onclick="document.getElementById(\'admin_panel_trigger\').click()" style="color: #10B981;">Admin Panel</a>'
+            admin_nav_item = '<a href="javascript:void(0)" onclick="document.querySelector(\'button[type=\\\"submit\\\"]\').click()" style="color: #10B981;">Admin Panel</a>'
+            admin_nav_dropdown = '<a href="javascript:void(0)" onclick="document.querySelector(\'button[type=\\\"submit\\\"]\').click()" style="color: #10B981;">Admin Panel</a>'
         
         # Create navigation header
         st.markdown(f"""
@@ -760,26 +760,27 @@ def main():
         # Logout button
         logout_button()
         
-        # Check for admin panel access
+        # Check for admin panel access - use a unique key that works with the navigation
         if is_admin():
-            # Hidden Streamlit button for admin panel (triggered by navigation links)
-            admin_panel_clicked = st.button("Admin Panel Trigger", key="admin_panel_trigger", help="Access admin controls", type="secondary")
-            
-            # Hide the button with CSS
+            # Create a container to hold the admin trigger button
+            admin_container = st.container()
+            with admin_container:
+                # Use a form to ensure the button works properly
+                with st.form("admin_form", clear_on_submit=False):
+                    admin_clicked = st.form_submit_button("🔧 Admin Panel", help="Access admin controls")
+                    
+                if admin_clicked:
+                    st.session_state.view_mode = "admin"
+                    st.rerun()
+                    
+            # Hide the admin form with CSS
             st.markdown("""
             <style>
-            button[kind="secondary"]:has([data-testid="baseButton-secondary"]) {
-                display: none !important;
-            }
-            div[data-testid="stButton"] button[data-testid="baseButton-secondary"] {
+            div[data-testid="stForm"] {
                 display: none !important;
             }
             </style>
             """, unsafe_allow_html=True)
-            
-            if admin_panel_clicked:
-                st.session_state.view_mode = "admin"
-                st.rerun()
         
         # Footer Section (Contact Us)
         st.markdown("""
