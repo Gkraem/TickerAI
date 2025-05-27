@@ -1960,24 +1960,39 @@ def main():
                 try:
                     import yfinance as yf
                     stock = yf.Ticker(ticker)
+                    info = stock.info
                     
-                    # Try to get next earnings date
+                    # Try multiple sources for earnings date
                     earnings_found = False
-                    if 'earningsDate' in company_info and company_info['earningsDate']:
-                        earnings_dates = company_info.get('earningsDate')
-                        if isinstance(earnings_dates, list) and len(earnings_dates) > 0:
-                            next_earnings = earnings_dates[0]
-                            if hasattr(next_earnings, 'strftime'):
-                                st.write(f"• {next_earnings.strftime('%B %d, %Y')} (Confirmed)")
-                                earnings_found = True
                     
-                    # Try calendar as backup
+                    # Check info for earnings date
+                    if info.get('earningsDate'):
+                        earnings_date = info.get('earningsDate')
+                        if hasattr(earnings_date, 'strftime'):
+                            st.write(f"• {earnings_date.strftime('%B %d, %Y')} (Confirmed)")
+                            earnings_found = True
+                        elif isinstance(earnings_date, str):
+                            st.write(f"• {earnings_date} (Confirmed)")
+                            earnings_found = True
+                    
+                    # Try calendar
                     if not earnings_found:
                         try:
                             calendar = stock.calendar
-                            if calendar is not None and not calendar.empty:
+                            if calendar is not None and len(calendar) > 0:
                                 earnings_date = calendar.index[0]
                                 st.write(f"• {earnings_date.strftime('%B %d, %Y')} (Unconfirmed)")
+                                earnings_found = True
+                        except:
+                            pass
+                    
+                    # Try earnings_dates
+                    if not earnings_found and info.get('earningsDate'):
+                        try:
+                            earnings_dates = info.get('earningsDate')
+                            if isinstance(earnings_dates, list) and len(earnings_dates) > 0:
+                                next_earnings = earnings_dates[0]
+                                st.write(f"• {next_earnings.strftime('%B %d, %Y')} (Confirmed)")
                                 earnings_found = True
                         except:
                             pass
@@ -1994,33 +2009,46 @@ def main():
                     import yfinance as yf
                     stock = yf.Ticker(ticker)
                     
-                    # Get quarterly earnings from income statement
-                    quarterly_income = stock.quarterly_income_stmt
-                    quarterly_earnings = stock.quarterly_earnings
-                    
                     earnings_displayed = False
                     
-                    # Try quarterly_earnings first
-                    if quarterly_earnings is not None and not quarterly_earnings.empty and len(quarterly_earnings) >= 2:
-                        recent_earnings = quarterly_earnings.head(2)
-                        for i, (date, row) in enumerate(recent_earnings.iterrows()):
-                            actual = row.get('Actual', 'N/A')
-                            estimate = row.get('Estimate', 'N/A')
-                            
-                            # Format quarter
-                            quarter_str = date.strftime('%Y Q%q') if hasattr(date, 'strftime') else str(date)[:7]
-                            
-                            # Determine beat/miss
-                            if actual != 'N/A' and estimate != 'N/A':
-                                try:
-                                    beat_status = "Beat" if float(actual) > float(estimate) else "Missed"
-                                    beat_icon = "🟢" if beat_status == "Beat" else "🔴"
-                                    st.write(f"• {quarter_str}: ${actual} vs ${estimate} est. {beat_icon} {beat_status}")
-                                except:
-                                    st.write(f"• {quarter_str}: ${actual} vs ${estimate} est.")
-                            else:
-                                st.write(f"• {quarter_str}: Data unavailable")
-                        earnings_displayed = True
+                    # Try to get earnings history
+                    try:
+                        earnings_history = stock.earnings_history
+                        if earnings_history is not None and not earnings_history.empty and len(earnings_history) >= 2:
+                            recent_earnings = earnings_history.head(2)
+                            for i, (date, row) in enumerate(recent_earnings.iterrows()):
+                                eps_actual = row.get('epsActual', 'N/A')
+                                eps_estimate = row.get('epsEstimate', 'N/A')
+                                
+                                # Format quarter from date
+                                quarter_str = date.strftime('%Y Q%q') if hasattr(date, 'strftime') else str(date)[:7]
+                                
+                                # Determine beat/miss
+                                if eps_actual != 'N/A' and eps_estimate != 'N/A':
+                                    try:
+                                        beat_status = "Beat" if float(eps_actual) > float(eps_estimate) else "Missed"
+                                        beat_icon = "🟢" if beat_status == "Beat" else "🔴"
+                                        st.write(f"• {quarter_str}: ${eps_actual} vs ${eps_estimate} est. {beat_icon} {beat_status}")
+                                        earnings_displayed = True
+                                    except:
+                                        st.write(f"• {quarter_str}: ${eps_actual} vs ${eps_estimate} est.")
+                                        earnings_displayed = True
+                    except:
+                        pass
+                    
+                    # Try quarterly financials as backup
+                    if not earnings_displayed:
+                        try:
+                            quarterly_financials = stock.quarterly_financials
+                            if quarterly_financials is not None and not quarterly_financials.empty:
+                                # Get latest 2 quarters
+                                dates = quarterly_financials.columns[:2]
+                                for date in dates:
+                                    quarter_str = date.strftime('%Y Q%q') if hasattr(date, 'strftime') else str(date)[:7]
+                                    st.write(f"• {quarter_str}: Financial data available")
+                                earnings_displayed = True
+                        except:
+                            pass
                     
                     if not earnings_displayed:
                         st.write("• Recent earnings data unavailable")
