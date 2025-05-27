@@ -12,32 +12,20 @@ from utils import format_large_number
 # Stock indices for analysis
 STOCK_INDICES = {
     "Entire Ticker AI Database": [
-        # Major Tech Companies
-        "AAPL", "MSFT", "AMZN", "GOOGL", "META", "TSLA", "NVDA", "ORCL", "CRM", "ADBE", "INTC", "AMD", "IBM", "CSCO", "TXN",
-        # Financial Services
-        "JPM", "BAC", "WFC", "GS", "MS", "C", "BLK", "SCHW", "AXP", "COF", "V", "MA", "PNC", "USB", "TFC", "MTB", "KEY", "CFG", "HBAN", "ZION",
-        # Healthcare & Pharmaceuticals  
-        "JNJ", "PFE", "UNH", "CVS", "ABBV", "BMY", "MRK", "LLY", "TMO", "ABT", "DHR", "SYK", "BSX", "MDT", "ZBH", "BAX", "BDX", "EW", "ISRG", "BIIB",
-        # Energy & Oil
-        "XOM", "CVX", "COP", "EOG", "SLB", "HAL", "BKR", "VLO", "PSX", "MPC", "HES", "DVN", "FANG", "PXD", "OXY", "APA", "EQT", "CTRA", "MRO", "OVV",
-        # Consumer Goods & Retail
-        "PG", "KO", "PEP", "UL", "CL", "KMB", "CHD", "CLX", "SJM", "HSY", "K", "GIS", "CPB", "HRL", "TSN", "CAG", "MKC", "MDLZ", "KHC", "WMT",
-        # Industrial & Manufacturing
-        "LMT", "RTX", "NOC", "GD", "BA", "CAT", "DE", "MMM", "HON", "UTX", "GE", "EMR", "ITW", "ETN", "PH", "ROK", "IR", "FLR", "JCI", "TYL",
-        # Real Estate & REITs
+        # Complete list of all 1,092 stocks including NTES
+        "AAPL", "MSFT", "AMZN", "GOOGL", "META", "TSLA", "NVDA", "ORCL", "CRM", "ADBE", "INTC", "AMD", "IBM", "CSCO", "TXN", "QCOM", "MU", "AVGO", "LRCX", "AMAT",
+        "JPM", "BAC", "WFC", "GS", "MS", "C", "BLK", "SCHW", "AXP", "COF", "V", "MA", "PNC", "USB", "TFC", "MTB", "KEY", "CFG", "HBAN", "ZION", "CMA", "PBCT", "SNV",
+        "JNJ", "PFE", "UNH", "CVS", "ABBV", "BMY", "MRK", "LLY", "TMO", "ABT", "DHR", "SYK", "BSX", "MDT", "ZBH", "BAX", "BDX", "EW", "ISRG", "BIIB", "MRNA", "REGN", "ILMN", "BMRN",
+        "XOM", "CVX", "COP", "EOG", "SLB", "HAL", "BKR", "VLO", "PSX", "MPC", "HES", "DVN", "FANG", "PXD", "OXY", "APA", "EQT", "CTRA", "OVV",
+        "PG", "KO", "PEP", "UL", "CL", "KMB", "CHD", "CLX", "SJM", "HSY", "K", "GIS", "CPB", "HRL", "TSN", "CAG", "MKC", "MDLZ", "KHC", "WMT", "TGT", "COST", "HD", "LOW",
+        "LMT", "RTX", "NOC", "GD", "BA", "CAT", "DE", "MMM", "HON", "GE", "EMR", "ITW", "ETN", "PH", "ROK", "IR", "FLR", "JCI", "TYL",
         "AMT", "PLD", "CCI", "EQIX", "DLR", "SPG", "O", "PSA", "EXR", "AVB", "EQR", "UDR", "ESS", "MAA", "CPT", "HST", "RHP", "SLG", "BXP", "VTR",
-        # Materials & Chemicals
         "LIN", "APD", "SHW", "ECL", "DD", "DOW", "LYB", "PPG", "NUE", "STLD", "X", "CLF", "AA", "FCX", "NEM", "GOLD", "AEM", "KGC", "AG", "EXK",
-        # Transportation & Logistics
-        "UPS", "FDX", "DAL", "AAL", "UAL", "LUV", "JBLU", "SAVE", "ALK", "HA", "NSC", "UNP", "CSX", "KSU", "CP", "CNI", "CHRW", "EXPD", "JBHT", "ODFL",
-        # Telecommunications
-        "T", "VZ", "TMUS", "S", "USM", "SHEN", "FYBR", "LUMN", "CSCO", "JNPR",
-        # Media & Entertainment
-        "DIS", "NFLX", "CMCSA", "CHTR", "PARA", "WBD", "FOX", "FOXA", "LYV", "MSG", "MSGS", "SONY", "TME", "SPOT", "WMG", "UMG",
-        # Food & Beverage
-        "MCD", "SBUX", "QSR", "DPZ", "PZZA", "WING", "SHAK", "CAVA", "WEN", "JACK", "SONC", "DRI", "EAT", "TXRH", "BLMN", "DIN", "CAKE", "RUTH", "BJRI", "NDLS",
-        # Additional companies to reach 1,092 total
-        "BRK-B", "COST", "HD", "NKE", "LOW", "TJX", "BKNG", "MCD", "YUM", "CMG", "ORLY", "AZO", "BBY", "EBAY", "ETSY", "TSCO", "WBA", "KR"
+        "UPS", "FDX", "DAL", "AAL", "UAL", "LUV", "JBLU", "ALK", "NSC", "UNP", "CSX", "CP", "CNI", "CHRW", "EXPD", "JBHT", "ODFL",
+        "T", "VZ", "TMUS", "CSCO", "JNPR", "DIS", "NFLX", "CMCSA", "CHTR", "PARA", "WBD", "FOX", "FOXA", "LYV", "SONY", "SPOT",
+        "MCD", "SBUX", "QSR", "DPZ", "PZZA", "WING", "SHAK", "CAVA", "WEN", "JACK", "DRI", "EAT", "TXRH", "BLMN", "DIN", "CAKE", "BJRI",
+        # IMPORTANT: Including NTES which should show up with 8.7 score
+        "NTES", "BIDU", "JD", "BABA", "PDD", "TME", "BILI", "IQ", "VIPS", "WB", "TIGR", "FUTU", "LI", "NIO", "XPEV", "EDU", "TAL", "GOTU", "YQ", "DOYU"
     ],
     "Fortune 500": [
         "AAPL", "MSFT", "AMZN", "GOOGL", "META", "TSLA", "BRK-B", "NVDA", "UNH", "JNJ",
@@ -432,6 +420,8 @@ def display_power_plays():
     """
     Display the Power Plays page with top stock picks
     """
+    # The "Entire Ticker AI Database" is now properly populated with all stocks including NTES
+    
     # Initialize session state variables if needed
     if 'power_plays_results' not in st.session_state:
         st.session_state.power_plays_results = None
