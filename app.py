@@ -328,14 +328,14 @@ def main():
             z-index: 1000;
             background-color: rgba(17, 24, 39, 0.95);
             backdrop-filter: blur(10px);
-            padding: 3px 0;
+            padding: 2px 0;
             border-bottom: 1px solid rgba(59, 130, 246, 0.3);
         }}
         .nav-content {{
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 0 20px;
+            padding: 0 30px;
             width: 100%;
             max-width: none;
         }}
@@ -344,12 +344,13 @@ def main():
             color: #3b82f6;
             font-size: 22px;
             font-weight: bold;
+            padding: 8px 0;
         }}
         .nav-menu {{
             display: flex;
             gap: 35px;
             margin-left: auto;
-            padding-right: 20px;
+            padding: 8px 0;
         }}
         .nav-menu a {{
             color: #e5e7eb;

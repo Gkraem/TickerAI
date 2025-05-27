@@ -548,7 +548,7 @@ def display_power_plays():
     
     # Add a button to go back to stock search
     st.write("")  # Add some spacing
-    if st.button("Back to Stock Search", key="back_to_search_button"):
+    if st.button("Reset Search", key="back_to_search_button"):
         # Clear power_plays_results and go back to the stock search page
         st.session_state.power_plays_results = None
         st.session_state.power_plays_view = False

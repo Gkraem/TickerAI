@@ -40,6 +40,29 @@ button[data-testid="collapsedControl"] {
     display: none !important;
 }
 
+/* More aggressive sidebar hiding */
+[data-testid="collapsedControl"],
+button[kind="header"],
+button[data-testid="baseButton-header"],
+.css-1rs6os,
+.css-14xtw13,
+.css-vk3wp9,
+[aria-label="Show navigation"],
+[aria-label="Hide navigation"],
+.st-emotion-cache-1rs6os,
+.st-emotion-cache-14xtw13 {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    width: 0 !important;
+    height: 0 !important;
+}
+
+/* Hide any button in the header area */
+header button {
+    display: none !important;
+}
+
 /* Main app styling */
 .stApp {
     background: linear-gradient(135deg, #111827 0%, #1e3a8a 100%);
