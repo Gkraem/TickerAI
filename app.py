@@ -1360,7 +1360,7 @@ def main():
             right: 0;
             z-index: 1000;
             background-color: #000000;
-            padding: 8px 0;
+            padding: 6px 0;
             border-bottom: 1px solid rgba(59, 130, 246, 0.3);
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
         }}
@@ -1368,13 +1368,13 @@ def main():
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 0 15px;
+            padding: 0 25px;
             width: 100%;
         }}
         .nav-logo {{
             margin: 0;
             color: #3b82f6;
-            font-size: 20px;
+            font-size: 18px;
             font-weight: bold;
         }}
         .nav-menu {{
