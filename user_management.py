@@ -144,15 +144,15 @@ def authenticate_user(identifier, password):
                 user_row = result.fetchone()
                 
                 if user_row and pbkdf2_sha256.verify(password, user_row[3]):
-                    return {
+                    user_data = {
                         "name": user_row[0],
                         "email": user_row[1],
                         "phone": user_row[2]
                     }
-                return None
+                    return True, user_data
+                return False, "Invalid credentials"
         except Exception as e:
-            st.error(f"Database error: {e}")
-            return None
+            return False, f"Database error: {e}"
     else:
         # Fallback to JSON file
         users_data = load_users()
@@ -197,7 +197,8 @@ def get_total_user_count():
         try:
             with engine.connect() as conn:
                 result = conn.execute(text("SELECT COUNT(*) FROM users"))
-                return result.fetchone()[0]
+                row = result.fetchone()
+                return row[0] if row else 0
         except Exception as e:
             st.error(f"Database error: {e}")
             return 0
