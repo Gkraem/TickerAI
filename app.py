@@ -1459,6 +1459,11 @@ def main():
                 # === 1. BUY RATING SECTION ===
                 st.markdown("### 📊 AI Buy Rating")
                 
+                # Get individual rating components
+                technical_score = rating_breakdown.get('Technical Analysis', {}).get('score', 0)
+                fundamental_score = rating_breakdown.get('Fundamental Analysis', {}).get('score', 0) 
+                sentiment_score = rating_breakdown.get('Market Sentiment', {}).get('score', 0)
+                
                 # Determine color and recommendation based on rating
                 if buy_rating >= 7:
                     color = "#10B981"  # Green
@@ -1470,16 +1475,67 @@ def main():
                     color = "#EF4444"  # Red
                     recommendation = "SELL"
                 
-                # Simple, clean rating display
-                col1, col2, col3 = st.columns([1, 2, 1])
-                with col2:
+                # Create meter and component ratings layout
+                meter_col, ratings_col = st.columns([1, 1])
+                
+                with meter_col:
+                    # Buy rating meter with SVG gauge
+                    meter_percentage = (buy_rating / 10) * 100
+                    
                     st.markdown(f"""
                     <div style="text-align: center; margin: 20px 0;">
-                        <div style="font-size: 48px; font-weight: bold; color: {color}; margin-bottom: 10px;">
-                            {buy_rating:.1f}/10
-                        </div>
-                        <div style="font-size: 24px; font-weight: bold; color: {color};">
+                        <svg width="200" height="120" viewBox="0 0 200 120">
+                            <!-- Background arc -->
+                            <path d="M 20 100 A 80 80 0 0 1 180 100" 
+                                  fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="12"/>
+                            <!-- Progress arc -->
+                            <path d="M 20 100 A 80 80 0 0 1 {20 + (160 * meter_percentage/100)} {100 - 80 * (1 - abs(1 - 2*meter_percentage/100))}" 
+                                  fill="none" stroke="{color}" stroke-width="12" stroke-linecap="round"/>
+                            <!-- Center text -->
+                            <text x="100" y="70" text-anchor="middle" fill="{color}" 
+                                  style="font-size: 32px; font-weight: bold;">{buy_rating:.1f}</text>
+                            <text x="100" y="90" text-anchor="middle" fill="{color}" 
+                                  style="font-size: 14px; font-weight: bold;">/ 10</text>
+                        </svg>
+                        <div style="font-size: 24px; font-weight: bold; color: {color}; margin-top: 10px;">
                             {recommendation}
+                        </div>
+                    </div>
+                    """, unsafe_allow_html=True)
+                
+                with ratings_col:
+                    # Individual component ratings
+                    st.markdown("**Rating Components:**")
+                    
+                    # Technical Analysis
+                    tech_color = "#10B981" if technical_score >= 7 else "#F59E0B" if technical_score >= 4 else "#EF4444"
+                    st.markdown(f"""
+                    <div style="margin: 10px 0; padding: 8px; background: rgba(255,255,255,0.05); border-radius: 8px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <span style="color: white; font-weight: 500;">📈 Technical Analysis</span>
+                            <span style="color: {tech_color}; font-weight: bold; font-size: 18px;">{technical_score:.1f}/10</span>
+                        </div>
+                    </div>
+                    """, unsafe_allow_html=True)
+                    
+                    # Fundamental Analysis  
+                    fund_color = "#10B981" if fundamental_score >= 7 else "#F59E0B" if fundamental_score >= 4 else "#EF4444"
+                    st.markdown(f"""
+                    <div style="margin: 10px 0; padding: 8px; background: rgba(255,255,255,0.05); border-radius: 8px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <span style="color: white; font-weight: 500;">💰 Fundamental Analysis</span>
+                            <span style="color: {fund_color}; font-weight: bold; font-size: 18px;">{fundamental_score:.1f}/10</span>
+                        </div>
+                    </div>
+                    """, unsafe_allow_html=True)
+                    
+                    # Market Sentiment
+                    sent_color = "#10B981" if sentiment_score >= 7 else "#F59E0B" if sentiment_score >= 4 else "#EF4444"
+                    st.markdown(f"""
+                    <div style="margin: 10px 0; padding: 8px; background: rgba(255,255,255,0.05); border-radius: 8px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <span style="color: white; font-weight: 500;">📊 Market Sentiment</span>
+                            <span style="color: {sent_color}; font-weight: bold; font-size: 18px;">{sentiment_score:.1f}/10</span>
                         </div>
                     </div>
                     """, unsafe_allow_html=True)
