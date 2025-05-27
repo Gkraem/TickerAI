@@ -1641,8 +1641,17 @@ def main():
         
         with col1:
             # Text input for stock search to avoid dropdown overlap issues
+            # Set value based on selected stock
+            input_value = ""
+            if "selected_ticker" in st.session_state and st.session_state.selected_ticker:
+                if "selected_stock_name" in st.session_state:
+                    input_value = f"{st.session_state.selected_ticker} - {st.session_state.selected_stock_name}"
+                else:
+                    input_value = st.session_state.selected_ticker
+            
             search_input = st.text_input(
                 "Search stocks by ticker or company name",
+                value=input_value,
                 placeholder="Type ticker (e.g., AAPL) or company name...",
                 key="stock_search_input"
             )
@@ -1651,25 +1660,31 @@ def main():
             if search_input and len(search_input) >= 1:
                 matching_stocks = []
                 search_lower = search_input.lower()
+                seen_tickers = set()
                 
                 for stock in POPULAR_STOCKS:
                     if (search_lower in stock['ticker'].lower() or 
                         search_lower in stock['name'].lower()):
-                        matching_stocks.append(stock)
+                        # Avoid duplicates
+                        if stock['ticker'] not in seen_tickers:
+                            matching_stocks.append(stock)
+                            seen_tickers.add(stock['ticker'])
                 
                 if matching_stocks:
-                    # Limit to top 5 matches to avoid clutter
-                    display_stocks = matching_stocks[:5]
+                    # Limit to top 3 matches to avoid clutter
+                    display_stocks = matching_stocks[:3]
                     
                     st.markdown("**Matching stocks:**")
                     for i, stock in enumerate(display_stocks):
+                        button_text = f"{stock['ticker']} - {stock['name']}"
                         if st.button(
-                            f"{stock['ticker']} - {stock['name']}", 
-                            key=f"stock_btn_{i}",
+                            button_text, 
+                            key=f"stock_btn_{i}_{stock['ticker']}",
                             use_container_width=True
                         ):
                             st.session_state.selected_ticker = stock['ticker']
-                            st.session_state.stock_search_input = f"{stock['ticker']} - {stock['name']}"
+                            st.session_state.selected_stock_name = stock['name']
+                            # Clear the search input by rerunning
                             st.rerun()
         
         with col2:
