@@ -347,6 +347,24 @@ section[data-testid="stSidebar"] h3 {
     border-radius: 6px !important;
 }
 
+/* Increase font size for all white body text */
+.stMarkdown p, .stMarkdown li, .stMarkdown div {
+    font-size: 18px !important;
+    line-height: 1.6 !important;
+}
+
+/* Specifically target white text content */
+.stApp .stMarkdown p {
+    font-size: 18px !important;
+    color: white !important;
+}
+
+/* Ensure bullet points are also larger */
+.stMarkdown ul li {
+    font-size: 18px !important;
+    margin-bottom: 8px !important;
+}
+
 /* Fix main content area */
 .stApp {
     height: 100vh !important;
