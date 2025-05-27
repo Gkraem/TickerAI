@@ -328,7 +328,7 @@ def main():
             z-index: 1000;
             background-color: rgba(17, 24, 39, 0.95);
             backdrop-filter: blur(10px);
-            padding: 15px 0;
+            padding: 8px 0;
             border-bottom: 1px solid rgba(59, 130, 246, 0.3);
         }}
         .nav-content {{
@@ -337,37 +337,56 @@ def main():
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 0 30px;
+            padding: 0 20px;
         }}
         .nav-logo {{
             margin: 0;
             color: #3b82f6;
-            font-size: 28px;
+            font-size: 24px;
             font-weight: bold;
         }}
         .nav-menu {{
             display: flex;
-            gap: 30px;
+            gap: 25px;
         }}
         .nav-menu a {{
             color: #e5e7eb;
             text-decoration: none;
             font-weight: 500;
+            font-size: 14px;
             transition: color 0.3s;
         }}
         .nav-menu a:hover {{
             color: #3b82f6;
         }}
+        .nav-toggle {{
+            display: none;
+            background: none;
+            border: none;
+            color: #e5e7eb;
+            font-size: 20px;
+            cursor: pointer;
+        }}
+        @media (max-width: 768px) {{
+            .nav-menu {{
+                display: none;
+            }}
+            .nav-toggle {{
+                display: block;
+            }}
+        }}
         .hero-section {{
             background: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url('data:image/jpeg;base64,{bg_image}') center/cover;
             height: 100vh;
+            width: 100vw;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
             text-align: center;
-            margin: 0 -1rem;
+            margin: 0 calc(-50vw + 50%);
             padding: 0 2rem;
+            position: relative;
         }}
         .hero-title {{
             font-size: 4rem;
@@ -385,7 +404,7 @@ def main():
         }}
         .hero-button {{
             background: linear-gradient(135deg, #3b82f6, #1d4ed8);
-            color: white;
+            color: white !important;
             padding: 15px 30px;
             border-radius: 8px;
             text-decoration: none;
@@ -398,9 +417,47 @@ def main():
         .hero-button:hover {{
             transform: translateY(-2px);
             box-shadow: 0 6px 12px rgba(0,0,0,0.4);
+            color: white !important;
         }}
         .section-spacer {{
-            height: 80px;
+            height: 60px;
+        }}
+        .footer {{
+            background-color: rgba(17, 24, 39, 0.95);
+            border-top: 1px solid rgba(59, 130, 246, 0.3);
+            padding: 20px 0;
+            margin-top: 50px;
+        }}
+        .footer-content {{
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+            flex-wrap: wrap;
+        }}
+        .footer-logo {{
+            color: #3b82f6;
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }}
+        .footer-info {{
+            color: #e5e7eb;
+            font-size: 14px;
+        }}
+        @media (max-width: 768px) {{
+            .footer-content {{
+                flex-direction: column;
+                text-align: center;
+            }}
+            .hero-title {{
+                font-size: 2.5rem;
+            }}
+            .hero-subtitle {{
+                font-size: 1.2rem;
+            }}
         }}
         </style>
         
@@ -408,17 +465,17 @@ def main():
             <div class="nav-content">
                 <h1 class="nav-logo">Ticker AI</h1>
                 <nav class="nav-menu">
-                    <a href="#home">How It Works</a>
+                    <a href="#howitworks">How It Works</a>
                     <a href="#analyzer">Stock Analyzer</a>
                     <a href="#powerplays">Power Plays</a>
-                    <a href="#contact">Contact Us</a>
                 </nav>
+                <button class="nav-toggle">☰</button>
             </div>
         </div>
         """, unsafe_allow_html=True)
         
         # Add top spacing to account for fixed header
-        st.markdown('<div style="height: 80px;"></div>', unsafe_allow_html=True)
+        st.markdown('<div style="height: 60px;"></div>', unsafe_allow_html=True)
         
         # Hero Section with background image
         st.markdown("""
@@ -614,30 +671,32 @@ def main():
         st.markdown('<div id="powerplays" class="section-spacer"></div>', unsafe_allow_html=True)
         display_power_plays()
         
-        # Contact Section
-        st.markdown('<div id="contact" class="section-spacer"></div>', unsafe_allow_html=True)
-        st.markdown("## 📞 Contact Us")
-        st.markdown("""
-        <div style="background-color: rgba(17, 24, 39, 0.7); padding: 30px; border-radius: 12px; margin: 20px 0;">
-            <h3 style="color: #3b82f6; margin-bottom: 20px;">Get In Touch</h3>
-            <p style="color: #e5e7eb; font-size: 1.1rem; line-height: 1.6;">
-                Have questions about our AI-powered stock analysis? Want to learn more about our methodology? 
-                We'd love to hear from you.
-            </p>
-            <div style="margin-top: 20px;">
-                <p style="color: #e5e7eb;"><strong>Email:</strong> gkraem@vt.edu</p>
-                <p style="color: #e5e7eb;"><strong>Phone:</strong> 240-285-7119</p>
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
-        
         # Data Sources section
         st.markdown("### 📊 Data Sources")
-        for source in DATA_SOURCES:
-            st.markdown(f"• **{source['name']}** - {source['description']}")
+        st.markdown("All our financial data comes from trusted, professional sources:")
+        st.markdown("• **Yahoo Finance** - Real-time stock prices, historical data, and company information")
+        st.markdown("• **Financial APIs** - Technical indicators and fundamental analysis metrics")
+        st.markdown("• **Market Data Providers** - News, analyst recommendations, and market sentiment")
         
         # Logout button
         logout_button()
+        
+        # Footer Section (Contact Us)
+        st.markdown("""
+        <div class="footer">
+            <div class="footer-content">
+                <div>
+                    <div class="footer-logo">Ticker AI</div>
+                    <div class="footer-info">AI-powered stock analysis and investment insights</div>
+                </div>
+                <div class="footer-info">
+                    <div><strong>Contact Us:</strong></div>
+                    <div>Email: gkraem@vt.edu</div>
+                    <div>Phone: 240-285-7119</div>
+                </div>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
 
 if __name__ == "__main__":
     main()
