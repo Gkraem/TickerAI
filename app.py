@@ -760,24 +760,11 @@ def main():
         # Logout button
         logout_button()
         
-        # Check for admin panel access - keep the working button hidden for header navigation
+        # Check for admin panel access - simple direct approach
         if is_admin():
-            # Hidden admin button that works with navigation
             if st.button("🔧 Admin Panel", key="admin_panel_access", help="Access admin controls"):
                 st.session_state.view_mode = "admin"
                 st.rerun()
-            
-            # Hide the admin button with CSS
-            st.markdown("""
-            <style>
-            button:has([data-testid="baseButton-secondary"]):contains("Admin Panel") {
-                display: none !important;
-            }
-            div[data-testid="stButton"] {
-                display: none !important;
-            }
-            </style>
-            """, unsafe_allow_html=True)
         
         # Footer Section (Contact Us)
         st.markdown("""
