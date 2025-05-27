@@ -1368,13 +1368,13 @@ def main():
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 0 25px;
+            padding: 0 40px;
             width: 100%;
         }}
         .nav-logo {{
             margin: 0;
             color: #3b82f6;
-            font-size: 18px;
+            font-size: 16px;
             font-weight: bold;
         }}
         .nav-menu {{
@@ -1573,9 +1573,6 @@ def main():
         st.markdown("""
         <div id="home" class="hero-section">
             <h1 class="hero-title">TICKER AI</h1>
-            <p class="hero-subtitle">
-                Transform complex financial data into actionable insights with AI-powered stock analysis
-            </p>
             <a href="#analyzer" class="hero-button">
                 Start Analyzing →
             </a>
