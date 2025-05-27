@@ -321,8 +321,9 @@ def main():
         admin_nav_item = ""
         admin_nav_dropdown = ""
         if is_admin():
-            admin_nav_item = '<a href="javascript:void(0)" onclick="setTimeout(() => { const buttons = document.querySelectorAll(\'button\'); buttons.forEach(btn => { if (btn.textContent.includes(\'Admin Panel\')) btn.click(); }); }, 100);" style="color: #10B981;">Admin Panel</a>'
-            admin_nav_dropdown = '<a href="javascript:void(0)" onclick="setTimeout(() => { const buttons = document.querySelectorAll(\'button\'); buttons.forEach(btn => { if (btn.textContent.includes(\'Admin Panel\')) btn.click(); }); }, 100);" style="color: #10B981;">Admin Panel</a>'
+            # Use JavaScript to set session state for admin panel
+            admin_nav_item = '<a href="javascript:void(0)" onclick="window.location.href = window.location.href.split(\'?\')[0] + \'?admin=true\'" style="color: #10B981;">Admin Panel</a>'
+            admin_nav_dropdown = '<a href="javascript:void(0)" onclick="window.location.href = window.location.href.split(\'?\')[0] + \'?admin=true\'" style="color: #10B981;">Admin Panel</a>'
         
         # Create navigation header
         st.markdown(f"""
@@ -760,8 +761,15 @@ def main():
         # Logout button
         logout_button()
         
-        # Check for admin panel access - simple direct approach
+        # Check for admin panel access via URL fragment or button
         if is_admin():
+            # Check if admin panel was requested via URL fragment
+            fragment = st.query_params.get("admin", None)
+            if fragment is not None:
+                st.session_state.view_mode = "admin"
+                st.rerun()
+            
+            # Admin panel button in data sources
             if st.button("🔧 Admin Panel", key="admin_panel_access", help="Access admin controls"):
                 st.session_state.view_mode = "admin"
                 st.rerun()
