@@ -156,3 +156,6 @@ def admin_panel():
     if st.button("Return to Stock Search", type="primary", use_container_width=True):
         st.session_state.view_mode = "main"
         st.rerun()
+    
+    # Add vertical buffer at the bottom
+    st.markdown("<div style='height: 100px;'></div>", unsafe_allow_html=True)

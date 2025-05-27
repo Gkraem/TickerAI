@@ -317,13 +317,9 @@ def main():
         # Get base64 encoded background image
         bg_image = get_base64_image("assets/ticker2.jpg")
         
-        # Prepare admin navigation items
+        # No admin panel in header navigation
         admin_nav_item = ""
         admin_nav_dropdown = ""
-        if is_admin():
-            # Use JavaScript to set session state for admin panel
-            admin_nav_item = '<a href="javascript:void(0)" onclick="window.location.href = window.location.href.split(\'?\')[0] + \'?admin=true\'" style="color: #10B981;">Admin Panel</a>'
-            admin_nav_dropdown = '<a href="javascript:void(0)" onclick="window.location.href = window.location.href.split(\'?\')[0] + \'?admin=true\'" style="color: #10B981;">Admin Panel</a>'
         
         # Create navigation header
         st.markdown(f"""
@@ -520,7 +516,6 @@ def main():
             <div class="nav-content">
                 <h1 class="nav-logo">Ticker AI</h1>
                 <nav class="nav-menu">
-                    {admin_nav_item}
                     <a href="#howitworks">How It Works</a>
                     <a href="#analyzer">Stock Analyzer</a>
                     <a href="#powerplays">Power Plays</a>
@@ -528,7 +523,6 @@ def main():
                 <div style="position: relative;">
                     <button class="nav-toggle">☰</button>
                     <div class="nav-dropdown">
-                        {admin_nav_dropdown}
                         <a href="#howitworks">How It Works</a>
                         <a href="#analyzer">Stock Analyzer</a>
                         <a href="#powerplays">Power Plays</a>
@@ -761,16 +755,13 @@ def main():
         # Logout button
         logout_button()
         
-        # Check for admin panel access via URL fragment or button
+        # Admin panel access - positioned below data sources with proper spacing
         if is_admin():
-            # Check if admin panel was requested via URL fragment
-            fragment = st.query_params.get("admin", None)
-            if fragment is not None:
-                st.session_state.view_mode = "admin"
-                st.rerun()
+            # Add some space to separate from data sources
+            st.markdown("<div style='height: 30px;'></div>", unsafe_allow_html=True)
             
-            # Admin panel button in data sources
-            if st.button("🔧 Admin Panel", key="admin_panel_access", help="Access admin controls"):
+            # Admin panel button with blue styling to match other action buttons
+            if st.button("🔧 Admin Panel", key="admin_panel_access", help="Access admin controls", type="primary"):
                 st.session_state.view_mode = "admin"
                 st.rerun()
         
