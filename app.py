@@ -407,7 +407,7 @@ def main():
             }}
         }}
         .hero-section {{
-            background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 25%, #16213e 50%, #0f3460 75%, #533483 100%);
+            background: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url('data:image/jpeg;base64,{bg_image}') center/cover;
             height: 100vh;
             width: 100vw;
             display: flex;
@@ -592,26 +592,25 @@ def main():
                 ticker_part = st.session_state.stock_search.split(" - ")[0]
                 st.session_state.selected_ticker = ticker_part
         
-        # Create columns for proper alignment
-        col1, col2, col3 = st.columns([3, 2, 1])
+        # Single combined dropdown - aligned left without columns to match header
+        selected_option = st.selectbox(
+            "Search stocks by typing",
+            options=[""] + all_options,
+            index=0,
+            key="stock_search",
+            on_change=update_stock_results
+        )
+        
+        # Extract ticker from selection if available
+        ticker = ""
+        if selected_option and " - " in selected_option:
+            ticker = selected_option.split(" - ")[0]
+            st.session_state.selected_ticker = ticker
+        
+        # Create columns for timeframe and button below the search
+        col1, col2 = st.columns([3, 1])
         
         with col1:
-            # Single combined dropdown - now aligned left
-            selected_option = st.selectbox(
-                "Search stocks by typing",
-                options=[""] + all_options,
-                index=0,
-                key="stock_search",
-                on_change=update_stock_results
-            )
-            
-            # Extract ticker from selection if available
-            ticker = ""
-            if selected_option and " - " in selected_option:
-                ticker = selected_option.split(" - ")[0]
-                st.session_state.selected_ticker = ticker
-        
-        with col2:
             # Timeframe selector
             timeframe = st.selectbox(
                 "Select Timeframe",
@@ -619,7 +618,7 @@ def main():
                 index=5  # Default to 1 year
             )
         
-        with col3:
+        with col2:
             # Add spacing to align button with dropdowns
             st.markdown('<div style="height: 26px;"></div>', unsafe_allow_html=True)
             # Search button
@@ -743,13 +742,31 @@ def main():
         logout_button()
         
         # Footer Section (Contact Us)
-        st.markdown("""
+        footer_center_content = ""
+        if is_admin():
+            footer_center_content = '''
+                <div style="text-align: center;">
+                    <button onclick="window.location.reload()" style="
+                        background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+                        color: white;
+                        border: none;
+                        padding: 10px 20px;
+                        border-radius: 6px;
+                        font-weight: bold;
+                        cursor: pointer;
+                        transition: all 0.3s;
+                    ">Admin Panel</button>
+                </div>
+            '''
+        
+        st.markdown(f"""
         <div class="footer">
             <div class="footer-content">
                 <div>
                     <div class="footer-logo">Ticker AI</div>
                     <div class="footer-info">AI-powered stock analysis and investment insights</div>
                 </div>
+                {footer_center_content}
                 <div class="footer-info">
                     <div><strong>Contact Us:</strong></div>
                     <div>Email: gkraem@vt.edu</div>
@@ -758,6 +775,12 @@ def main():
             </div>
         </div>
         """, unsafe_allow_html=True)
+        
+        # Check for admin panel button click
+        if is_admin():
+            if st.button("🔧 Admin Panel", key="admin_panel_button", help="Access admin controls"):
+                st.session_state.view_mode = "admin"
+                st.rerun()
 
 if __name__ == "__main__":
     main()
