@@ -1642,19 +1642,29 @@ def main():
         col1, col2 = st.columns([3, 1.5])
         
         with col1:
-            # Initialize search input state if needed
-            if "stock_search_input" not in st.session_state:
-                st.session_state.stock_search_input = ""
+            # Text input for stock search with populated value
+            input_value = ""
+            if "selected_ticker" in st.session_state and st.session_state.selected_ticker:
+                if "selected_stock_name" in st.session_state:
+                    input_value = f"{st.session_state.selected_ticker} - {st.session_state.selected_stock_name}"
+                else:
+                    input_value = st.session_state.selected_ticker
             
-            # Text input for stock search
             search_input = st.text_input(
                 "Search stocks by ticker or company name",
+                value=input_value,
                 placeholder="Type ticker (e.g., AAPL) or company name...",
                 key="stock_search_input"
             )
             
-            # Show matching stocks if search input exists
-            if search_input and len(search_input) >= 1:
+            # Show matching stocks if search input exists and is not a selected stock
+            show_results = search_input and len(search_input) >= 1 and not (
+                "selected_ticker" in st.session_state and 
+                st.session_state.selected_ticker and 
+                st.session_state.selected_ticker in search_input
+            )
+            
+            if show_results:
                 matching_stocks = []
                 search_lower = search_input.lower()
                 seen_tickers = set()
@@ -1681,8 +1691,6 @@ def main():
                         ):
                             st.session_state.selected_ticker = stock['ticker']
                             st.session_state.selected_stock_name = stock['name']
-                            # Clear the search by resetting it
-                            del st.session_state.stock_search_input
                             st.rerun()
         
         with col2:
@@ -2029,11 +2037,6 @@ def main():
                         change_icon = "🟢" if change_52w > 0 else "🔴" if change_52w < 0 else "⚪"
                         st.write(f"• 52-week performance: {change_52w:+.1f}% {change_icon}")
                     
-                    # Dividend info
-                    if company_info.get('dividendYield'):
-                        div_yield = company_info.get('dividendYield') * 100
-                        st.write(f"• Dividend yield: {div_yield:.2f}%")
-                    
                     # Recent news from Yahoo Finance
                     import yfinance as yf
                     stock = yf.Ticker(ticker)
@@ -2052,30 +2055,6 @@ def main():
                         
                 except Exception as e:
                     st.write("• Check company investor relations for updates")
-                
-                # Alternative news approach if Yahoo Finance fails
-                if not news_found:
-                    try:
-                        # Use company info for basic updates
-                        recent_events = []
-                        if company_info.get('nextFiscalYearEnd'):
-                            recent_events.append("Upcoming fiscal year end")
-                        if company_info.get('lastDividendValue'):
-                            recent_events.append(f"Dividend: ${company_info.get('lastDividendValue'):.2f}")
-                        if company_info.get('52WeekChange'):
-                            change = company_info.get('52WeekChange') * 100
-                            recent_events.append(f"52-week performance: {change:+.1f}%")
-                        
-                        if recent_events:
-                            st.write("**Recent Updates:**")
-                            for event in recent_events[:3]:
-                                st.write(f"• {event}")
-                            news_found = True
-                    except:
-                        pass
-                
-                if not news_found:
-                    st.write("**Recent News:** Check company's investor relations page for latest updates")
                 
                 # Add vertical spacing
                 st.markdown("<br><br>", unsafe_allow_html=True)
