@@ -2272,10 +2272,6 @@ def main():
         st.markdown('<div id="powerplays" class="section-spacer"></div>', unsafe_allow_html=True)
         st.markdown('<div class="section-header">Power Plays<span class="section-emoji">🚀</span></div>', unsafe_allow_html=True)
         
-        # Update Power Plays with full database (1,092 stocks)
-        from power_plays import STOCK_INDICES
-        STOCK_INDICES["Entire Ticker AI Database"] = [stock["ticker"] for stock in STOCK_DATABASE]
-        
         display_power_plays()
         
         # Data Sources section
