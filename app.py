@@ -1517,7 +1517,7 @@ def main():
                 st.metric("Forward P/E", f"{forward_pe:.2f}" if forward_pe else "N/A")
                 st.metric("Market Cap", format_large_number(market_cap) if market_cap else "N/A")
                 st.metric("Profit Margin", f"{profit_margin*100:.2f}%" if profit_margin else "N/A")
-                st.metric("Annual Dividend Yield", f"{dividend_yield*100:.2f}%" if dividend_yield else "N/A")
+                st.metric("Annual Dividend Yield", f"{dividend_yield:.2f}%" if dividend_yield else "N/A")
                 
                 # === 3. SECTOR COMPARISON SECTION ===
                 st.markdown("### 🏭 Sector Analysis")
@@ -1531,69 +1531,76 @@ def main():
                 # Sector peer comparison
                 st.markdown("#### Sector Comparison")
                 
-                # Get sector peers based on sector type, excluding the current stock
-                all_peers = {
-                    "Technology": [
-                        {"name": "Microsoft (MSFT)", "rating": 8.2, "reason": "Higher profitability and stronger balance sheet"},
-                        {"name": "Apple (AAPL)", "rating": 7.8, "reason": "More consistent revenue growth and premium valuation"},
-                        {"name": "Meta Platforms (META)", "rating": 7.7, "reason": "Strong advertising recovery and AI investments"},
-                        {"name": "Alphabet (GOOGL)", "rating": 8.1, "reason": "Search dominance and cloud computing growth"},
-                        {"name": "Intel (INTC)", "rating": 6.1, "reason": "Lower growth prospects but attractive dividend yield"},
-                        {"name": "NVIDIA (NVDA)", "rating": 8.3, "reason": "AI leadership and data center dominance"}
-                    ],
-                    "Healthcare": [
-                        {"name": "Johnson & Johnson (JNJ)", "rating": 7.5, "reason": "Diversified portfolio and stable dividend payments"},
-                        {"name": "Pfizer (PFE)", "rating": 6.8, "reason": "Strong pipeline but facing patent cliffs"},
-                        {"name": "Merck (MRK)", "rating": 7.2, "reason": "Solid oncology franchise and reasonable valuation"}
-                    ],
-                    "Financial Services": [
-                        {"name": "JPMorgan Chase (JPM)", "rating": 7.9, "reason": "Superior return on equity and trading revenues"},
-                        {"name": "Bank of America (BAC)", "rating": 7.1, "reason": "Strong deposit base but interest rate sensitivity"},
-                        {"name": "Wells Fargo (WFC)", "rating": 6.3, "reason": "Recovery story but regulatory overhang remains"}
-                    ],
-                    "Consumer Cyclical": [
-                        {"name": "Amazon (AMZN)", "rating": 8.5, "reason": "Dominant e-commerce position and cloud growth"},
-                        {"name": "Tesla (TSLA)", "rating": 7.4, "reason": "EV market leadership but high valuation"},
-                        {"name": "Home Depot (HD)", "rating": 7.6, "reason": "Strong housing market exposure and execution"}
-                    ],
-                    "Communication Services": [
-                        {"name": "Meta Platforms (META)", "rating": 7.7, "reason": "Strong advertising recovery and AI investments"},
-                        {"name": "Alphabet (GOOGL)", "rating": 8.1, "reason": "Search dominance and cloud computing growth"},
-                        {"name": "Netflix (NFLX)", "rating": 6.9, "reason": "Content costs pressuring margins despite subscriber growth"}
-                    ],
-                    "Energy": [
-                        {"name": "Exxon Mobil (XOM)", "rating": 7.3, "reason": "Improved capital discipline and strong cash flow"},
-                        {"name": "Chevron (CVX)", "rating": 7.8, "reason": "Lower cost structure and consistent dividend policy"},
-                        {"name": "ConocoPhillips (COP)", "rating": 7.5, "reason": "Variable dividend policy and shale expertise"}
-                    ]
+                # Get sector peers with their tickers for real data comparison
+                sector_peers = {
+                    "Technology": ["MSFT", "AAPL", "GOOGL", "NVDA", "INTC", "CRM"],
+                    "Healthcare": ["JNJ", "PFE", "MRK", "UNH", "ABBV", "TMO"],
+                    "Financial Services": ["JPM", "BAC", "WFC", "GS", "MS", "C"],
+                    "Consumer Cyclical": ["AMZN", "TSLA", "HD", "MCD", "NKE", "SBUX"],
+                    "Communication Services": ["META", "GOOGL", "NFLX", "DIS", "T", "VZ"],
+                    "Energy": ["XOM", "CVX", "COP", "SLB", "EOG", "MPC"],
+                    "Consumer Defensive": ["PG", "KO", "PEP", "WMT", "COST", "CL"],
+                    "Industrials": ["BA", "CAT", "GE", "MMM", "UPS", "RTX"]
                 }
                 
-                # Get peers for the sector and filter out the current stock
-                peers = all_peers.get(sector, [
-                    {"name": "S&P 500 Index (SPY)", "rating": 7.2, "reason": "Broad market diversification"},
-                    {"name": "Sector ETF", "rating": 7.0, "reason": "Sector-specific exposure without single stock risk"},
-                    {"name": "Market Average", "rating": 6.8, "reason": "Historical market performance baseline"}
-                ])
+                # Get peer tickers for this sector
+                peer_tickers = sector_peers.get(sector, ["SPY", "QQQ", "DIA"])
                 
-                # Filter out the current stock being analyzed
-                peers = [peer for peer in peers if ticker not in peer["name"]][:3]
+                # Filter out the current stock and get first 3
+                peer_tickers = [t for t in peer_tickers if t != ticker][:3]
                 
-                for i, peer in enumerate(peers):
-                    peer_rating = peer["rating"]
-                    if peer_rating >= 7:
-                        peer_color = "#10B981"
-                        peer_rec = "BUY"
-                    elif peer_rating >= 4:
-                        peer_color = "#F59E0B"
-                        peer_rec = "HOLD"
-                    else:
-                        peer_color = "#EF4444"
-                        peer_rec = "SELL"
-                    
-                    st.markdown(f"""
-                    **{peer['name']}** - <span style='color: {peer_color}; font-weight: bold;'>{peer_rating}/10 ({peer_rec})</span>  
-                    {peer['reason']}
-                    """, unsafe_allow_html=True)
+                # Get real financial data for each peer
+                for peer_ticker in peer_tickers:
+                    try:
+                        import yfinance as yf
+                        peer_stock = yf.Ticker(peer_ticker)
+                        peer_info = peer_stock.info
+                        
+                        # Get peer financial metrics
+                        peer_name = peer_info.get('longName', peer_ticker)
+                        peer_price = peer_info.get('currentPrice', peer_info.get('regularMarketPrice', None))
+                        peer_pe = peer_info.get('trailingPE', None)
+                        peer_market_cap = peer_info.get('marketCap', None)
+                        peer_dividend_yield = peer_info.get('dividendYield', None)
+                        peer_target_price = peer_info.get('targetMeanPrice', None)
+                        
+                        # Calculate peer upside/downside
+                        if peer_target_price and peer_price:
+                            peer_potential = ((peer_target_price - peer_price) / peer_price) * 100
+                            peer_potential_text = f"{peer_potential:+.1f}%"
+                        else:
+                            peer_potential_text = "N/A"
+                        
+                        # Display peer comparison with actual stats
+                        st.markdown(f"**{peer_name} ({peer_ticker})**")
+                        
+                        # Create columns for peer stats
+                        peer_col1, peer_col2, peer_col3 = st.columns(3)
+                        
+                        with peer_col1:
+                            st.write(f"Price: ${peer_price:.2f}" if peer_price else "Price: N/A")
+                            st.write(f"P/E: {peer_pe:.2f}" if peer_pe else "P/E: N/A")
+                        
+                        with peer_col2:
+                            st.write(f"Market Cap: {format_large_number(peer_market_cap)}" if peer_market_cap else "Market Cap: N/A")
+                            st.write(f"Dividend: {peer_dividend_yield:.2f}%" if peer_dividend_yield else "Dividend: N/A")
+                        
+                        with peer_col3:
+                            st.write(f"Upside: {peer_potential_text}")
+                        
+                        # Add comparison insight with clear company names
+                        company_name = company_info.get('longName', ticker)
+                        if peer_pe and trailing_pe:
+                            if peer_pe > trailing_pe:
+                                st.write(f"💡 {company_name} trades at a lower P/E than {peer_name}")
+                            else:
+                                st.write(f"💡 {peer_name} trades at a lower P/E than {company_name}")
+                        
+                        st.markdown("---")
+                        
+                    except Exception as e:
+                        st.write(f"**{peer_ticker}** - Unable to fetch comparison data")
+                        st.markdown("---")
                 
                 # === 4. NEWS SECTION ===
                 st.markdown("### 📰 News")
