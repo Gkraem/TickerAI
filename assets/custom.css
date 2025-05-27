@@ -1,4 +1,27 @@
-/* Custom CSS for Stock Market Analyzer */
+/* Custom CSS for Single Page Ticker AI */
+
+/* Hide Streamlit elements for clean single page layout */
+header[data-testid="stHeader"] {
+    display: none !important;
+}
+
+[data-testid="stToolbar"],
+[data-testid="stDecoration"] {
+    display: none !important;
+}
+
+/* Hide sidebar completely */
+section[data-testid="stSidebar"] {
+    display: none !important;
+}
+
+/* Main app styling */
+.stApp {
+    background: linear-gradient(135deg, #111827 0%, #1e3a8a 100%);
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+}
 
 /* Fix dropdown menu styling */
 div[data-baseweb="select"] ul {
@@ -17,13 +40,9 @@ div[data-baseweb="select"] li:hover {
     background-color: rgba(59, 130, 246, 0.2) !important;
 }
 
-/* Modern gradient background */
-.stApp {
-    background: linear-gradient(135deg, #111827 0%, #1e3a8a 100%);
-    background-size: cover;
-    background-repeat: no-repeat;
-    background-attachment: fixed;
-    padding-top: 20px; /* Add space at the top of the entire app */
+/* Smooth scrolling for navigation links */
+html {
+    scroll-behavior: smooth;
 }
 
 /* Hide any headers that Streamlit might be creating */
