@@ -63,6 +63,19 @@ header button {
     display: none !important;
 }
 
+/* Target the specific sidebar arrow that appears near the logo */
+.stApp > header button,
+.stApp > div > div > div > button,
+button[title*="navigation"],
+button[title*="sidebar"],
+.css-1dp5vir,
+.st-emotion-cache-1dp5vir {
+    display: none !important;
+    visibility: hidden !important;
+    position: absolute !important;
+    left: -9999px !important;
+}
+
 /* Main app styling */
 .stApp {
     background: linear-gradient(135deg, #111827 0%, #1e3a8a 100%);

@@ -356,7 +356,7 @@ def main():
             color: #e5e7eb;
             text-decoration: none;
             font-weight: 500;
-            font-size: 14px;
+            font-size: 16px;
             transition: color 0.3s;
         }}
         .nav-menu a:hover {{
@@ -557,14 +557,14 @@ def main():
         
         with col2:
             st.markdown("""
-            ### 2. AI Analysis
-            Our advanced AI algorithms analyze technical indicators, fundamental data, and market sentiment.
+            ### 2. Power Plays
+            Our Power Plays feature scans hundreds of stocks from major indices to identify the top 5 investment opportunities with the highest AI-driven buy ratings.
             """)
         
         with col3:
             st.markdown("""
-            ### 3. Actionable Insights
-            Get a comprehensive buy/sell rating with detailed explanations and investment recommendations.
+            ### 3. Make Educated Decisions
+            Use our comprehensive analysis, buy/sell ratings, and detailed explanations to make informed investment decisions with confidence.
             """)
         
         # Stock Analyzer Section

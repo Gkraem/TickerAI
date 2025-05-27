@@ -411,21 +411,7 @@ def display_power_plays():
     if 'power_plays_index' not in st.session_state:
         st.session_state.power_plays_index = "Fortune 500"
     
-    # Simple description without background bubble
-    if st.session_state.power_plays_results is None:
-        st.markdown("""
-        <p style="color: #e5e7eb; font-size: 1.1rem; line-height: 1.6; margin-bottom: 30px;">
-        Power Plays delivers the five most compelling stock opportunities, ranked by AI-driven buy ratings. 
-        Scanning hundreds of companies to find the best investment opportunities right now.
-        </p>
-        """, unsafe_allow_html=True)
-    else:
-        st.markdown("""
-        <p style="color: #e5e7eb; font-size: 1.1rem; line-height: 1.6; margin-bottom: 30px;">
-        Power Plays delivers the five most compelling stock opportunities, ranked by AI-driven buy ratings.
-        These top picks offer a snapshot of where the strongest buying signals are—so you can act fast, with confidence.
-        </p>
-        """, unsafe_allow_html=True)
+    # No description text - it's now explained in "How It Works" section
     
     # Dropdown for selecting stock index
     selected_index = st.selectbox(
