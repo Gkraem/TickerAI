@@ -1487,33 +1487,25 @@ def main():
                     # Calculate angle for needle (0-180 degrees, left to right)
                     angle = (buy_rating / 10) * 180
                     
-                    # Create SVG gauge meter
-                    gauge_svg = f"""
-                    <div style="display: flex; flex-direction: column; align-items: center; margin: 20px 0;">
-                        <svg width="300" height="180" viewBox="0 0 300 180">
-                            <!-- Background arc -->
-                            <path d="M 30 150 A 120 120 0 0 1 270 150" stroke="#374151" stroke-width="20" fill="none"/>
-                            <!-- Red section (SELL) -->
-                            <path d="M 30 150 A 120 120 0 0 0 150 30" stroke="#EF4444" stroke-width="20" fill="none"/>
-                            <!-- Yellow section (HOLD) -->
-                            <path d="M 150 30 A 120 120 0 0 0 225 75" stroke="#F59E0B" stroke-width="20" fill="none"/>
-                            <!-- Green section (BUY) -->
-                            <path d="M 225 75 A 120 120 0 0 0 270 150" stroke="#10B981" stroke-width="20" fill="none"/>
-                            
-                            <!-- Labels -->
-                            <text x="50" y="170" fill="white" font-size="14" font-weight="bold">SELL</text>
-                            <text x="135" y="25" fill="white" font-size="14" font-weight="bold">NEUTRAL</text>
-                            <text x="240" y="170" fill="white" font-size="14" font-weight="bold">BUY</text>
-                            
-                            <!-- Needle -->
-                            <g transform="translate(150,150)">
-                                <line x1="0" y1="0" x2="{90 * (buy_rating/10 - 0.5):,.0f}" y2="{-90 * (1 - abs(buy_rating/10 - 0.5)**0.5):,.0f}" 
-                                      stroke="white" stroke-width="3" stroke-linecap="round"/>
-                                <circle cx="0" cy="0" r="8" fill="white"/>
-                            </g>
-                        </svg>
+                    # Create a simpler, more reliable rating display
+                    rating_display = f"""
+                    <div style="display: flex; flex-direction: column; align-items: center; margin: 30px 0;">
+                        <!-- Progress bar style meter -->
+                        <div style="width: 300px; height: 30px; background: linear-gradient(to right, #EF4444 0%, #EF4444 33%, #F59E0B 33%, #F59E0B 66%, #10B981 66%, #10B981 100%); 
+                                   border-radius: 15px; position: relative; border: 2px solid #374151;">
+                            <div style="position: absolute; left: {(buy_rating/10)*100}%; top: -5px; transform: translateX(-50%); 
+                                       width: 6px; height: 40px; background: white; border-radius: 3px; box-shadow: 0 2px 4px rgba(0,0,0,0.3);"></div>
+                        </div>
                         
-                        <div style="text-align: center; margin-top: 10px;">
+                        <!-- Labels -->
+                        <div style="width: 300px; display: flex; justify-content: space-between; margin-top: 10px; font-size: 12px; color: #9CA3AF;">
+                            <span>SELL</span>
+                            <span>NEUTRAL</span>
+                            <span>BUY</span>
+                        </div>
+                        
+                        <!-- Rating display -->
+                        <div style="text-align: center; margin-top: 20px;">
                             <div style="font-size: 48px; font-weight: bold; color: {color}; margin-bottom: 5px;">
                                 {buy_rating:.1f}/10
                             </div>
@@ -1523,7 +1515,7 @@ def main():
                         </div>
                     </div>
                     """
-                    st.markdown(gauge_svg, unsafe_allow_html=True)
+                    st.markdown(rating_display, unsafe_allow_html=True)
                 
                 # === 2. FINANCIALS SECTION ===
                 st.markdown("### 💰 Key Financials")
