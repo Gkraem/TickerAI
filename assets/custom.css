@@ -15,6 +15,16 @@ section[data-testid="stSidebar"] {
     display: none !important;
 }
 
+/* Hide sidebar toggle button */
+button[data-testid="collapsedControl"] {
+    display: none !important;
+}
+
+/* Hide any remaining sidebar controls */
+[data-testid="stSidebarNav"] {
+    display: none !important;
+}
+
 /* Main app styling */
 .stApp {
     background: linear-gradient(135deg, #111827 0%, #1e3a8a 100%);

@@ -328,26 +328,27 @@ def main():
             z-index: 1000;
             background-color: rgba(17, 24, 39, 0.95);
             backdrop-filter: blur(10px);
-            padding: 8px 0;
+            padding: 5px 0;
             border-bottom: 1px solid rgba(59, 130, 246, 0.3);
         }}
         .nav-content {{
-            max-width: 1200px;
-            margin: 0 auto;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 0 20px;
+            padding: 0 40px;
+            width: 100%;
         }}
         .nav-logo {{
             margin: 0;
             color: #3b82f6;
             font-size: 24px;
             font-weight: bold;
+            margin-left: -20px;
         }}
         .nav-menu {{
             display: flex;
-            gap: 25px;
+            gap: 30px;
+            margin-right: -20px;
         }}
         .nav-menu a {{
             color: #e5e7eb;
@@ -450,6 +451,21 @@ def main():
         .section-spacer {{
             height: 60px;
         }}
+        .section-header {{
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #3b82f6;
+            margin: 40px 0 30px 0;
+            padding-bottom: 15px;
+            border-bottom: 2px solid rgba(59, 130, 246, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }}
+        .section-emoji {{
+            font-size: 2rem;
+            margin-left: 15px;
+        }}
         .footer {{
             background-color: rgba(17, 24, 39, 0.95);
             border-top: 1px solid rgba(59, 130, 246, 0.3);
@@ -459,13 +475,12 @@ def main():
             margin-left: calc(-50vw + 50%);
         }}
         .footer-content {{
-            max-width: 1200px;
-            margin: 0 auto;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 0 20px;
+            padding: 0 40px;
             flex-wrap: wrap;
+            width: 100%;
         }}
         .footer-logo {{
             color: #3b82f6;
@@ -512,7 +527,7 @@ def main():
         """, unsafe_allow_html=True)
         
         # Add top spacing to account for fixed header
-        st.markdown('<div style="height: 60px;"></div>', unsafe_allow_html=True)
+        st.markdown('<div style="height: 50px;"></div>', unsafe_allow_html=True)
         
         # Hero Section with background image
         st.markdown("""
@@ -529,7 +544,7 @@ def main():
         
         # How It Works Section
         st.markdown('<div id="howitworks" class="section-spacer"></div>', unsafe_allow_html=True)
-        st.markdown("## 🔍 How It Works")
+        st.markdown('<div class="section-header">How It Works<span class="section-emoji">🔍</span></div>', unsafe_allow_html=True)
         
         col1, col2, col3 = st.columns(3)
         with col1:
@@ -552,7 +567,7 @@ def main():
         
         # Stock Analyzer Section
         st.markdown('<div id="analyzer" class="section-spacer"></div>', unsafe_allow_html=True)
-        st.markdown("## 📊 Stock Analyzer")
+        st.markdown('<div class="section-header">Stock Analyzer<span class="section-emoji">📊</span></div>', unsafe_allow_html=True)
         
         # Initialize session states for stock search
         if "search_query" not in st.session_state:
@@ -706,10 +721,11 @@ def main():
         
         # Power Plays Section
         st.markdown('<div id="powerplays" class="section-spacer"></div>', unsafe_allow_html=True)
+        st.markdown('<div class="section-header">Power Plays<span class="section-emoji">🚀</span></div>', unsafe_allow_html=True)
         display_power_plays()
         
         # Data Sources section
-        st.markdown("### 📊 Data Sources")
+        st.markdown('<div class="section-header">Data Sources<span class="section-emoji">📊</span></div>', unsafe_allow_html=True)
         st.markdown("All our financial data comes from trusted, professional sources:")
         st.markdown("• **[Yahoo Finance](https://finance.yahoo.com/)** - Real-time stock prices, historical data, and company information")
         st.markdown("• **[yfinance Python Library](https://pypi.org/project/yfinance/)** - Yahoo Finance API wrapper for data retrieval")
