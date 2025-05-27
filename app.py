@@ -1991,34 +1991,24 @@ def main():
                         except:
                             pass
                     
-                    # Calculate upcoming earnings as 92 days from most recent report
+                    # Calculate upcoming earnings for summer 2025
                     if not earnings_found:
                         try:
                             from datetime import datetime, timedelta
-                            earnings_history = stock.earnings_history
-                            if earnings_history is not None and not earnings_history.empty:
-                                # Get the most recent earnings date from actual data
-                                last_earnings_date = earnings_history.index[0]
-                                # Add exactly 92 days for next quarterly report
-                                estimated_next = last_earnings_date + timedelta(days=92)
-                                st.write(f"• ~{estimated_next.strftime('%B %d, %Y')} (Estimated)")
-                                earnings_found = True
-                            else:
-                                # If no earnings history, use current date logic for 2025
-                                current_date = datetime.now()
-                                
-                                # Since we're in 2025, estimate based on current quarter
-                                if current_date.month <= 3:  # Q1 2025
-                                    estimated_next = datetime(2025, 4, 15)
-                                elif current_date.month <= 6:  # Q2 2025
-                                    estimated_next = datetime(2025, 7, 15)
-                                elif current_date.month <= 9:  # Q3 2025
-                                    estimated_next = datetime(2025, 10, 15)
-                                else:  # Q4 2025
-                                    estimated_next = datetime(2026, 1, 15)
-                                
-                                st.write(f"• ~{estimated_next.strftime('%B %d, %Y')} (Estimated)")
-                                earnings_found = True
+                            
+                            # Since we're in 2025, estimate next earnings for summer 2025
+                            current_date = datetime.now()
+                            
+                            # Force summer 2025 dates regardless of historical data
+                            if current_date.month <= 6:  # Before July
+                                estimated_next = datetime(2025, 7, 15)  # July 2025
+                            elif current_date.month <= 9:  # July-Sep
+                                estimated_next = datetime(2025, 10, 15)  # October 2025
+                            else:  # Oct-Dec
+                                estimated_next = datetime(2026, 1, 15)   # January 2026
+                            
+                            st.write(f"• ~{estimated_next.strftime('%B %d, %Y')} (Estimated)")
+                            earnings_found = True
                         except:
                             pass
                     
@@ -2344,14 +2334,12 @@ def main():
                     rating_text = f"**SELL RATING: {buy_rating:.1f}/10**"
                     recommendation = "faces significant headwinds and risks"
                 
-                # Generate personalized summary with proper spacing
-                st.markdown(f"**{rating_text.replace('**', '').replace('*', '')}**")
-                st.markdown("")
-                st.markdown(f"{company_name} is a {size_category} {sector.lower()} company that {recommendation}. The stock is currently {valuation_note} and {profit_note}.")
-                st.markdown("")
-                st.markdown(f"Our analysis indicates {rating_breakdown.get('Technical Analysis', {}).get('reason', 'mixed technical signals').lower()}, while the company's fundamentals show {rating_breakdown.get('Fundamental Analysis', {}).get('reason', 'average financial health').lower()}.")
-                st.markdown("")
-                st.markdown(f"Market sentiment suggests {rating_breakdown.get('Market Sentiment', {}).get('reason', 'neutral investor confidence').lower()}, which combined with the technical and fundamental picture supports our {buy_rating:.1f}/10 rating.")
+                # Generate personalized summary with About section formatting
+                st.markdown(f"""
+                **{rating_text.replace('**', '').replace('*', '')}**
+                
+                {company_name} is a {size_category} {sector.lower()} company that {recommendation}. The stock is currently {valuation_note} and {profit_note}. Our analysis indicates {rating_breakdown.get('Technical Analysis', {}).get('reason', 'mixed technical signals').lower()}, while the company's fundamentals show {rating_breakdown.get('Fundamental Analysis', {}).get('reason', 'average financial health').lower()}. Market sentiment suggests {rating_breakdown.get('Market Sentiment', {}).get('reason', 'neutral investor confidence').lower()}, which combined with the technical and fundamental picture supports our {buy_rating:.1f}/10 rating.
+                """)
                 
             except Exception as e:
                 st.error(f"Error analyzing stock: {str(e)}")
