@@ -317,6 +317,13 @@ def main():
         # Get base64 encoded background image
         bg_image = get_base64_image("assets/ticker2.jpg")
         
+        # Prepare admin navigation items
+        admin_nav_item = ""
+        admin_nav_dropdown = ""
+        if is_admin():
+            admin_nav_item = '<a href="#admin" onclick="window.location.reload()" style="color: #10B981;">Admin Panel</a>'
+            admin_nav_dropdown = '<a href="#admin" onclick="window.location.reload()" style="color: #10B981;">Admin Panel</a>'
+        
         # Create navigation header
         st.markdown(f"""
         <style>
@@ -512,6 +519,7 @@ def main():
             <div class="nav-content">
                 <h1 class="nav-logo">Ticker AI</h1>
                 <nav class="nav-menu">
+                    {admin_nav_item}
                     <a href="#howitworks">How It Works</a>
                     <a href="#analyzer">Stock Analyzer</a>
                     <a href="#powerplays">Power Plays</a>
@@ -519,6 +527,7 @@ def main():
                 <div style="position: relative;">
                     <button class="nav-toggle">☰</button>
                     <div class="nav-dropdown">
+                        {admin_nav_dropdown}
                         <a href="#howitworks">How It Works</a>
                         <a href="#analyzer">Stock Analyzer</a>
                         <a href="#powerplays">Power Plays</a>
@@ -592,42 +601,42 @@ def main():
                 ticker_part = st.session_state.stock_search.split(" - ")[0]
                 st.session_state.selected_ticker = ticker_part
         
-        # Single combined dropdown - aligned left without columns to match header
-        selected_option = st.selectbox(
-            "Search stocks by typing",
-            options=[""] + all_options,
-            index=0,
-            key="stock_search",
-            on_change=update_stock_results
-        )
-        
-        # Extract ticker from selection if available
-        ticker = ""
-        if selected_option and " - " in selected_option:
-            ticker = selected_option.split(" - ")[0]
-            st.session_state.selected_ticker = ticker
-        
-        # Create columns for timeframe and button below the search
-        col1, col2 = st.columns([3, 1])
+        # Create columns for all elements on one line
+        col1, col2, col3 = st.columns([3, 2, 1])
         
         with col1:
-            # Timeframe selector
-            timeframe = st.selectbox(
-                "Select Timeframe",
-                ["1d", "5d", "1mo", "3mo", "6mo", "1y", "2y", "5y", "max"],
-                index=5  # Default to 1 year
+            # Single combined dropdown - aligned left
+            selected_option = st.selectbox(
+                "Search stocks by typing",
+                options=[""] + all_options,
+                index=0,
+                key="stock_search",
+                on_change=update_stock_results
             )
         
         with col2:
+            # Timeframe selector
+            timeframe = st.selectbox(
+                "Select Timeframe",
+                ["1d", "5d", "1mo", "3mo", "6mo", "1y", "2y", "max"],
+                index=5  # Default to 1 year
+            )
+        
+        with col3:
             # Add spacing to align button with dropdowns
             st.markdown('<div style="height: 26px;"></div>', unsafe_allow_html=True)
             # Search button
             search_button = st.button("Analyze Stock", type="primary")
         
-        # Display selected ticker
+        # Extract ticker from selection if available (removed confirmation box)
+        ticker = ""
+        if selected_option and " - " in selected_option:
+            ticker = selected_option.split(" - ")[0]
+            st.session_state.selected_ticker = ticker
+        
+        # Use selected ticker if available
         if "selected_ticker" in st.session_state and st.session_state.selected_ticker:
             ticker = st.session_state.selected_ticker
-            st.success(f"Selected: **{ticker}**")
         
         # Stock analysis display
         if search_button and ticker:
@@ -719,6 +728,16 @@ def main():
             except Exception as e:
                 st.error(f"Error analyzing {ticker}: {str(e)}")
                 st.info("Please check if the ticker symbol is correct and try again.")
+            
+            # Add reset search button after analysis
+            st.write("")  # Add some spacing
+            if st.button("Reset Search", key="reset_stock_search"):
+                # Clear all analysis-related session state
+                if "selected_ticker" in st.session_state:
+                    del st.session_state.selected_ticker
+                if "stock_search" in st.session_state:
+                    del st.session_state.stock_search
+                st.rerun()
         
         elif search_button and not ticker:
             st.warning("Please select a stock from the dropdown before analyzing.")

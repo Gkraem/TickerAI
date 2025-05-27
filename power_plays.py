@@ -413,40 +413,53 @@ def display_power_plays():
     
     # No description text - it's now explained in "How It Works" section
     
-    # Dropdown for selecting stock index
-    selected_index = st.selectbox(
-        "Select stock index to analyze:", 
-        options=list(STOCK_INDICES.keys()),
-        index=list(STOCK_INDICES.keys()).index(st.session_state.power_plays_index)
-    )
+    # Create columns for dropdown and buttons on same line
+    col1, col2, col3 = st.columns([3, 1.5, 1])
     
-    # Update the session state if index changed
-    if selected_index != st.session_state.power_plays_index:
-        st.session_state.power_plays_index = selected_index
+    with col1:
+        # Dropdown for selecting stock index
+        selected_index = st.selectbox(
+            "Select stock index to analyze:", 
+            options=list(STOCK_INDICES.keys()),
+            index=list(STOCK_INDICES.keys()).index(st.session_state.power_plays_index)
+        )
+        
+        # Update the session state if index changed
+        if selected_index != st.session_state.power_plays_index:
+            st.session_state.power_plays_index = selected_index
+            st.session_state.power_plays_results = None
+    
+    with col2:
+        # Add spacing to align button with dropdown
+        st.markdown('<div style="height: 26px;"></div>', unsafe_allow_html=True)
+        # Button for analysis - show Run or Refresh based on state
+        if st.session_state.power_plays_results is None:
+            # Show Run Analysis button
+            run_button = st.button("Run Analysis", key="run_power_plays_button")
+        else:
+            # Show Refresh Analysis button
+            run_button = st.button("Refresh Analysis", key="refresh_power_plays_button")
+    
+    with col3:
+        # Reset button - only show if we have results
+        if st.session_state.power_plays_results is not None:
+            st.markdown('<div style="height: 26px;"></div>', unsafe_allow_html=True)
+            reset_button = st.button("Reset Search", key="reset_power_plays")
+        else:
+            reset_button = False
+    
+    # Handle button clicks
+    if run_button:
+        with st.spinner(f"Analyzing {selected_index} stocks to find the best opportunities..."):
+            st.session_state.power_plays_results = get_top_stocks(
+                max_stocks=5, 
+                max_tickers=500,
+                index_name=selected_index
+            )
+    
+    if reset_button:
         st.session_state.power_plays_results = None
-    
-    # Add some space
-    st.write("")
-    
-    # Button for analysis - show Run or Refresh based on state
-    if st.session_state.power_plays_results is None:
-        # Show Run Analysis button
-        if st.button("Run Analysis", key="run_power_plays_button"):
-            with st.spinner(f"Analyzing {selected_index} stocks to find the best opportunities..."):
-                st.session_state.power_plays_results = get_top_stocks(
-                    max_stocks=5, 
-                    max_tickers=500,
-                    index_name=selected_index
-                )
-    else:
-        # Show Refresh Analysis button
-        if st.button("Refresh Analysis", key="refresh_power_plays_button"):
-            with st.spinner(f"Refreshing analysis for {selected_index}..."):
-                st.session_state.power_plays_results = get_top_stocks(
-                    max_stocks=5, 
-                    max_tickers=500, 
-                    index_name=selected_index
-                )
+        st.rerun()
     
     # Display results only if we have them
     top_stocks = st.session_state.power_plays_results
