@@ -1436,8 +1436,16 @@ def main():
         if "selected_ticker" in st.session_state and st.session_state.selected_ticker:
             ticker = st.session_state.selected_ticker
         
-        # Stock analysis display
+        # Stock analysis display - use session state to prevent reset
         if search_button and ticker:
+            # Store analysis data in session state
+            st.session_state[f'analysis_data_{ticker}'] = {
+                'ticker': ticker,
+                'timestamp': time.time()
+            }
+        
+        # Display analysis if we have stored data
+        if f'analysis_data_{ticker}' in st.session_state and ticker:
             try:
                 analyzer = StockAnalyzer(ticker)
                 
@@ -1479,25 +1487,30 @@ def main():
                 meter_col, ratings_col = st.columns([1, 1])
                 
                 with meter_col:
-                    # Buy rating meter with SVG gauge
-                    meter_percentage = (buy_rating / 10) * 100
+                    # Clean circular progress meter
+                    progress_percentage = (buy_rating / 10) * 100
                     
                     st.markdown(f"""
                     <div style="text-align: center; margin: 20px 0;">
-                        <svg width="200" height="120" viewBox="0 0 200 120">
-                            <!-- Background arc -->
-                            <path d="M 20 100 A 80 80 0 0 1 180 100" 
-                                  fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="12"/>
-                            <!-- Progress arc -->
-                            <path d="M 20 100 A 80 80 0 0 1 {20 + (160 * meter_percentage/100)} {100 - 80 * (1 - abs(1 - 2*meter_percentage/100))}" 
-                                  fill="none" stroke="{color}" stroke-width="12" stroke-linecap="round"/>
-                            <!-- Center text -->
-                            <text x="100" y="70" text-anchor="middle" fill="{color}" 
-                                  style="font-size: 32px; font-weight: bold;">{buy_rating:.1f}</text>
-                            <text x="100" y="90" text-anchor="middle" fill="{color}" 
-                                  style="font-size: 14px; font-weight: bold;">/ 10</text>
-                        </svg>
-                        <div style="font-size: 24px; font-weight: bold; color: {color}; margin-top: 10px;">
+                        <div style="position: relative; width: 150px; height: 150px; margin: 0 auto;">
+                            <!-- Background circle -->
+                            <svg width="150" height="150" style="position: absolute; top: 0; left: 0;">
+                                <circle cx="75" cy="75" r="60" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="8"/>
+                                <circle cx="75" cy="75" r="60" fill="none" stroke="{color}" stroke-width="8" 
+                                        stroke-dasharray="{(progress_percentage * 3.77):.1f} 377" 
+                                        stroke-linecap="round" transform="rotate(-90 75 75)"/>
+                            </svg>
+                            <!-- Center content -->
+                            <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center;">
+                                <div style="color: {color}; font-size: 36px; font-weight: bold; line-height: 1;">
+                                    {buy_rating:.1f}
+                                </div>
+                                <div style="color: {color}; font-size: 16px; font-weight: bold;">
+                                    / 10
+                                </div>
+                            </div>
+                        </div>
+                        <div style="font-size: 24px; font-weight: bold; color: {color}; margin-top: 15px;">
                             {recommendation}
                         </div>
                     </div>
@@ -1726,21 +1739,51 @@ def main():
                 if not earnings_displayed:
                     st.write("**Next Earnings:** Date not available")
                 
-                # Get recent news headlines
+                # Get recent news headlines from multiple sources
+                news_found = False
+                
+                # Try Yahoo Finance news first
                 try:
                     import yfinance as yf
                     stock = yf.Ticker(ticker)
                     news = stock.news
-                    if news:
+                    if news and len(news) > 0:
                         st.write("**Recent News:**")
                         for article in news[:3]:
-                            title = article.get('title', 'News article')
-                            if title and title != 'News article':
-                                st.write(f"• {title}")
-                    else:
-                        st.write("**Recent News:** No recent news available")
+                            title = article.get('title', '')
+                            link = article.get('link', '')
+                            if title and title.strip():
+                                if link:
+                                    st.markdown(f"• [{title}]({link})")
+                                else:
+                                    st.write(f"• {title}")
+                        news_found = True
                 except:
-                    st.write("**Recent News:** Unable to fetch news at this time")
+                    pass
+                
+                # Alternative news approach if Yahoo Finance fails
+                if not news_found:
+                    try:
+                        # Use company info for basic updates
+                        recent_events = []
+                        if company_info.get('nextFiscalYearEnd'):
+                            recent_events.append("Upcoming fiscal year end")
+                        if company_info.get('lastDividendValue'):
+                            recent_events.append(f"Dividend: ${company_info.get('lastDividendValue'):.2f}")
+                        if company_info.get('52WeekChange'):
+                            change = company_info.get('52WeekChange') * 100
+                            recent_events.append(f"52-week performance: {change:+.1f}%")
+                        
+                        if recent_events:
+                            st.write("**Recent Updates:**")
+                            for event in recent_events[:3]:
+                                st.write(f"• {event}")
+                            news_found = True
+                    except:
+                        pass
+                
+                if not news_found:
+                    st.write("**Recent News:** Check company's investor relations page for latest updates")
                 
                 # Add vertical spacing
                 st.markdown("<br><br>", unsafe_allow_html=True)
