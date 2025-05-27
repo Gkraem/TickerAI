@@ -3,8 +3,21 @@ import json
 import os
 from passlib.hash import pbkdf2_sha256
 from datetime import datetime
+import sqlalchemy as sa
+from sqlalchemy import create_engine, text
+import pandas as pd
 
-# File to store user data
+# Database connection
+def get_db_engine():
+    """Get database engine using environment variables"""
+    database_url = os.environ.get("DATABASE_URL")
+    if database_url:
+        return create_engine(database_url)
+    else:
+        # Fallback to JSON file if database not available
+        return None
+
+# File to store user data (fallback)
 USER_DB_FILE = "user_data.json"
 
 def initialize_user_db():

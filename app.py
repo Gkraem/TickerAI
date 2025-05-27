@@ -516,6 +516,7 @@ def main():
             <div class="nav-content">
                 <h1 class="nav-logo">Ticker AI</h1>
                 <nav class="nav-menu">
+                    <a href="#about">About</a>
                     <a href="#howitworks">How It Works</a>
                     <a href="#analyzer">Stock Analyzer</a>
                     <a href="#powerplays">Power Plays</a>
@@ -523,6 +524,7 @@ def main():
                 <div style="position: relative;">
                     <button class="nav-toggle">☰</button>
                     <div class="nav-dropdown">
+                        <a href="#about">About</a>
                         <a href="#howitworks">How It Works</a>
                         <a href="#analyzer">Stock Analyzer</a>
                         <a href="#powerplays">Power Plays</a>
@@ -548,9 +550,17 @@ def main():
         </div>
         """, unsafe_allow_html=True)
         
+        # About Section
+        st.markdown('<div id="about" class="section-spacer"></div>', unsafe_allow_html=True)
+        st.markdown('<div class="section-header">About Ticker AI<span class="section-emoji">🤖</span></div>', unsafe_allow_html=True)
+        st.markdown("""
+        **About Ticker AI:**
+        Ticker AI is a powerful stock analysis platform that combines real-time data with advanced AI to help you make smarter investment decisions. It analyzes price trends, technical indicators, and historical patterns to predict market movements with precision. Ticker AI also monitors breaking news and social media to gauge sentiment shifts, while factoring in key financial metrics like earnings growth, valuations, and insider activity. By tracking market events and seasonal trends, it delivers a complete, up-to-the-minute picture of a stock's potential—summarized in a clear, actionable rating.
+        """)
+        
         # How It Works Section
         st.markdown('<div id="howitworks" class="section-spacer"></div>', unsafe_allow_html=True)
-        st.markdown('<div class="section-header">How It Works<span class="section-emoji">🔍</span></div>', unsafe_allow_html=True)
+        st.markdown('<div class="section-header">How It Works<span class="section-emoji">⚡</span></div>', unsafe_allow_html=True)
         
         col1, col2, col3 = st.columns(3)
         with col1:
