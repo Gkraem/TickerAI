@@ -1640,18 +1640,13 @@ def main():
         col1, col2 = st.columns([3, 1.5])
         
         with col1:
-            # Text input for stock search to avoid dropdown overlap issues
-            # Set value based on selected stock
-            input_value = ""
-            if "selected_ticker" in st.session_state and st.session_state.selected_ticker:
-                if "selected_stock_name" in st.session_state:
-                    input_value = f"{st.session_state.selected_ticker} - {st.session_state.selected_stock_name}"
-                else:
-                    input_value = st.session_state.selected_ticker
+            # Initialize search input state if needed
+            if "stock_search_input" not in st.session_state:
+                st.session_state.stock_search_input = ""
             
+            # Text input for stock search
             search_input = st.text_input(
                 "Search stocks by ticker or company name",
-                value=input_value,
                 placeholder="Type ticker (e.g., AAPL) or company name...",
                 key="stock_search_input"
             )
@@ -1684,7 +1679,8 @@ def main():
                         ):
                             st.session_state.selected_ticker = stock['ticker']
                             st.session_state.selected_stock_name = stock['name']
-                            # Clear the search input by rerunning
+                            # Clear the search by resetting it
+                            del st.session_state.stock_search_input
                             st.rerun()
         
         with col2:

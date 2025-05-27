@@ -156,13 +156,19 @@ def authenticate_user(identifier, password):
     else:
         # Fallback to JSON file
         users_data = load_users()
-    
-    for user in users_data["users"]:
-        # Check if identifier matches email or phone
-        if user["email"] == identifier or user["phone"] == identifier:
-            # Verify password
-            if pbkdf2_sha256.verify(password, user["password"]):
-                return True, user
+        
+        for user in users_data["users"]:
+            # Check if identifier matches email or phone
+            if user["email"] == identifier or user["phone"] == identifier:
+                # Verify password
+                if pbkdf2_sha256.verify(password, user["password"]):
+                    # Return consistent format
+                    user_data = {
+                        "name": user["name"],
+                        "email": user["email"],
+                        "phone": user["phone"]
+                    }
+                    return True, user_data
     
     return False, "Invalid credentials"
 
