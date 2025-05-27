@@ -1360,7 +1360,7 @@ def main():
             right: 0;
             z-index: 1000;
             background-color: #000000;
-            padding: 3px 0;
+            padding: 2px 0;
             border-bottom: 1px solid rgba(59, 130, 246, 0.3);
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
         }}
@@ -1374,7 +1374,7 @@ def main():
         .nav-logo {{
             margin: 0;
             color: #3b82f6;
-            font-size: 12px;
+            font-size: 10px;
             font-weight: bold;
         }}
         .nav-menu {{
@@ -1454,7 +1454,7 @@ def main():
             margin: 0 calc(-50vw + 50%);
             padding: 0 2rem;
             position: relative;
-            transform: translateY(-30px);
+            transform: translateY(-60px);
         }}
         .hero-title {{
             font-size: 4rem;
