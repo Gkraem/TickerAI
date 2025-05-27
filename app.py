@@ -1919,8 +1919,14 @@ def main():
                                 font=dict(color='white')
                             )
                             
-                            # Format y-axis to show values in billions/millions
-                            fig.update_layout(yaxis_tickformat='.2s')
+                            # Format y-axis to show values in billions/millions with clear labels
+                            fig.update_layout(
+                                yaxis=dict(
+                                    tickformat='$,.0f',
+                                    tickmode='auto',
+                                    nticks=6
+                                )
+                            )
                             
                             st.plotly_chart(fig, use_container_width=True)
                         else:
