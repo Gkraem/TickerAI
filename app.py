@@ -1407,8 +1407,8 @@ def main():
                 ticker_part = st.session_state.stock_search.split(" - ")[0]
                 st.session_state.selected_ticker = ticker_part
         
-        # Create columns for all elements on one line
-        col1, col2, col3 = st.columns([3, 2, 1])
+        # Create columns for dropdown and button
+        col1, col2 = st.columns([4, 1])
         
         with col1:
             # Single combined dropdown - aligned left
@@ -1421,15 +1421,7 @@ def main():
             )
         
         with col2:
-            # Timeframe selector
-            timeframe = st.selectbox(
-                "Select Timeframe",
-                ["1d", "5d", "1mo", "3mo", "6mo", "1y", "2y", "max"],
-                index=5  # Default to 1 year
-            )
-        
-        with col3:
-            # Add spacing to align button with dropdowns
+            # Add spacing to align button with dropdown
             st.markdown('<div style="height: 26px;"></div>', unsafe_allow_html=True)
             # Search button
             search_button = st.button("Analyze Stock", type="primary")
@@ -1509,15 +1501,22 @@ def main():
                 else:
                     potential_text = "N/A"
                 
-                # Mobile-responsive layout - single column on mobile, 3 columns on desktop
-                st.metric("Current Price", f"${current_price:.2f}" if current_price else "N/A")
-                st.metric("Target Price", f"${target_price:.2f}" if target_price else "N/A")
-                st.metric("Upside/Downside", potential_text)
-                st.metric("P/E Ratio (TTM)", f"{trailing_pe:.2f}" if trailing_pe else "N/A")
-                st.metric("Forward P/E", f"{forward_pe:.2f}" if forward_pe else "N/A")
-                st.metric("Market Cap", format_large_number(market_cap) if market_cap else "N/A")
-                st.metric("Profit Margin", f"{profit_margin*100:.2f}%" if profit_margin else "N/A")
-                st.metric("Annual Dividend Yield", f"{dividend_yield:.2f}%" if dividend_yield else "N/A")
+                # Use same formatting as sector comparison for consistency
+                fin_col1, fin_col2, fin_col3 = st.columns(3)
+                
+                with fin_col1:
+                    st.write(f"Price: ${current_price:.2f}" if current_price else "Price: N/A")
+                    st.write(f"P/E: {trailing_pe:.2f}" if trailing_pe else "P/E: N/A")
+                    st.write(f"Profit Margin: {profit_margin*100:.2f}%" if profit_margin else "Profit Margin: N/A")
+                
+                with fin_col2:
+                    st.write(f"Market Cap: {format_large_number(market_cap)}" if market_cap else "Market Cap: N/A")
+                    st.write(f"Forward P/E: {forward_pe:.2f}" if forward_pe else "Forward P/E: N/A")
+                    st.write(f"Dividend: {dividend_yield:.2f}%" if dividend_yield else "Dividend: N/A")
+                
+                with fin_col3:
+                    st.write(f"Analyst's Mean Target Price: ${target_price:.2f}" if target_price else "Target Price: N/A")
+                    st.write(f"Upside: {potential_text}")
                 
                 # === 3. SECTOR COMPARISON SECTION ===
                 st.markdown("### 🏭 Sector Analysis")
@@ -1586,15 +1585,10 @@ def main():
                             st.write(f"Dividend: {peer_dividend_yield:.2f}%" if peer_dividend_yield else "Dividend: N/A")
                         
                         with peer_col3:
+                            st.write(f"Analyst's Mean Target Price: ${peer_target_price:.2f}" if peer_target_price else "Target Price: N/A")
                             st.write(f"Upside: {peer_potential_text}")
                         
-                        # Add comparison insight with clear company names
-                        company_name = company_info.get('longName', ticker)
-                        if peer_pe and trailing_pe:
-                            if peer_pe > trailing_pe:
-                                st.write(f"💡 {company_name} trades at a lower P/E than {peer_name}")
-                            else:
-                                st.write(f"💡 {peer_name} trades at a lower P/E than {company_name}")
+
                         
                         st.markdown("---")
                         
