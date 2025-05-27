@@ -1355,6 +1355,8 @@ def main():
         st.markdown('<div class="section-header">About Ticker AI<span class="section-emoji">🤖</span></div>', unsafe_allow_html=True)
         st.markdown("""
         A powerful stock analysis platform that combines real-time data with advanced AI to help you make smarter investment decisions. It analyzes price trends, technical indicators, and historical patterns to predict market movements with precision. Ticker AI also monitors breaking news and social media to gauge sentiment shifts, while factoring in key financial metrics like earnings growth, valuations, and insider activity. By tracking market events and seasonal trends, it delivers a complete, up-to-the-minute picture of a stock's potential—summarized in a clear, actionable rating.
+        
+        Ticker AI's buy rating engine is powered by a weighted algorithm that evaluates each stock through a multi-layered scoring system. The model assigns 40% weight to technical indicators—such as RSI, MACD, moving averages, and Bollinger Bands—calculating bullish momentum based on the ratio of confirming signals. Another 40% is dedicated to fundamental analysis, where key financial metrics like P/E ratio, profit margins, revenue growth, and debt-to-equity are benchmarked and scored relative to industry norms. The remaining 20% draws on market sentiment, translating analyst recommendations into a normalized confidence score. Each layer is independently scored on a 10-point scale and then aggregated into a final buy rating, enabling the AI to deliver a clear, data-driven investment outlook.
         """)
         
         # How It Works Section
