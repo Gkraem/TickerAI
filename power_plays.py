@@ -453,6 +453,9 @@ def display_power_plays():
     top_stocks = st.session_state.power_plays_results
     
     if top_stocks is not None:
+        # Add vertical spacing between dropdown and results
+        st.markdown("<br>", unsafe_allow_html=True)
+        
         # Display each top stock
         for i, stock in enumerate(top_stocks):
             ticker = stock['ticker']
