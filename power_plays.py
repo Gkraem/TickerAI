@@ -340,7 +340,7 @@ def get_top_stocks(max_stocks=5, max_tickers=500, progress_callback=None, index_
     list
         List of top stock dictionaries sorted by buy rating
     """
-    st.write(f"Scanning {index_name} companies for investment opportunities...")
+
     
     # Get tickers for the selected index (fallback to Fortune 500 if the index doesn't exist)
     tickers_to_analyze = STOCK_INDICES.get(index_name, STOCK_INDICES["Fortune 500"])
