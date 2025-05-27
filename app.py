@@ -760,32 +760,37 @@ def main():
         # Logout button
         logout_button()
         
-        # Footer Section (Contact Us)
-        footer_center_content = ""
+        # Check for admin panel access
         if is_admin():
-            footer_center_content = '''
-                <div style="text-align: center;">
-                    <button onclick="window.location.reload()" style="
-                        background: linear-gradient(135deg, #3b82f6, #1d4ed8);
-                        color: white;
-                        border: none;
-                        padding: 10px 20px;
-                        border-radius: 6px;
-                        font-weight: bold;
-                        cursor: pointer;
-                        transition: all 0.3s;
-                    ">Admin Panel</button>
-                </div>
-            '''
+            # JavaScript to handle admin panel clicks
+            st.markdown("""
+            <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const adminLinks = document.querySelectorAll('a[href="#admin"]');
+                adminLinks.forEach(link => {
+                    link.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        // Trigger admin panel
+                        window.parent.postMessage({type: 'admin_panel'}, '*');
+                    });
+                });
+            });
+            </script>
+            """, unsafe_allow_html=True)
+            
+            # Streamlit button for admin panel (hidden but functional)
+            if st.button("Admin Panel Access", key="admin_panel_button", help="Access admin controls", type="secondary"):
+                st.session_state.view_mode = "admin"
+                st.rerun()
         
-        st.markdown(f"""
+        # Footer Section (Contact Us)
+        st.markdown("""
         <div class="footer">
             <div class="footer-content">
                 <div>
                     <div class="footer-logo">Ticker AI</div>
                     <div class="footer-info">AI-powered stock analysis and investment insights</div>
                 </div>
-                {footer_center_content}
                 <div class="footer-info">
                     <div><strong>Contact Us:</strong></div>
                     <div>Email: gkraem@vt.edu</div>
@@ -794,12 +799,6 @@ def main():
             </div>
         </div>
         """, unsafe_allow_html=True)
-        
-        # Check for admin panel button click
-        if is_admin():
-            if st.button("🔧 Admin Panel", key="admin_panel_button", help="Access admin controls"):
-                st.session_state.view_mode = "admin"
-                st.rerun()
 
 if __name__ == "__main__":
     main()
