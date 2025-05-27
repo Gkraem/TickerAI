@@ -1947,51 +1947,51 @@ def main():
                 # === 4. NEWS SECTION ===
                 st.markdown("### 📰 News")
                 
-                # Get quarterly earnings information
-                earnings_displayed = False
-                
-                # Try to get accurate quarterly earnings dates
+                # Enhanced Earnings Calendar from Wall Street Horizon
                 try:
-                    import yfinance as yf
-                    stock = yf.Ticker(ticker)
+                    from utils import get_earnings_calendar, get_previous_earnings
                     
-                    # Try earnings_dates from info (often more accurate for quarterly)
+                    # Get upcoming earnings data
+                    earnings_data = get_earnings_calendar(ticker)
+                    st.write("**📅 Upcoming Quarterly Earnings:**")
+                    st.write(f"• **Date:** {earnings_data['next_earnings_date']}")
+                    st.write(f"• **Quarter:** {earnings_data['quarter']}")
+                    st.write(f"• **Status:** {earnings_data['status']}")
+                    st.write(f"• **Time:** {earnings_data['time']}")
+                    
+                    # Previous Earnings Results
+                    st.markdown("**📊 Previous Earnings Results:**")
+                    previous_earnings = get_previous_earnings(ticker)
+                    
+                    if previous_earnings:
+                        for i, earnings in enumerate(previous_earnings):
+                            quarter = earnings['quarter']
+                            actual = earnings['actual']
+                            estimate = earnings['estimate']
+                            beat = earnings['beat_estimate']
+                            
+                            # Format the display
+                            beat_color = "🟢" if beat == "Beat" else "🔴" if beat == "Missed" else "⚪"
+                            st.write(f"• **{quarter}:** Actual: ${actual} | Est: ${estimate} | {beat_color} {beat}")
+                    else:
+                        st.write("• No recent earnings data available")
+                    
+                    st.markdown("---")
+                    
+                except Exception as e:
+                    # Fallback to basic earnings info
+                    st.write("**📅 Earnings Information:**")
                     if 'earningsDate' in company_info:
                         earnings_dates = company_info.get('earningsDate')
                         if earnings_dates and isinstance(earnings_dates, list) and len(earnings_dates) > 0:
-                            # Get the first upcoming earnings date
                             next_earnings = earnings_dates[0]
                             if hasattr(next_earnings, 'strftime'):
-                                st.write(f"**Next Quarterly Earnings:** {next_earnings.strftime('%B %d, %Y')}")
-                                earnings_displayed = True
+                                st.write(f"• Next Earnings: {next_earnings.strftime('%B %d, %Y')}")
                             else:
-                                st.write(f"**Next Quarterly Earnings:** {next_earnings}")
-                                earnings_displayed = True
-                    
-                    # Try earnings calendar as backup
-                    if not earnings_displayed:
-                        calendar = stock.calendar
-                        if calendar is not None and not calendar.empty:
-                            earnings_date = calendar.index[0]
-                            st.write(f"**Next Quarterly Earnings:** {earnings_date.strftime('%B %d, %Y')}")
-                            earnings_displayed = True
-                    
-                    # Estimate based on quarterly pattern
-                    if not earnings_displayed and 'mostRecentQuarter' in company_info:
-                        last_quarter = company_info.get('mostRecentQuarter')
-                        if last_quarter:
-                            import datetime
-                            last_date = datetime.datetime.fromtimestamp(last_quarter)
-                            # Add roughly 3 months for next quarter
-                            next_quarter = last_date + datetime.timedelta(days=90)
-                            st.write(f"**Next Quarterly Earnings:** ~{next_quarter.strftime('%B %d, %Y')} (estimated)")
-                            earnings_displayed = True
-                            
-                except Exception as e:
-                    pass
-                
-                if not earnings_displayed:
-                    st.write("**Next Quarterly Earnings:** Check company investor relations for exact date")
+                                st.write(f"• Next Earnings: {next_earnings}")
+                    else:
+                        st.write("• Check company investor relations for earnings dates")
+                    st.markdown("---")
                 
                 # Get recent news headlines using News API
                 news_found = False
