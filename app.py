@@ -1919,12 +1919,26 @@ def main():
                                 font=dict(color='white')
                             )
                             
-                            # Format y-axis to show values in billions/millions with clear labels
+                            # Format y-axis to show abbreviated values (B for billions, M for millions)
+                            def format_currency(value):
+                                if abs(value) >= 1e9:
+                                    return f"${value/1e9:.1f}B"
+                                elif abs(value) >= 1e6:
+                                    return f"${value/1e6:.1f}M"
+                                elif abs(value) >= 1e3:
+                                    return f"${value/1e3:.1f}K"
+                                else:
+                                    return f"${value:.0f}"
+                            
+                            # Apply custom formatting to y-axis
+                            max_val = max(revenue_data.values)
+                            min_val = min(revenue_data.values)
+                            
                             fig.update_layout(
                                 yaxis=dict(
-                                    tickformat='$,.0f',
-                                    tickmode='auto',
-                                    nticks=6
+                                    tickvals=[min_val, (min_val + max_val)/2, max_val],
+                                    ticktext=[format_currency(min_val), format_currency((min_val + max_val)/2), format_currency(max_val)],
+                                    tickmode='array'
                                 )
                             )
                             
