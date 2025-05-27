@@ -413,8 +413,8 @@ def display_power_plays():
     
     # No description text - it's now explained in "How It Works" section
     
-    # Create columns for dropdown and buttons on same line
-    col1, col2, col3 = st.columns([3, 1.5, 1])
+    # Create columns for dropdown and button on same line (no reset button here)
+    col1, col2 = st.columns([3, 1.5])
     
     with col1:
         # Dropdown for selecting stock index
@@ -440,14 +440,6 @@ def display_power_plays():
             # Show Refresh Analysis button with blue styling
             run_button = st.button("Refresh Analysis", key="refresh_power_plays_button", type="primary")
     
-    with col3:
-        # Reset button - only show if we have results
-        if st.session_state.power_plays_results is not None:
-            st.markdown('<div style="height: 26px;"></div>', unsafe_allow_html=True)
-            reset_button = st.button("Reset Search", key="reset_power_plays", type="secondary")
-        else:
-            reset_button = False
-    
     # Handle button clicks
     if run_button:
         with st.spinner(f"Analyzing {selected_index} stocks to find the best opportunities..."):
@@ -456,10 +448,6 @@ def display_power_plays():
                 max_tickers=500,
                 index_name=selected_index
             )
-    
-    if reset_button:
-        st.session_state.power_plays_results = None
-        st.rerun()
     
     # Display results only if we have them
     top_stocks = st.session_state.power_plays_results
@@ -544,14 +532,12 @@ def display_power_plays():
             # Add horizontal separator except for the last item
             if i < len(top_stocks) - 1:
                 st.markdown("<hr style='margin-top: 30px; margin-bottom: 30px; border-color: rgba(59, 130, 246, 0.2);'>", unsafe_allow_html=True)
-    
-    # Add a button to go back to stock search
-    st.write("")  # Add some spacing
-    if st.button("Reset Search", key="back_to_search_button"):
-        # Clear power_plays_results and go back to the stock search page
-        st.session_state.power_plays_results = None
-        st.session_state.power_plays_view = False
-        st.rerun()
+        
+        # Add reset search button after results (exactly like Stock Analyzer)
+        st.write("")  # Add some spacing
+        if st.button("Reset Search", key="reset_power_plays_search"):
+            st.session_state.power_plays_results = None
+            st.rerun()
     
     # Add vertical buffer at the bottom to push content away from footer
     st.markdown("<div style='height: 80px;'></div>", unsafe_allow_html=True)

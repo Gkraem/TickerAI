@@ -321,8 +321,8 @@ def main():
         admin_nav_item = ""
         admin_nav_dropdown = ""
         if is_admin():
-            admin_nav_item = '<a href="javascript:void(0)" onclick="document.querySelector(\'button[type=\\\"submit\\\"]\').click()" style="color: #10B981;">Admin Panel</a>'
-            admin_nav_dropdown = '<a href="javascript:void(0)" onclick="document.querySelector(\'button[type=\\\"submit\\\"]\').click()" style="color: #10B981;">Admin Panel</a>'
+            admin_nav_item = '<a href="javascript:void(0)" onclick="document.querySelector(\'button[data-testid=\\\"baseButton-secondary\\\"]\').click()" style="color: #10B981;">Admin Panel</a>'
+            admin_nav_dropdown = '<a href="javascript:void(0)" onclick="document.querySelector(\'button[data-testid=\\\"baseButton-secondary\\\"]\').click()" style="color: #10B981;">Admin Panel</a>'
         
         # Create navigation header
         st.markdown(f"""
@@ -760,27 +760,12 @@ def main():
         # Logout button
         logout_button()
         
-        # Check for admin panel access - use a unique key that works with the navigation
+        # Check for admin panel access
         if is_admin():
-            # Create a container to hold the admin trigger button
-            admin_container = st.container()
-            with admin_container:
-                # Use a form to ensure the button works properly
-                with st.form("admin_form", clear_on_submit=False):
-                    admin_clicked = st.form_submit_button("🔧 Admin Panel", help="Access admin controls")
-                    
-                if admin_clicked:
-                    st.session_state.view_mode = "admin"
-                    st.rerun()
-                    
-            # Hide the admin form with CSS
-            st.markdown("""
-            <style>
-            div[data-testid="stForm"] {
-                display: none !important;
-            }
-            </style>
-            """, unsafe_allow_html=True)
+            # Simple admin button that works with navigation
+            if st.button("🔧 Admin Panel", key="admin_panel_access", help="Access admin controls"):
+                st.session_state.view_mode = "admin"
+                st.rerun()
         
         # Footer Section (Contact Us)
         st.markdown("""
