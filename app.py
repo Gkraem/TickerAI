@@ -1360,7 +1360,7 @@ def main():
             right: 0;
             z-index: 1000;
             background-color: #000000;
-            padding: 15px 0;
+            padding: 8px 0;
             border-bottom: 1px solid rgba(59, 130, 246, 0.3);
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
         }}
@@ -1368,19 +1368,18 @@ def main():
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 0 30px;
-            max-width: 1200px;
-            margin: 0 auto;
+            padding: 0 15px;
+            width: 100%;
         }}
         .nav-logo {{
             margin: 0;
             color: #3b82f6;
-            font-size: 24px;
+            font-size: 20px;
             font-weight: bold;
         }}
         .nav-menu {{
             display: flex;
-            gap: 40px;
+            gap: 35px;
             margin-left: auto;
         }}
         .nav-menu a {{
@@ -1506,7 +1505,7 @@ def main():
             margin-left: 15px;
         }}
         .footer {{
-            background-color: rgba(17, 24, 39, 0.95);
+            background-color: #000000;
             border-top: 1px solid rgba(59, 130, 246, 0.3);
             padding: 20px 0;
             margin-top: 50px;
