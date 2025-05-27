@@ -1691,26 +1691,33 @@ def main():
                 # Get quarterly earnings information
                 earnings_displayed = False
                 
-                # Try to get earnings calendar for quarterly dates
+                # Try to get accurate quarterly earnings dates
                 try:
                     import yfinance as yf
                     stock = yf.Ticker(ticker)
                     
-                    # Try earnings calendar first
-                    calendar = stock.calendar
-                    if calendar is not None and hasattr(calendar, 'index') and len(calendar.index) > 0:
-                        earnings_date = calendar.index[0]
-                        st.write(f"**Next Quarterly Earnings:** {earnings_date.strftime('%B %d, %Y')}")
-                        earnings_displayed = True
+                    # Try earnings_dates from info (often more accurate for quarterly)
+                    if 'earningsDate' in company_info:
+                        earnings_dates = company_info.get('earningsDate')
+                        if earnings_dates and isinstance(earnings_dates, list) and len(earnings_dates) > 0:
+                            # Get the first upcoming earnings date
+                            next_earnings = earnings_dates[0]
+                            if hasattr(next_earnings, 'strftime'):
+                                st.write(f"**Next Quarterly Earnings:** {next_earnings.strftime('%B %d, %Y')}")
+                                earnings_displayed = True
+                            else:
+                                st.write(f"**Next Quarterly Earnings:** {next_earnings}")
+                                earnings_displayed = True
                     
-                    # Alternative: try earnings_dates from info
-                    if not earnings_displayed and 'earningsDate' in company_info:
-                        earnings_info = company_info.get('earningsDate')
-                        if earnings_info:
-                            st.write(f"**Next Quarterly Earnings:** {earnings_info}")
+                    # Try earnings calendar as backup
+                    if not earnings_displayed:
+                        calendar = stock.calendar
+                        if calendar is not None and not calendar.empty:
+                            earnings_date = calendar.index[0]
+                            st.write(f"**Next Quarterly Earnings:** {earnings_date.strftime('%B %d, %Y')}")
                             earnings_displayed = True
                     
-                    # Last resort: estimate based on last quarter
+                    # Estimate based on quarterly pattern
                     if not earnings_displayed and 'mostRecentQuarter' in company_info:
                         last_quarter = company_info.get('mostRecentQuarter')
                         if last_quarter:
@@ -1758,6 +1765,9 @@ def main():
                             articles = news_data.get('articles', [])
                             
                             if articles:
+                                st.write("**Recent News:**")
+                                st.markdown("")  # Add spacing
+                                
                                 for i, article in enumerate(articles[:3]):
                                     title = article.get('title', 'No title available')
                                     url = article.get('url', '#')
