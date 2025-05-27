@@ -7,6 +7,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import base64
 import os
+import time
 from datetime import datetime, timedelta
 from stock_analyzer import StockAnalyzer
 from technical_analysis import TechnicalAnalysis
