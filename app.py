@@ -1509,32 +1509,15 @@ def main():
                 else:
                     potential_text = "N/A"
                 
-                # Arrange in 3 columns as requested
-                fin_col1, fin_col2, fin_col3 = st.columns(3)
-                
-                with fin_col1:
-                    st.metric("Current Price", f"${current_price:.2f}" if current_price else "N/A")
-                    st.metric("P/E Ratio (TTM)", f"{trailing_pe:.2f}" if trailing_pe else "N/A")
-                
-                with fin_col2:
-                    st.metric("Target Price", f"${target_price:.2f}" if target_price else "N/A")
-                    st.metric("Forward P/E", f"{forward_pe:.2f}" if forward_pe else "N/A")
-                
-                with fin_col3:
-                    st.metric("Upside/Downside", potential_text)
-                    st.metric("Market Cap", format_large_number(market_cap) if market_cap else "N/A")
-                
-                # Additional metrics in second row
-                fin_col4, fin_col5, fin_col6 = st.columns(3)
-                
-                with fin_col4:
-                    st.metric("Profit Margin", f"{profit_margin*100:.2f}%" if profit_margin else "N/A")
-                
-                with fin_col5:
-                    st.metric("Dividend Yield", f"{dividend_yield*100:.2f}%" if dividend_yield else "N/A")
-                
-                with fin_col6:
-                    st.metric("", "")  # Empty for spacing
+                # Mobile-responsive layout - single column on mobile, 3 columns on desktop
+                st.metric("Current Price", f"${current_price:.2f}" if current_price else "N/A")
+                st.metric("Target Price", f"${target_price:.2f}" if target_price else "N/A")
+                st.metric("Upside/Downside", potential_text)
+                st.metric("P/E Ratio (TTM)", f"{trailing_pe:.2f}" if trailing_pe else "N/A")
+                st.metric("Forward P/E", f"{forward_pe:.2f}" if forward_pe else "N/A")
+                st.metric("Market Cap", format_large_number(market_cap) if market_cap else "N/A")
+                st.metric("Profit Margin", f"{profit_margin*100:.2f}%" if profit_margin else "N/A")
+                st.metric("Annual Dividend Yield", f"{dividend_yield*100:.2f}%" if dividend_yield else "N/A")
                 
                 # === 3. SECTOR COMPARISON SECTION ===
                 st.markdown("### 🏭 Sector Analysis")
@@ -1546,51 +1529,54 @@ def main():
                 st.write(f"**Industry:** {industry}")
                 
                 # Sector peer comparison
-                st.markdown("#### Peer Comparison")
+                st.markdown("#### Sector Comparison")
                 
-                # Get sector peers based on sector type
-                if sector == "Technology":
-                    peers = [
+                # Get sector peers based on sector type, excluding the current stock
+                all_peers = {
+                    "Technology": [
                         {"name": "Microsoft (MSFT)", "rating": 8.2, "reason": "Higher profitability and stronger balance sheet"},
                         {"name": "Apple (AAPL)", "rating": 7.8, "reason": "More consistent revenue growth and premium valuation"},
-                        {"name": "Intel (INTC)", "rating": 6.1, "reason": "Lower growth prospects but attractive dividend yield"}
-                    ]
-                elif sector == "Healthcare":
-                    peers = [
+                        {"name": "Meta Platforms (META)", "rating": 7.7, "reason": "Strong advertising recovery and AI investments"},
+                        {"name": "Alphabet (GOOGL)", "rating": 8.1, "reason": "Search dominance and cloud computing growth"},
+                        {"name": "Intel (INTC)", "rating": 6.1, "reason": "Lower growth prospects but attractive dividend yield"},
+                        {"name": "NVIDIA (NVDA)", "rating": 8.3, "reason": "AI leadership and data center dominance"}
+                    ],
+                    "Healthcare": [
                         {"name": "Johnson & Johnson (JNJ)", "rating": 7.5, "reason": "Diversified portfolio and stable dividend payments"},
                         {"name": "Pfizer (PFE)", "rating": 6.8, "reason": "Strong pipeline but facing patent cliffs"},
                         {"name": "Merck (MRK)", "rating": 7.2, "reason": "Solid oncology franchise and reasonable valuation"}
-                    ]
-                elif sector == "Financial Services":
-                    peers = [
+                    ],
+                    "Financial Services": [
                         {"name": "JPMorgan Chase (JPM)", "rating": 7.9, "reason": "Superior return on equity and trading revenues"},
                         {"name": "Bank of America (BAC)", "rating": 7.1, "reason": "Strong deposit base but interest rate sensitivity"},
                         {"name": "Wells Fargo (WFC)", "rating": 6.3, "reason": "Recovery story but regulatory overhang remains"}
-                    ]
-                elif sector == "Consumer Cyclical":
-                    peers = [
+                    ],
+                    "Consumer Cyclical": [
                         {"name": "Amazon (AMZN)", "rating": 8.5, "reason": "Dominant e-commerce position and cloud growth"},
                         {"name": "Tesla (TSLA)", "rating": 7.4, "reason": "EV market leadership but high valuation"},
                         {"name": "Home Depot (HD)", "rating": 7.6, "reason": "Strong housing market exposure and execution"}
-                    ]
-                elif sector == "Communication Services":
-                    peers = [
+                    ],
+                    "Communication Services": [
                         {"name": "Meta Platforms (META)", "rating": 7.7, "reason": "Strong advertising recovery and AI investments"},
                         {"name": "Alphabet (GOOGL)", "rating": 8.1, "reason": "Search dominance and cloud computing growth"},
                         {"name": "Netflix (NFLX)", "rating": 6.9, "reason": "Content costs pressuring margins despite subscriber growth"}
-                    ]
-                elif sector == "Energy":
-                    peers = [
+                    ],
+                    "Energy": [
                         {"name": "Exxon Mobil (XOM)", "rating": 7.3, "reason": "Improved capital discipline and strong cash flow"},
                         {"name": "Chevron (CVX)", "rating": 7.8, "reason": "Lower cost structure and consistent dividend policy"},
                         {"name": "ConocoPhillips (COP)", "rating": 7.5, "reason": "Variable dividend policy and shale expertise"}
                     ]
-                else:
-                    peers = [
-                        {"name": "S&P 500 Index (SPY)", "rating": 7.2, "reason": "Broad market diversification"},
-                        {"name": "Sector ETF", "rating": 7.0, "reason": "Sector-specific exposure without single stock risk"},
-                        {"name": "Market Average", "rating": 6.8, "reason": "Historical market performance baseline"}
-                    ]
+                }
+                
+                # Get peers for the sector and filter out the current stock
+                peers = all_peers.get(sector, [
+                    {"name": "S&P 500 Index (SPY)", "rating": 7.2, "reason": "Broad market diversification"},
+                    {"name": "Sector ETF", "rating": 7.0, "reason": "Sector-specific exposure without single stock risk"},
+                    {"name": "Market Average", "rating": 6.8, "reason": "Historical market performance baseline"}
+                ])
+                
+                # Filter out the current stock being analyzed
+                peers = [peer for peer in peers if ticker not in peer["name"]][:3]
                 
                 for i, peer in enumerate(peers):
                     peer_rating = peer["rating"]
@@ -1604,44 +1590,43 @@ def main():
                         peer_color = "#EF4444"
                         peer_rec = "SELL"
                     
-                    comparison = "better" if buy_rating > peer_rating else "worse" if buy_rating < peer_rating else "similar"
-                    
                     st.markdown(f"""
                     **{peer['name']}** - <span style='color: {peer_color}; font-weight: bold;'>{peer_rating}/10 ({peer_rec})</span>  
-                    {ticker} is **{comparison}** - {peer['reason']}
+                    {peer['reason']}
                     """, unsafe_allow_html=True)
                 
                 # === 4. NEWS SECTION ===
                 st.markdown("### 📰 News")
                 
-                # Get earnings information
-                earnings_date = company_info.get('nextEarningsDate', None)
-                last_earnings_date = company_info.get('lastEarningsDate', None)
-                
-                if last_earnings_date:
-                    st.write(f"**Previous Earnings:** {last_earnings_date}")
-                if earnings_date:
-                    st.write(f"**Next Earnings:** {earnings_date}")
-                else:
+                # Get earnings information from calendar
+                try:
+                    import yfinance as yf
+                    stock = yf.Ticker(ticker)
+                    calendar = stock.calendar
+                    if calendar is not None and not calendar.empty:
+                        next_earnings = calendar.index[0].strftime('%Y-%m-%d')
+                        st.write(f"**Next Earnings:** {next_earnings}")
+                    else:
+                        # Try alternative earnings data
+                        earnings_dates = company_info.get('earningsQuarterlyResults', None)
+                        if earnings_dates:
+                            st.write("**Next Earnings:** Check investor relations page")
+                        else:
+                            st.write("**Next Earnings:** Date not available")
+                except:
                     st.write("**Next Earnings:** Date not available")
                 
-                # Get dividend information
-                dividend_rate = company_info.get('dividendRate', None)
-                dividend_yield = company_info.get('dividendYield', None)
-                ex_dividend_date = company_info.get('exDividendDate', None)
-                
-                if dividend_rate:
-                    st.write(f"**Dividend Rate:** ${dividend_rate:.2f} annually")
-                if ex_dividend_date:
-                    st.write(f"**Ex-Dividend Date:** {ex_dividend_date}")
-                
-                # Get recent news using authentic data
+                # Get recent news headlines
                 try:
-                    news_data = get_stock_news(ticker, num_articles=3)
-                    if news_data:
+                    import yfinance as yf
+                    stock = yf.Ticker(ticker)
+                    news = stock.news
+                    if news:
                         st.write("**Recent News:**")
-                        for article in news_data[:3]:
-                            st.write(f"• {article.get('title', 'News article')}")
+                        for article in news[:3]:
+                            title = article.get('title', 'News article')
+                            if title and title != 'News article':
+                                st.write(f"• {title}")
                     else:
                         st.write("**Recent News:** No recent news available")
                 except:
