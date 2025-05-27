@@ -1993,28 +1993,33 @@ def main():
                         st.write("• Check company investor relations for earnings dates")
                     st.markdown("---")
                 
-                # Get recent news headlines using News API
+                # Enhanced News Section with improved relevance
+                st.write("**📰 Recent News:**")
                 news_found = False
                 
                 try:
                     import requests
                     import os
+                    from utils import get_stock_news
                     
                     # Get company name for better search results
                     company_name = company_info.get('longName', ticker)
                     
-                    # News API request
+                    # First try News API for premium financial news
                     news_api_key = os.environ.get('NEWS_API_KEY')
                     if news_api_key:
-                        # Search for company-specific news
+                        # Enhanced search with financial keywords
+                        financial_terms = "earnings OR revenue OR profit OR guidance OR analyst OR upgrade OR downgrade OR results OR performance"
+                        search_query = f'("{company_name}" OR "{ticker}") AND ({financial_terms})'
+                        
                         news_url = f"https://newsapi.org/v2/everything"
                         news_params = {
-                            'q': f'"{company_name}" OR "{ticker}"',
+                            'q': search_query,
                             'sortBy': 'publishedAt',
                             'language': 'en',
-                            'pageSize': 3,
+                            'pageSize': 8,  # Get more to filter better
                             'apiKey': news_api_key,
-                            'sources': 'reuters,bloomberg,cnbc,the-wall-street-journal,financial-times,associated-press'
+                            'sources': 'reuters,bloomberg,cnbc,the-wall-street-journal,financial-times,associated-press,marketwatch,yahoo-finance'
                         }
                         
                         news_response = requests.get(news_url, params=news_params, timeout=10)
@@ -2023,11 +2028,22 @@ def main():
                             news_data = news_response.json()
                             articles = news_data.get('articles', [])
                             
-                            if articles:
-                                st.write("**Recent News:**")
-                                st.markdown("")  # Add spacing
+                            # Filter for high relevance
+                            relevant_articles = []
+                            for article in articles:
+                                title = article.get('title', '').lower()
+                                description = article.get('description', '').lower()
                                 
-                                for i, article in enumerate(articles[:3]):
+                                # Strong relevance check
+                                ticker_mentioned = ticker.lower() in title or ticker.lower() in description
+                                company_mentioned = company_name.lower() in title
+                                financial_content = any(term in title for term in ['earnings', 'revenue', 'profit', 'guidance', 'analyst', 'upgrade', 'downgrade', 'beat', 'miss', 'quarter'])
+                                
+                                if ticker_mentioned or company_mentioned or financial_content:
+                                    relevant_articles.append(article)
+                            
+                            if relevant_articles:
+                                for i, article in enumerate(relevant_articles[:3]):
                                     title = article.get('title', 'No title available')
                                     url = article.get('url', '#')
                                     published = article.get('publishedAt', '')
@@ -2053,24 +2069,30 @@ def main():
                 except Exception as e:
                     pass
                 
-                # Only use Yahoo Finance as fallback if News API fails - don't show duplicate header
+                # Enhanced Yahoo Finance fallback with better filtering
                 if not news_found:
                     try:
-                        import yfinance as yf
-                        stock = yf.Ticker(ticker)
-                        news = stock.news
-                        if news and len(news) > 0:
-                            st.write("**Recent News:**")
-                            for article in news[:3]:
-                                title = article.get('title', '')
-                                link = article.get('link', '')
-                                if title and title.strip():
-                                    if link:
-                                        st.markdown(f"• [{title}]({link})")
-                                    else:
-                                        st.write(f"• {title}")
+                        # Use enhanced news function from utils
+                        yahoo_articles = get_stock_news(ticker, num_articles=3)
+                        
+                        if yahoo_articles:
+                            for i, article in enumerate(yahoo_articles):
+                                title = article.get('title', 'No title')
+                                url = article.get('url', '')
+                                publisher = article.get('publisher', 'Financial News')
+                                pub_date = article.get('published_date', 'Recent')
+                                
+                                # Display with enhanced formatting
+                                st.markdown(f"**{title}**")
+                                st.markdown(f"*{publisher} - {pub_date}*")
+                                if url:
+                                    st.markdown(f"[Read Article]({url})")
+                                
+                                if i < len(yahoo_articles) - 1:
+                                    st.markdown("---")
+                            
                             news_found = True
-                    except:
+                    except Exception as e:
                         pass
                 
                 # Alternative news approach if Yahoo Finance fails

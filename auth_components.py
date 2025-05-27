@@ -45,15 +45,23 @@ def login_form():
                     # Set view_mode to "admin" directly
                     st.session_state.view_mode = "admin"
                     st.success("Admin login successful!")
+                    st.rerun()
                 else:
                     # Regular user authentication
-                    success, result = authenticate_user(identifier, password)
-                    if success:
-                        st.session_state["user"] = result
-                        st.success("Login successful!")
-                        st.rerun()
-                    else:
-                        st.error(result)
+                    try:
+                        auth_result = authenticate_user(identifier, password)
+                        if isinstance(auth_result, tuple) and len(auth_result) == 2:
+                            success, result = auth_result
+                            if success:
+                                st.session_state["user"] = result
+                                st.success("Login successful!")
+                                st.rerun()
+                            else:
+                                st.error(result)
+                        else:
+                            st.error("Authentication error occurred")
+                    except Exception as e:
+                        st.error("Login failed. Please try again.")
 
 def register_form():
     """Display the registration form"""
