@@ -19,8 +19,6 @@ def admin_panel():
         st.error("You don't have permission to access this page")
         return
     
-    st.title("Ticker AI Admin Panel")
-    
     # Display user stats
     users_data = load_users()
     user_count = get_total_user_count()
@@ -28,32 +26,7 @@ def admin_panel():
     # Dashboard stats
     st.markdown("### Dashboard")
     
-    col1, col2, col3 = st.columns(3)
-    with col1:
-        st.metric("Total Registered Users", user_count)
-    
-    with col2:
-        # Check how many users registered in the last 24 hours
-        import datetime
-        now = datetime.datetime.now()
-        last_24h = 0
-        last_7d = 0
-        
-        for user in users_data["users"]:
-            try:
-                created = datetime.datetime.fromisoformat(user["created_at"])
-                time_diff = now - created
-                if time_diff.days < 1:
-                    last_24h += 1
-                if time_diff.days < 7:
-                    last_7d += 1
-            except (ValueError, KeyError):
-                continue
-                
-        st.metric("New Users (24h)", last_24h)
-    
-    with col3:
-        st.metric("New Users (7d)", last_7d)
+    st.metric("Total Registered Users", user_count)
     
     # User management section
     st.markdown("---")
@@ -108,48 +81,6 @@ def admin_panel():
                 save_users(users_data)
                 st.success(f"User {selected_user} deleted successfully")
                 st.rerun()
-    
-    # User Statistics Section
-    st.markdown("---")
-    st.header("User Statistics")
-    
-    # Get user statistics
-    if users_data["users"]:
-        # Group users by registration date
-        import datetime
-        
-        # Analyze user registration patterns
-        dates = []
-        for user in users_data["users"]:
-            try:
-                date_str = user.get("created_at", "").split(" ")[0]  # Get just the date part
-                if date_str:
-                    dates.append(date_str)
-            except (ValueError, IndexError, KeyError):
-                continue
-        
-        if dates:
-            # Count occurrences of each date
-            from collections import Counter
-            date_counts = Counter(dates)
-            
-            # Create a dataframe for visualization
-            date_df = pd.DataFrame({
-                "Date": list(date_counts.keys()),
-                "Number of Registrations": list(date_counts.values())
-            })
-            
-            # Sort by date
-            date_df["Date"] = pd.to_datetime(date_df["Date"])
-            date_df = date_df.sort_values("Date")
-            
-            # Plot the data
-            st.subheader("User Registration Trend")
-            st.bar_chart(date_df.set_index("Date"))
-            
-            # Display registration date statistics in a table
-            st.subheader("Registration Statistics by Date")
-            st.dataframe(date_df, use_container_width=True)
     
     # Return to home button
     st.markdown("---")

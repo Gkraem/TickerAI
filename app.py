@@ -755,10 +755,10 @@ def main():
         # Logout button
         logout_button()
         
-        # Admin panel access - positioned below data sources with proper spacing
+        # Admin panel access - positioned well below data sources
         if is_admin():
-            # Add some space to separate from data sources
-            st.markdown("<div style='height: 30px;'></div>", unsafe_allow_html=True)
+            # Add more space to clearly separate from data sources
+            st.markdown("<div style='height: 60px;'></div>", unsafe_allow_html=True)
             
             # Admin panel button with blue styling to match other action buttons
             if st.button("🔧 Admin Panel", key="admin_panel_access", help="Access admin controls", type="primary"):
