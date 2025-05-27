@@ -151,9 +151,8 @@ def admin_panel():
             st.subheader("Registration Statistics by Date")
             st.dataframe(date_df, use_container_width=True)
     
-    # Display admin contact information
+    # Return to home button
     st.markdown("---")
-    st.markdown("### Administrator Contact")
-    st.markdown("For system issues, please contact:")
-    st.markdown("**Email:** gkraem@vt.edu")
-    st.markdown("**Phone:** 240-285-7119")
+    if st.button("Return to Stock Search", type="primary", use_container_width=True):
+        st.session_state.view_mode = "main"
+        st.rerun()

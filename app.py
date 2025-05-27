@@ -321,8 +321,8 @@ def main():
         admin_nav_item = ""
         admin_nav_dropdown = ""
         if is_admin():
-            admin_nav_item = '<a href="javascript:void(0)" onclick="document.querySelector(\'button[data-testid=\\\"baseButton-secondary\\\"]\').click()" style="color: #10B981;">Admin Panel</a>'
-            admin_nav_dropdown = '<a href="javascript:void(0)" onclick="document.querySelector(\'button[data-testid=\\\"baseButton-secondary\\\"]\').click()" style="color: #10B981;">Admin Panel</a>'
+            admin_nav_item = '<a href="javascript:void(0)" onclick="setTimeout(() => { const buttons = document.querySelectorAll(\'button\'); buttons.forEach(btn => { if (btn.textContent.includes(\'Admin Panel\')) btn.click(); }); }, 100);" style="color: #10B981;">Admin Panel</a>'
+            admin_nav_dropdown = '<a href="javascript:void(0)" onclick="setTimeout(() => { const buttons = document.querySelectorAll(\'button\'); buttons.forEach(btn => { if (btn.textContent.includes(\'Admin Panel\')) btn.click(); }); }, 100);" style="color: #10B981;">Admin Panel</a>'
         
         # Create navigation header
         st.markdown(f"""
@@ -760,12 +760,24 @@ def main():
         # Logout button
         logout_button()
         
-        # Check for admin panel access
+        # Check for admin panel access - keep the working button hidden for header navigation
         if is_admin():
-            # Simple admin button that works with navigation
+            # Hidden admin button that works with navigation
             if st.button("🔧 Admin Panel", key="admin_panel_access", help="Access admin controls"):
                 st.session_state.view_mode = "admin"
                 st.rerun()
+            
+            # Hide the admin button with CSS
+            st.markdown("""
+            <style>
+            button:has([data-testid="baseButton-secondary"]):contains("Admin Panel") {
+                display: none !important;
+            }
+            div[data-testid="stButton"] {
+                display: none !important;
+            }
+            </style>
+            """, unsafe_allow_html=True)
         
         # Footer Section (Contact Us)
         st.markdown("""
