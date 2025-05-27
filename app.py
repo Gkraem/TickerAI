@@ -1991,16 +1991,28 @@ def main():
                         except:
                             pass
                     
-                    # Try estimating based on last earnings
+                    # Try estimating based on last earnings (use current year + quarters)
                     if not earnings_found:
                         try:
-                            earnings_history = stock.earnings_history
-                            if earnings_history is not None and not earnings_history.empty:
-                                last_earnings_date = earnings_history.index[0]
-                                # Add approximately 3 months (90 days) for next quarter
-                                estimated_next = last_earnings_date + timedelta(days=90)
-                                st.write(f"• ~{estimated_next.strftime('%B %d, %Y')} (Estimated)")
-                                earnings_found = True
+                            from datetime import datetime
+                            current_date = datetime.now()
+                            current_year = current_date.year
+                            current_month = current_date.month
+                            
+                            # Estimate next earnings based on quarterly pattern
+                            if current_month <= 3:  # Q1
+                                next_earnings_month = 4  # April
+                            elif current_month <= 6:  # Q2
+                                next_earnings_month = 7  # July
+                            elif current_month <= 9:  # Q3
+                                next_earnings_month = 10  # October
+                            else:  # Q4
+                                next_earnings_month = 1  # January next year
+                                current_year += 1
+                            
+                            estimated_next = datetime(current_year, next_earnings_month, 15)  # Mid-month estimate
+                            st.write(f"• ~{estimated_next.strftime('%B %d, %Y')} (Estimated)")
+                            earnings_found = True
                         except:
                             pass
                     
@@ -2024,19 +2036,22 @@ def main():
                         if earnings_history is not None and not earnings_history.empty and len(earnings_history) >= 2:
                             recent_earnings = earnings_history.head(2)
                             for i, (date, row) in enumerate(recent_earnings.iterrows()):
-                                eps_actual = row.get('epsActual', 'N/A')
-                                eps_estimate = row.get('epsEstimate', 'N/A')
+                                eps_actual = row.get('epsActual')
+                                eps_estimate = row.get('epsEstimate')
                                 
-                                # Format quarter from date
-                                if hasattr(date, 'year') and hasattr(date, 'quarter'):
-                                    quarter_str = f"{date.year} Q{date.quarter}"
-                                elif hasattr(date, 'strftime'):
-                                    quarter_str = date.strftime('%Y Q%q')
-                                else:
+                                # Format quarter from date  
+                                try:
+                                    if hasattr(date, 'year'):
+                                        year = date.year
+                                        quarter = ((date.month - 1) // 3) + 1
+                                        quarter_str = f"{year} Q{quarter}"
+                                    else:
+                                        quarter_str = str(date)[:7]
+                                except:
                                     quarter_str = str(date)[:7]
                                 
                                 # Determine beat/miss
-                                if eps_actual != 'N/A' and eps_estimate != 'N/A':
+                                if eps_actual is not None and eps_estimate is not None:
                                     try:
                                         actual_val = float(eps_actual)
                                         estimate_val = float(eps_estimate)
@@ -2044,9 +2059,12 @@ def main():
                                         beat_icon = "🟢" if beat_status == "Beat" else "🔴"
                                         st.write(f"• {quarter_str}: ${actual_val:.2f} vs ${estimate_val:.2f} est. {beat_icon} {beat_status}")
                                         earnings_displayed = True
-                                    except:
-                                        st.write(f"• {quarter_str}: ${eps_actual} vs ${eps_estimate} est.")
+                                    except ValueError:
+                                        st.write(f"• {quarter_str}: ${str(eps_actual)} vs ${str(eps_estimate)} est.")
                                         earnings_displayed = True
+                                else:
+                                    st.write(f"• {quarter_str}: Earnings data available")
+                                    earnings_displayed = True
                     except:
                         pass
                     
