@@ -1947,153 +1947,111 @@ def main():
                 # === 4. NEWS SECTION ===
                 st.markdown("### 📰 News")
                 
-                # Enhanced Earnings Calendar from Wall Street Horizon
+                # Upcoming Quarterly Earnings
+                st.write("**📅 Upcoming Quarterly Earnings**")
                 try:
-                    from utils import get_earnings_calendar, get_previous_earnings
+                    import yfinance as yf
+                    stock = yf.Ticker(ticker)
                     
-                    # Get upcoming earnings data
-                    earnings_data = get_earnings_calendar(ticker)
-                    st.write("**📅 Upcoming Quarterly Earnings:**")
-                    st.write(f"• **Date:** {earnings_data['next_earnings_date']}")
-                    st.write(f"• **Quarter:** {earnings_data['quarter']}")
-                    st.write(f"• **Status:** {earnings_data['status']}")
-                    st.write(f"• **Time:** {earnings_data['time']}")
-                    
-                    # Previous Earnings Results
-                    st.markdown("**📊 Previous Earnings Results:**")
-                    previous_earnings = get_previous_earnings(ticker)
-                    
-                    if previous_earnings:
-                        for i, earnings in enumerate(previous_earnings):
-                            quarter = earnings['quarter']
-                            actual = earnings['actual']
-                            estimate = earnings['estimate']
-                            beat = earnings['beat_estimate']
-                            
-                            # Format the display
-                            beat_color = "🟢" if beat == "Beat" else "🔴" if beat == "Missed" else "⚪"
-                            st.write(f"• **{quarter}:** Actual: ${actual} | Est: ${estimate} | {beat_color} {beat}")
-                    else:
-                        st.write("• No recent earnings data available")
-                    
-                    st.markdown("---")
-                    
-                except Exception as e:
-                    # Fallback to basic earnings info
-                    st.write("**📅 Earnings Information:**")
-                    if 'earningsDate' in company_info:
+                    # Try to get next earnings date
+                    earnings_found = False
+                    if 'earningsDate' in company_info and company_info['earningsDate']:
                         earnings_dates = company_info.get('earningsDate')
-                        if earnings_dates and isinstance(earnings_dates, list) and len(earnings_dates) > 0:
+                        if isinstance(earnings_dates, list) and len(earnings_dates) > 0:
                             next_earnings = earnings_dates[0]
                             if hasattr(next_earnings, 'strftime'):
-                                st.write(f"• Next Earnings: {next_earnings.strftime('%B %d, %Y')}")
-                            else:
-                                st.write(f"• Next Earnings: {next_earnings}")
-                    else:
-                        st.write("• Check company investor relations for earnings dates")
-                    st.markdown("---")
-                
-                # Enhanced News Section with improved relevance
-                st.write("**📰 Recent News:**")
-                news_found = False
-                
-                try:
-                    import requests
-                    import os
-                    from utils import get_stock_news
+                                st.write(f"• {next_earnings.strftime('%B %d, %Y')} (Confirmed)")
+                                earnings_found = True
                     
-                    # Get company name for better search results
-                    company_name = company_info.get('longName', ticker)
+                    # Try calendar as backup
+                    if not earnings_found:
+                        try:
+                            calendar = stock.calendar
+                            if calendar is not None and not calendar.empty:
+                                earnings_date = calendar.index[0]
+                                st.write(f"• {earnings_date.strftime('%B %d, %Y')} (Unconfirmed)")
+                                earnings_found = True
+                        except:
+                            pass
                     
-                    # First try News API for premium financial news
-                    news_api_key = os.environ.get('NEWS_API_KEY')
-                    if news_api_key:
-                        # Enhanced search with financial keywords
-                        financial_terms = "earnings OR revenue OR profit OR guidance OR analyst OR upgrade OR downgrade OR results OR performance"
-                        search_query = f'("{company_name}" OR "{ticker}") AND ({financial_terms})'
+                    if not earnings_found:
+                        st.write("• Date TBD - Check investor relations")
                         
-                        news_url = f"https://newsapi.org/v2/everything"
-                        news_params = {
-                            'q': search_query,
-                            'sortBy': 'publishedAt',
-                            'language': 'en',
-                            'pageSize': 8,  # Get more to filter better
-                            'apiKey': news_api_key,
-                            'sources': 'reuters,bloomberg,cnbc,the-wall-street-journal,financial-times,associated-press,marketwatch,yahoo-finance'
-                        }
-                        
-                        news_response = requests.get(news_url, params=news_params, timeout=10)
-                        
-                        if news_response.status_code == 200:
-                            news_data = news_response.json()
-                            articles = news_data.get('articles', [])
-                            
-                            # Filter for high relevance
-                            relevant_articles = []
-                            for article in articles:
-                                title = article.get('title', '').lower()
-                                description = article.get('description', '').lower()
-                                
-                                # Strong relevance check
-                                ticker_mentioned = ticker.lower() in title or ticker.lower() in description
-                                company_mentioned = company_name.lower() in title
-                                financial_content = any(term in title for term in ['earnings', 'revenue', 'profit', 'guidance', 'analyst', 'upgrade', 'downgrade', 'beat', 'miss', 'quarter'])
-                                
-                                if ticker_mentioned or company_mentioned or financial_content:
-                                    relevant_articles.append(article)
-                            
-                            if relevant_articles:
-                                for i, article in enumerate(relevant_articles[:3]):
-                                    title = article.get('title', 'No title available')
-                                    url = article.get('url', '#')
-                                    published = article.get('publishedAt', '')
-                                    source = article.get('source', {}).get('name', 'Unknown Source')
-                                    
-                                    # Format date
-                                    if published:
-                                        from datetime import datetime
-                                        pub_date = datetime.fromisoformat(published.replace('Z', '+00:00'))
-                                        formatted_date = pub_date.strftime('%B %d, %Y')
-                                    else:
-                                        formatted_date = 'Recent'
-                                    
-                                    # Display article
-                                    st.markdown(f"**{title}**")
-                                    st.markdown(f"*{source} - {formatted_date}*")
-                                    st.markdown(f"[Read Article]({url})")
-                                    if i < 2:  # Add spacing between articles
-                                        st.markdown("---")
-                                
-                                news_found = True
-                            
                 except Exception as e:
-                    pass
+                    st.write("• Date TBD - Check investor relations")
                 
-                # Enhanced Yahoo Finance fallback with better filtering
-                if not news_found:
-                    try:
-                        # Use enhanced news function from utils
-                        yahoo_articles = get_stock_news(ticker, num_articles=3)
-                        
-                        if yahoo_articles:
-                            for i, article in enumerate(yahoo_articles):
-                                title = article.get('title', 'No title')
-                                url = article.get('url', '')
-                                publisher = article.get('publisher', 'Financial News')
-                                pub_date = article.get('published_date', 'Recent')
-                                
-                                # Display with enhanced formatting
-                                st.markdown(f"**{title}**")
-                                st.markdown(f"*{publisher} - {pub_date}*")
-                                if url:
-                                    st.markdown(f"[Read Article]({url})")
-                                
-                                if i < len(yahoo_articles) - 1:
-                                    st.markdown("---")
+                # Previous Earnings Results
+                st.write("**📊 Previous Earnings Results**")
+                try:
+                    import yfinance as yf
+                    stock = yf.Ticker(ticker)
+                    
+                    # Get quarterly earnings from income statement
+                    quarterly_income = stock.quarterly_income_stmt
+                    quarterly_earnings = stock.quarterly_earnings
+                    
+                    earnings_displayed = False
+                    
+                    # Try quarterly_earnings first
+                    if quarterly_earnings is not None and not quarterly_earnings.empty and len(quarterly_earnings) >= 2:
+                        recent_earnings = quarterly_earnings.head(2)
+                        for i, (date, row) in enumerate(recent_earnings.iterrows()):
+                            actual = row.get('Actual', 'N/A')
+                            estimate = row.get('Estimate', 'N/A')
                             
-                            news_found = True
-                    except Exception as e:
-                        pass
+                            # Format quarter
+                            quarter_str = date.strftime('%Y Q%q') if hasattr(date, 'strftime') else str(date)[:7]
+                            
+                            # Determine beat/miss
+                            if actual != 'N/A' and estimate != 'N/A':
+                                try:
+                                    beat_status = "Beat" if float(actual) > float(estimate) else "Missed"
+                                    beat_icon = "🟢" if beat_status == "Beat" else "🔴"
+                                    st.write(f"• {quarter_str}: ${actual} vs ${estimate} est. {beat_icon} {beat_status}")
+                                except:
+                                    st.write(f"• {quarter_str}: ${actual} vs ${estimate} est.")
+                            else:
+                                st.write(f"• {quarter_str}: Data unavailable")
+                        earnings_displayed = True
+                    
+                    if not earnings_displayed:
+                        st.write("• Recent earnings data unavailable")
+                        
+                except Exception as e:
+                    st.write("• Recent earnings data unavailable")
+                
+                # Recent News
+                st.write("**📰 Recent News**")
+                try:
+                    # 52-week performance
+                    if '52WeekChange' in company_info:
+                        change_52w = company_info.get('52WeekChange', 0) * 100
+                        change_icon = "🟢" if change_52w > 0 else "🔴" if change_52w < 0 else "⚪"
+                        st.write(f"• 52-week performance: {change_52w:+.1f}% {change_icon}")
+                    
+                    # Dividend info
+                    if company_info.get('dividendYield'):
+                        div_yield = company_info.get('dividendYield') * 100
+                        st.write(f"• Dividend yield: {div_yield:.2f}%")
+                    
+                    # Recent news from Yahoo Finance
+                    import yfinance as yf
+                    stock = yf.Ticker(ticker)
+                    news = stock.news
+                    
+                    if news and len(news) > 0:
+                        # Show only the most recent relevant article
+                        for article in news[:1]:
+                            title = article.get('title', '')
+                            link = article.get('link', '')
+                            if title and link:
+                                st.write(f"• [{title}]({link})")
+                                break
+                    else:
+                        st.write("• Check company investor relations for updates")
+                        
+                except Exception as e:
+                    st.write("• Check company investor relations for updates")
                 
                 # Alternative news approach if Yahoo Finance fails
                 if not news_found:
