@@ -1959,40 +1959,47 @@ def main():
                 st.write("**📅 Upcoming Quarterly Earnings**")
                 try:
                     import yfinance as yf
+                    from datetime import datetime, timedelta
                     stock = yf.Ticker(ticker)
                     info = stock.info
                     
-                    # Try multiple sources for earnings date
                     earnings_found = False
                     
-                    # Check info for earnings date
+                    # Try earnings_dates from info
                     if info.get('earningsDate'):
-                        earnings_date = info.get('earningsDate')
-                        if hasattr(earnings_date, 'strftime'):
-                            st.write(f"• {earnings_date.strftime('%B %d, %Y')} (Confirmed)")
-                            earnings_found = True
-                        elif isinstance(earnings_date, str):
-                            st.write(f"• {earnings_date} (Confirmed)")
-                            earnings_found = True
+                        earnings_data = info.get('earningsDate')
+                        if isinstance(earnings_data, list) and len(earnings_data) > 0:
+                            try:
+                                next_date = earnings_data[0]
+                                if hasattr(next_date, 'strftime'):
+                                    st.write(f"• {next_date.strftime('%B %d, %Y')} (Confirmed)")
+                                    earnings_found = True
+                                else:
+                                    st.write(f"• {next_date} (Confirmed)")
+                                    earnings_found = True
+                            except:
+                                pass
                     
-                    # Try calendar
+                    # Try calendar data
                     if not earnings_found:
                         try:
                             calendar = stock.calendar
-                            if calendar is not None and len(calendar) > 0:
+                            if hasattr(calendar, 'index') and len(calendar.index) > 0:
                                 earnings_date = calendar.index[0]
                                 st.write(f"• {earnings_date.strftime('%B %d, %Y')} (Unconfirmed)")
                                 earnings_found = True
                         except:
                             pass
                     
-                    # Try earnings_dates
-                    if not earnings_found and info.get('earningsDate'):
+                    # Try estimating based on last earnings
+                    if not earnings_found:
                         try:
-                            earnings_dates = info.get('earningsDate')
-                            if isinstance(earnings_dates, list) and len(earnings_dates) > 0:
-                                next_earnings = earnings_dates[0]
-                                st.write(f"• {next_earnings.strftime('%B %d, %Y')} (Confirmed)")
+                            earnings_history = stock.earnings_history
+                            if earnings_history is not None and not earnings_history.empty:
+                                last_earnings_date = earnings_history.index[0]
+                                # Add approximately 3 months (90 days) for next quarter
+                                estimated_next = last_earnings_date + timedelta(days=90)
+                                st.write(f"• ~{estimated_next.strftime('%B %d, %Y')} (Estimated)")
                                 earnings_found = True
                         except:
                             pass
@@ -2021,14 +2028,21 @@ def main():
                                 eps_estimate = row.get('epsEstimate', 'N/A')
                                 
                                 # Format quarter from date
-                                quarter_str = date.strftime('%Y Q%q') if hasattr(date, 'strftime') else str(date)[:7]
+                                if hasattr(date, 'year') and hasattr(date, 'quarter'):
+                                    quarter_str = f"{date.year} Q{date.quarter}"
+                                elif hasattr(date, 'strftime'):
+                                    quarter_str = date.strftime('%Y Q%q')
+                                else:
+                                    quarter_str = str(date)[:7]
                                 
                                 # Determine beat/miss
                                 if eps_actual != 'N/A' and eps_estimate != 'N/A':
                                     try:
-                                        beat_status = "Beat" if float(eps_actual) > float(eps_estimate) else "Missed"
+                                        actual_val = float(eps_actual)
+                                        estimate_val = float(eps_estimate)
+                                        beat_status = "Beat" if actual_val > estimate_val else "Missed"
                                         beat_icon = "🟢" if beat_status == "Beat" else "🔴"
-                                        st.write(f"• {quarter_str}: ${eps_actual} vs ${eps_estimate} est. {beat_icon} {beat_status}")
+                                        st.write(f"• {quarter_str}: ${actual_val:.2f} vs ${estimate_val:.2f} est. {beat_icon} {beat_status}")
                                         earnings_displayed = True
                                     except:
                                         st.write(f"• {quarter_str}: ${eps_actual} vs ${eps_estimate} est.")
