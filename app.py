@@ -1359,29 +1359,28 @@ def main():
             left: 0;
             right: 0;
             z-index: 1000;
-            background-color: #111827;
-            padding: 8px 0;
+            background-color: #000000;
+            padding: 15px 0;
             border-bottom: 1px solid rgba(59, 130, 246, 0.3);
-            height: 48px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
         }}
         .nav-content {{
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 0 20px;
-            width: 100%;
-            max-width: none;
-            height: 100%;
+            padding: 0 30px;
+            max-width: 1200px;
+            margin: 0 auto;
         }}
         .nav-logo {{
             margin: 0;
             color: #3b82f6;
-            font-size: 20px;
+            font-size: 24px;
             font-weight: bold;
         }}
         .nav-menu {{
             display: flex;
-            gap: 30px;
+            gap: 40px;
             margin-left: auto;
         }}
         .nav-menu a {{
@@ -1428,7 +1427,10 @@ def main():
         }}
         @media (max-width: 768px) {{
             .nav-content {{
-                padding: 0 15px;
+                padding: 0 20px;
+            }}
+            .nav-logo {{
+                font-size: 22px;
             }}
             .nav-menu {{
                 display: none;

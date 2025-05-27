@@ -3,11 +3,24 @@
 /* Hide Streamlit elements for clean single page layout */
 header[data-testid="stHeader"] {
     display: none !important;
+    height: 0 !important;
 }
 
 [data-testid="stToolbar"],
 [data-testid="stDecoration"] {
     display: none !important;
+}
+
+/* Ensure no Streamlit header spacing */
+.stApp > header {
+    display: none !important;
+    height: 0 !important;
+}
+
+/* Remove any default header padding/margin */
+.stApp {
+    padding-top: 0 !important;
+    margin-top: 0 !important;
 }
 
 /* Hide sidebar completely */
