@@ -78,7 +78,7 @@ button[title*="sidebar"],
 
 /* Main app styling */
 .stApp {
-    background: linear-gradient(135deg, #111827 0%, #1e3a8a 100%);
+    background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 25%, #16213e 50%, #0f3460 75%, #533483 100%);
     background-size: cover;
     background-repeat: no-repeat;
     background-attachment: fixed;

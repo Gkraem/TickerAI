@@ -335,7 +335,7 @@ def main():
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 0 50px;
+            padding: 0 80px;
             width: 100%;
             max-width: none;
         }}
@@ -407,7 +407,7 @@ def main():
             }}
         }}
         .hero-section {{
-            background: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url('data:image/jpeg;base64,{bg_image}') center/cover;
+            background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 25%, #16213e 50%, #0f3460 75%, #533483 100%);
             height: 100vh;
             width: 100vw;
             display: flex;
@@ -578,51 +578,48 @@ def main():
             st.session_state.selected_ticker = ""
         
         # Stock search interface with proper alignment
-        col1, col2 = st.columns([4, 1])
+        # Generate all stock options for the dropdown
+        all_options = []
+        for stock in POPULAR_STOCKS:
+            all_options.append(f"{stock['ticker']} - {stock['name']}")
+        
+        # Function to update stock search results
+        def update_stock_results():
+            if not st.session_state.stock_search or st.session_state.stock_search == "":
+                st.session_state.selected_ticker = ""
+                return
+            if " - " in st.session_state.stock_search:
+                ticker_part = st.session_state.stock_search.split(" - ")[0]
+                st.session_state.selected_ticker = ticker_part
+        
+        # Create columns for proper alignment
+        col1, col2, col3 = st.columns([3, 2, 1])
         
         with col1:
-            # Create two sub-columns for dropdowns
-            subcol1, subcol2 = st.columns([2, 1])
+            # Single combined dropdown - now aligned left
+            selected_option = st.selectbox(
+                "Search stocks by typing",
+                options=[""] + all_options,
+                index=0,
+                key="stock_search",
+                on_change=update_stock_results
+            )
             
-            with subcol1:
-                # Generate all stock options for the dropdown
-                all_options = []
-                for stock in POPULAR_STOCKS:
-                    all_options.append(f"{stock['ticker']} - {stock['name']}")
-                
-                # Function to update stock search results
-                def update_stock_results():
-                    if not st.session_state.stock_search or st.session_state.stock_search == "":
-                        st.session_state.selected_ticker = ""
-                        return
-                    if " - " in st.session_state.stock_search:
-                        ticker_part = st.session_state.stock_search.split(" - ")[0]
-                        st.session_state.selected_ticker = ticker_part
-                
-                # Single combined dropdown
-                selected_option = st.selectbox(
-                    "Search stocks by typing",
-                    options=[""] + all_options,
-                    index=0,
-                    key="stock_search",
-                    on_change=update_stock_results
-                )
-                
-                # Extract ticker from selection if available
-                ticker = ""
-                if selected_option and " - " in selected_option:
-                    ticker = selected_option.split(" - ")[0]
-                    st.session_state.selected_ticker = ticker
-            
-            with subcol2:
-                # Timeframe selector
-                timeframe = st.selectbox(
-                    "Select Timeframe",
-                    ["1d", "5d", "1mo", "3mo", "6mo", "1y", "2y", "5y", "max"],
-                    index=5  # Default to 1 year
-                )
+            # Extract ticker from selection if available
+            ticker = ""
+            if selected_option and " - " in selected_option:
+                ticker = selected_option.split(" - ")[0]
+                st.session_state.selected_ticker = ticker
         
         with col2:
+            # Timeframe selector
+            timeframe = st.selectbox(
+                "Select Timeframe",
+                ["1d", "5d", "1mo", "3mo", "6mo", "1y", "2y", "5y", "max"],
+                index=5  # Default to 1 year
+            )
+        
+        with col3:
             # Add spacing to align button with dropdowns
             st.markdown('<div style="height: 26px;"></div>', unsafe_allow_html=True)
             # Search button
