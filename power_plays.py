@@ -11,6 +11,7 @@ from utils import format_large_number
 
 # Stock indices for analysis
 STOCK_INDICES = {
+    "Entire Ticker AI Database": [],  # Will be populated with full database
     "Fortune 500": [
         "AAPL", "MSFT", "AMZN", "GOOGL", "META", "TSLA", "BRK-B", "NVDA", "UNH", "JNJ",
         "JPM", "V", "PG", "MA", "HD", "ABBV", "MRK", "XOM", "BAC", "CVX", 
