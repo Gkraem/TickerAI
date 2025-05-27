@@ -1459,7 +1459,7 @@ def main():
             font-size: 4rem;
             font-weight: bold;
             color: white;
-            margin-bottom: 1rem;
+            margin-bottom: 2rem;
             text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
         }}
         .hero-subtitle {{
