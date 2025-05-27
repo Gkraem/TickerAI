@@ -321,8 +321,8 @@ def main():
         admin_nav_item = ""
         admin_nav_dropdown = ""
         if is_admin():
-            admin_nav_item = '<a href="#admin" onclick="window.location.reload()" style="color: #10B981;">Admin Panel</a>'
-            admin_nav_dropdown = '<a href="#admin" onclick="window.location.reload()" style="color: #10B981;">Admin Panel</a>'
+            admin_nav_item = '<a href="javascript:void(0)" onclick="document.getElementById(\'admin_panel_trigger\').click()" style="color: #10B981;">Admin Panel</a>'
+            admin_nav_dropdown = '<a href="javascript:void(0)" onclick="document.getElementById(\'admin_panel_trigger\').click()" style="color: #10B981;">Admin Panel</a>'
         
         # Create navigation header
         st.markdown(f"""
@@ -762,24 +762,22 @@ def main():
         
         # Check for admin panel access
         if is_admin():
-            # JavaScript to handle admin panel clicks
+            # Hidden Streamlit button for admin panel (triggered by navigation links)
+            admin_panel_clicked = st.button("Admin Panel Trigger", key="admin_panel_trigger", help="Access admin controls", type="secondary")
+            
+            # Hide the button with CSS
             st.markdown("""
-            <script>
-            document.addEventListener('DOMContentLoaded', function() {
-                const adminLinks = document.querySelectorAll('a[href="#admin"]');
-                adminLinks.forEach(link => {
-                    link.addEventListener('click', function(e) {
-                        e.preventDefault();
-                        // Trigger admin panel
-                        window.parent.postMessage({type: 'admin_panel'}, '*');
-                    });
-                });
-            });
-            </script>
+            <style>
+            button[kind="secondary"]:has([data-testid="baseButton-secondary"]) {
+                display: none !important;
+            }
+            div[data-testid="stButton"] button[data-testid="baseButton-secondary"] {
+                display: none !important;
+            }
+            </style>
             """, unsafe_allow_html=True)
             
-            # Streamlit button for admin panel (hidden but functional)
-            if st.button("Admin Panel Access", key="admin_panel_button", help="Access admin controls", type="secondary"):
+            if admin_panel_clicked:
                 st.session_state.view_mode = "admin"
                 st.rerun()
         

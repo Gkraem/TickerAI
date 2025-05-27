@@ -434,17 +434,17 @@ def display_power_plays():
         st.markdown('<div style="height: 26px;"></div>', unsafe_allow_html=True)
         # Button for analysis - show Run or Refresh based on state
         if st.session_state.power_plays_results is None:
-            # Show Run Analysis button
-            run_button = st.button("Run Analysis", key="run_power_plays_button")
+            # Show Run Analysis button with blue styling
+            run_button = st.button("Run Analysis", key="run_power_plays_button", type="primary")
         else:
-            # Show Refresh Analysis button
-            run_button = st.button("Refresh Analysis", key="refresh_power_plays_button")
+            # Show Refresh Analysis button with blue styling
+            run_button = st.button("Refresh Analysis", key="refresh_power_plays_button", type="primary")
     
     with col3:
         # Reset button - only show if we have results
         if st.session_state.power_plays_results is not None:
             st.markdown('<div style="height: 26px;"></div>', unsafe_allow_html=True)
-            reset_button = st.button("Reset Search", key="reset_power_plays")
+            reset_button = st.button("Reset Search", key="reset_power_plays", type="secondary")
         else:
             reset_button = False
     
