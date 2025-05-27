@@ -328,27 +328,28 @@ def main():
             z-index: 1000;
             background-color: rgba(17, 24, 39, 0.95);
             backdrop-filter: blur(10px);
-            padding: 5px 0;
+            padding: 3px 0;
             border-bottom: 1px solid rgba(59, 130, 246, 0.3);
         }}
         .nav-content {{
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 0 40px;
+            padding: 0 20px;
             width: 100%;
+            max-width: none;
         }}
         .nav-logo {{
             margin: 0;
             color: #3b82f6;
-            font-size: 24px;
+            font-size: 22px;
             font-weight: bold;
-            margin-left: -20px;
         }}
         .nav-menu {{
             display: flex;
-            gap: 30px;
-            margin-right: -20px;
+            gap: 35px;
+            margin-left: auto;
+            padding-right: 20px;
         }}
         .nav-menu a {{
             color: #e5e7eb;
@@ -527,7 +528,7 @@ def main():
         """, unsafe_allow_html=True)
         
         # Add top spacing to account for fixed header
-        st.markdown('<div style="height: 50px;"></div>', unsafe_allow_html=True)
+        st.markdown('<div style="height: 40px;"></div>', unsafe_allow_html=True)
         
         # Hero Section with background image
         st.markdown("""

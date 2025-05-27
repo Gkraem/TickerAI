@@ -404,9 +404,6 @@ def display_power_plays():
     """
     Display the Power Plays page with top stock picks
     """
-    # Header and introduction
-    st.title("Power Plays 🚀")
-    
     # Initialize session state variables if needed
     if 'power_plays_results' not in st.session_state:
         st.session_state.power_plays_results = None
@@ -414,24 +411,20 @@ def display_power_plays():
     if 'power_plays_index' not in st.session_state:
         st.session_state.power_plays_index = "Fortune 500"
     
-    # Conditional description based on whether we have results
+    # Simple description without background bubble
     if st.session_state.power_plays_results is None:
         st.markdown("""
-        <div style="background-color: rgba(17, 24, 39, 0.7); padding: 20px; border-radius: 10px; margin-bottom: 30px;">
-        <p style="font-size: 18px; line-height: 1.6;">
+        <p style="color: #e5e7eb; font-size: 1.1rem; line-height: 1.6; margin-bottom: 30px;">
         Power Plays delivers the five most compelling stock opportunities, ranked by AI-driven buy ratings. 
         Scanning hundreds of companies to find the best investment opportunities right now.
         </p>
-        </div>
         """, unsafe_allow_html=True)
     else:
         st.markdown("""
-        <div style="background-color: rgba(17, 24, 39, 0.7); padding: 20px; border-radius: 10px; margin-bottom: 30px;">
-        <p style="font-size: 18px; line-height: 1.6;">
+        <p style="color: #e5e7eb; font-size: 1.1rem; line-height: 1.6; margin-bottom: 30px;">
         Power Plays delivers the five most compelling stock opportunities, ranked by AI-driven buy ratings.
         These top picks offer a snapshot of where the strongest buying signals are—so you can act fast, with confidence.
         </p>
-        </div>
         """, unsafe_allow_html=True)
     
     # Dropdown for selecting stock index

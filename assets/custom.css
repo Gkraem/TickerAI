@@ -25,6 +25,21 @@ button[data-testid="collapsedControl"] {
     display: none !important;
 }
 
+/* Hide all sidebar related elements */
+[data-testid="stSidebarUserContent"] {
+    display: none !important;
+}
+
+/* Force hide sidebar collapse button */
+.css-1rs6os.edgvbvh3 {
+    display: none !important;
+}
+
+/* Hide streamlit sidebar button */
+.css-1y4p8pa {
+    display: none !important;
+}
+
 /* Main app styling */
 .stApp {
     background: linear-gradient(135deg, #111827 0%, #1e3a8a 100%);
