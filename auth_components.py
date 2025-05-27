@@ -108,17 +108,17 @@ def auth_page():
     <style>
     @media (max-width: 768px) {
         .block-container {
-            padding-top: 15vh !important;
+            padding-top: 10vh !important;
             padding-bottom: 5vh !important;
         }
     }
     @media (min-width: 769px) {
         .block-container {
-            padding-top: 20vh !important;
+            padding-top: 15vh !important;
         }
     }
     </style>
-    <div style='padding-top: 20vh;'></div>
+    <div style='padding-top: 15vh;'></div>
     """, unsafe_allow_html=True)
     
     # Use container and columns for proper centering
