@@ -315,7 +315,7 @@ def main():
         # === MAIN SINGLE PAGE LAYOUT ===
         
         # Get base64 encoded background image
-        bg_image = get_base64_image("assets/ticker.jpg")
+        bg_image = get_base64_image("assets/ticker2.jpg")
         
         # Create navigation header
         st.markdown(f"""
@@ -335,7 +335,7 @@ def main():
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 0 30px;
+            padding: 0 50px;
             width: 100%;
             max-width: none;
         }}
@@ -551,8 +551,8 @@ def main():
         col1, col2, col3 = st.columns(3)
         with col1:
             st.markdown("""
-            ### 1. Search & Select
-            Simply type any company name or ticker symbol to find and select the stock you want to analyze.
+            ### 1. Search & Analyze
+            Simply type any company name or ticker symbol to find and analyze the stock you want to research.
             """)
         
         with col2:
@@ -577,48 +577,54 @@ def main():
         if "selected_ticker" not in st.session_state:
             st.session_state.selected_ticker = ""
         
-        # Stock search interface
-        col1, col2, col3 = st.columns([3, 2, 1])
+        # Stock search interface with proper alignment
+        col1, col2 = st.columns([4, 1])
         
         with col1:
-            # Generate all stock options for the dropdown
-            all_options = []
-            for stock in POPULAR_STOCKS:
-                all_options.append(f"{stock['ticker']} - {stock['name']}")
+            # Create two sub-columns for dropdowns
+            subcol1, subcol2 = st.columns([2, 1])
             
-            # Function to update stock search results
-            def update_stock_results():
-                if not st.session_state.stock_search or st.session_state.stock_search == "":
-                    st.session_state.selected_ticker = ""
-                    return
-                if " - " in st.session_state.stock_search:
-                    ticker_part = st.session_state.stock_search.split(" - ")[0]
-                    st.session_state.selected_ticker = ticker_part
+            with subcol1:
+                # Generate all stock options for the dropdown
+                all_options = []
+                for stock in POPULAR_STOCKS:
+                    all_options.append(f"{stock['ticker']} - {stock['name']}")
+                
+                # Function to update stock search results
+                def update_stock_results():
+                    if not st.session_state.stock_search or st.session_state.stock_search == "":
+                        st.session_state.selected_ticker = ""
+                        return
+                    if " - " in st.session_state.stock_search:
+                        ticker_part = st.session_state.stock_search.split(" - ")[0]
+                        st.session_state.selected_ticker = ticker_part
+                
+                # Single combined dropdown
+                selected_option = st.selectbox(
+                    "Search stocks by typing",
+                    options=[""] + all_options,
+                    index=0,
+                    key="stock_search",
+                    on_change=update_stock_results
+                )
+                
+                # Extract ticker from selection if available
+                ticker = ""
+                if selected_option and " - " in selected_option:
+                    ticker = selected_option.split(" - ")[0]
+                    st.session_state.selected_ticker = ticker
             
-            # Single combined dropdown
-            selected_option = st.selectbox(
-                "Search stocks by typing",
-                options=[""] + all_options,
-                index=0,
-                key="stock_search",
-                on_change=update_stock_results
-            )
-            
-            # Extract ticker from selection if available
-            ticker = ""
-            if selected_option and " - " in selected_option:
-                ticker = selected_option.split(" - ")[0]
-                st.session_state.selected_ticker = ticker
+            with subcol2:
+                # Timeframe selector
+                timeframe = st.selectbox(
+                    "Select Timeframe",
+                    ["1d", "5d", "1mo", "3mo", "6mo", "1y", "2y", "5y", "max"],
+                    index=5  # Default to 1 year
+                )
         
         with col2:
-            # Timeframe selector
-            timeframe = st.selectbox(
-                "Select Timeframe",
-                ["1d", "5d", "1mo", "3mo", "6mo", "1y", "2y", "5y", "max"],
-                index=5  # Default to 1 year
-            )
-        
-        with col3:
+            # Add spacing to align button with dropdowns
+            st.markdown('<div style="height: 26px;"></div>', unsafe_allow_html=True)
             # Search button
             search_button = st.button("Analyze Stock", type="primary")
         
@@ -700,7 +706,7 @@ def main():
                         st.metric("Current Price", f"${current_price:.2f}")
                 
                 with col2:
-                    if price_change:
+                    if price_change and isinstance(price_change, dict):
                         change_value = price_change.get('change', 0)
                         change_percent = price_change.get('changePercent', 0)
                         delta_color = "normal" if change_value >= 0 else "inverse"
