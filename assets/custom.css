@@ -712,50 +712,74 @@ div[data-testid="stVerticalBlock"] > div {
     color: white !important;
 }
 
-/* Fix dropdown overlap issues */
-.stSelectbox > div > div {
-    z-index: 999 !important;
+/* Fix dropdown overlap issues with more specific targeting */
+.stSelectbox {
+    margin-bottom: 20px !important;
+    position: relative !important;
+    z-index: 100 !important;
 }
 
-.stSelectbox [data-baseweb="select"] {
-    z-index: 999 !important;
-}
-
-.stSelectbox [data-baseweb="popover"] {
+.stSelectbox > div {
     z-index: 1000 !important;
-    background: rgba(20, 20, 30, 0.95) !important;
-    backdrop-filter: blur(10px) !important;
-    border: 1px solid rgba(59, 130, 246, 0.3) !important;
+    position: relative !important;
+}
+
+.stSelectbox > div > div {
+    z-index: 1001 !important;
+}
+
+/* Target the dropdown container more specifically */
+.stSelectbox [data-baseweb="select"] {
+    z-index: 1002 !important;
+    position: relative !important;
+}
+
+/* Style the dropdown menu itself */
+.stSelectbox [data-baseweb="popover"] {
+    z-index: 9999 !important;
+    background: #1a1a2e !important;
+    border: 1px solid rgba(59, 130, 246, 0.5) !important;
+    border-radius: 8px !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8) !important;
 }
 
 .stSelectbox [data-baseweb="menu"] {
-    background: rgba(20, 20, 30, 0.95) !important;
-    backdrop-filter: blur(10px) !important;
+    background: #1a1a2e !important;
+    border-radius: 8px !important;
+    max-height: 300px !important;
+    overflow-y: auto !important;
 }
 
+/* Style individual options */
 .stSelectbox [role="option"] {
-    color: white !important;
+    color: #ffffff !important;
     background: transparent !important;
-    padding: 8px 12px !important;
+    padding: 12px 16px !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+    font-size: 14px !important;
+    line-height: 1.4 !important;
 }
 
 .stSelectbox [role="option"]:hover {
-    background: rgba(59, 130, 246, 0.2) !important;
-    color: white !important;
+    background: rgba(59, 130, 246, 0.3) !important;
+    color: #ffffff !important;
 }
 
-/* Ensure proper spacing and no overlap */
-.stSelectbox {
-    margin-bottom: 20px !important;
+.stSelectbox [role="option"]:last-child {
+    border-bottom: none !important;
 }
 
-/* Fix any z-index conflicts with other elements */
+/* Ensure the main content doesn't interfere */
 .main .block-container {
     position: relative;
     z-index: 1;
 }
 
-.stSelectbox div[data-testid="stSelectbox"] {
-    z-index: 999 !important;
-    position: relative !important;
+/* Additional specificity for stubborn elements */
+div[data-testid="stSelectbox"] {
+    z-index: 1000 !important;
+}
+
+div[data-testid="stSelectbox"] > div {
+    z-index: 1001 !important;
 }
