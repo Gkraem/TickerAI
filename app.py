@@ -1407,8 +1407,8 @@ def main():
                 ticker_part = st.session_state.stock_search.split(" - ")[0]
                 st.session_state.selected_ticker = ticker_part
         
-        # Create columns for dropdown and button
-        col1, col2 = st.columns([4, 1])
+        # Create columns to match Power Plays layout exactly
+        col1, col2 = st.columns([3, 1.5])
         
         with col1:
             # Single combined dropdown - aligned left
@@ -1484,6 +1484,9 @@ def main():
                     </div>
                     """, unsafe_allow_html=True)
                 
+                # Add vertical spacing
+                st.markdown("<br><br>", unsafe_allow_html=True)
+                
                 # === 2. FINANCIALS SECTION ===
                 st.markdown("### 💰 Key Financials")
                 
@@ -1501,22 +1504,29 @@ def main():
                 else:
                     potential_text = "N/A"
                 
-                # Use same formatting as sector comparison for consistency
+                # Get net revenue
+                total_revenue = company_info.get('totalRevenue', None)
+                
+                # Use 3x3 grid format as requested
                 fin_col1, fin_col2, fin_col3 = st.columns(3)
                 
                 with fin_col1:
                     st.write(f"Price: ${current_price:.2f}" if current_price else "Price: N/A")
-                    st.write(f"P/E: {trailing_pe:.2f}" if trailing_pe else "P/E: N/A")
-                    st.write(f"Profit Margin: {profit_margin*100:.2f}%" if profit_margin else "Profit Margin: N/A")
+                    st.write(f"Analyst's Mean Target Price: ${target_price:.2f}" if target_price else "Target Price: N/A")
+                    st.write(f"Upside: {potential_text}")
                 
                 with fin_col2:
                     st.write(f"Market Cap: {format_large_number(market_cap)}" if market_cap else "Market Cap: N/A")
+                    st.write(f"P/E: {trailing_pe:.2f}" if trailing_pe else "P/E: N/A")
                     st.write(f"Forward P/E: {forward_pe:.2f}" if forward_pe else "Forward P/E: N/A")
-                    st.write(f"Dividend: {dividend_yield:.2f}%" if dividend_yield else "Dividend: N/A")
                 
                 with fin_col3:
-                    st.write(f"Analyst's Mean Target Price: ${target_price:.2f}" if target_price else "Target Price: N/A")
-                    st.write(f"Upside: {potential_text}")
+                    st.write(f"Profit Margin: {profit_margin*100:.2f}%" if profit_margin else "Profit Margin: N/A")
+                    st.write(f"Net Revenue: {format_large_number(total_revenue)}" if total_revenue else "Net Revenue: N/A")
+                    st.write(f"Dividend: {dividend_yield:.2f}%" if dividend_yield else "Dividend: N/A")
+                
+                # Add vertical spacing
+                st.markdown("<br><br>", unsafe_allow_html=True)
                 
                 # === 3. SECTOR COMPARISON SECTION ===
                 st.markdown("### 🏭 Sector Analysis")
@@ -1559,9 +1569,12 @@ def main():
                         peer_name = peer_info.get('longName', peer_ticker)
                         peer_price = peer_info.get('currentPrice', peer_info.get('regularMarketPrice', None))
                         peer_pe = peer_info.get('trailingPE', None)
+                        peer_forward_pe = peer_info.get('forwardPE', None)
                         peer_market_cap = peer_info.get('marketCap', None)
                         peer_dividend_yield = peer_info.get('dividendYield', None)
                         peer_target_price = peer_info.get('targetMeanPrice', None)
+                        peer_profit_margin = peer_info.get('profitMargins', None)
+                        peer_total_revenue = peer_info.get('totalRevenue', None)
                         
                         # Calculate peer upside/downside
                         if peer_target_price and peer_price:
@@ -1573,20 +1586,23 @@ def main():
                         # Display peer comparison with actual stats
                         st.markdown(f"**{peer_name} ({peer_ticker})**")
                         
-                        # Create columns for peer stats
+                        # Create columns for peer stats in 3x3 format
                         peer_col1, peer_col2, peer_col3 = st.columns(3)
                         
                         with peer_col1:
                             st.write(f"Price: ${peer_price:.2f}" if peer_price else "Price: N/A")
-                            st.write(f"P/E: {peer_pe:.2f}" if peer_pe else "P/E: N/A")
+                            st.write(f"Analyst's Mean Target Price: ${peer_target_price:.2f}" if peer_target_price else "Target Price: N/A")
+                            st.write(f"Upside: {peer_potential_text}")
                         
                         with peer_col2:
                             st.write(f"Market Cap: {format_large_number(peer_market_cap)}" if peer_market_cap else "Market Cap: N/A")
-                            st.write(f"Dividend: {peer_dividend_yield:.2f}%" if peer_dividend_yield else "Dividend: N/A")
+                            st.write(f"P/E: {peer_pe:.2f}" if peer_pe else "P/E: N/A")
+                            st.write(f"Forward P/E: {peer_forward_pe:.2f}" if peer_forward_pe else "Forward P/E: N/A")
                         
                         with peer_col3:
-                            st.write(f"Analyst's Mean Target Price: ${peer_target_price:.2f}" if peer_target_price else "Target Price: N/A")
-                            st.write(f"Upside: {peer_potential_text}")
+                            st.write(f"Profit Margin: {peer_profit_margin*100:.2f}%" if peer_profit_margin else "Profit Margin: N/A")
+                            st.write(f"Net Revenue: {format_large_number(peer_total_revenue)}" if peer_total_revenue else "Net Revenue: N/A")
+                            st.write(f"Dividend: {peer_dividend_yield:.2f}%" if peer_dividend_yield else "Dividend: N/A")
                         
 
                         
@@ -1595,6 +1611,9 @@ def main():
                     except Exception as e:
                         st.write(f"**{peer_ticker}** - Unable to fetch comparison data")
                         st.markdown("---")
+                
+                # Add vertical spacing
+                st.markdown("<br><br>", unsafe_allow_html=True)
                 
                 # === 4. NEWS SECTION ===
                 st.markdown("### 📰 News")
@@ -1633,26 +1652,10 @@ def main():
                 except:
                     st.write("**Recent News:** Unable to fetch news at this time")
                 
-                # === 5. AI SUMMARY SECTION ===
-                st.markdown("### 🤖 AI Analysis Summary")
+                # Add vertical spacing
+                st.markdown("<br><br>", unsafe_allow_html=True)
                 
-                # Generate AI summary based on rating components
-                technical_reason = rating_breakdown.get('Technical Analysis', {}).get('reason', 'Technical analysis unavailable')
-                fundamental_reason = rating_breakdown.get('Fundamental Analysis', {}).get('reason', 'Fundamental analysis unavailable')
-                sentiment_reason = rating_breakdown.get('Market Sentiment', {}).get('reason', 'Sentiment analysis unavailable')
-                
-                if buy_rating >= 7:
-                    summary_intro = f"**{ticker} receives a BUY rating of {buy_rating:.1f}/10.** "
-                elif buy_rating >= 4:
-                    summary_intro = f"**{ticker} receives a HOLD rating of {buy_rating:.1f}/10.** "
-                else:
-                    summary_intro = f"**{ticker} receives a SELL rating of {buy_rating:.1f}/10.** "
-                
-                ai_summary = f"""{summary_intro}The analysis reveals {technical_reason.lower()}, while fundamentally the stock shows {fundamental_reason.lower()}. Market sentiment indicates {sentiment_reason.lower()}. This combined analysis suggests the current rating reflects the stock's balanced risk-reward profile based on technical momentum, fundamental valuation, and market consensus."""
-                
-                st.write(ai_summary)
-                
-                # === 6. INTERACTIVE GRAPH SECTION ===
+                # === 5. INTERACTIVE GRAPH SECTION ===
                 st.markdown("### 📈 Historical Performance")
                 
                 # Graph controls - use unique keys tied to the ticker to prevent reset
@@ -1709,6 +1712,28 @@ def main():
                         st.error(f"Error loading historical data: {str(e)}")
                 else:
                     st.info(f"Historical {metric_choice} data visualization coming soon")
+                
+                # Add vertical spacing
+                st.markdown("<br><br>", unsafe_allow_html=True)
+                
+                # === 6. AI SUMMARY SECTION (moved after Historical Performance) ===
+                st.markdown("### 🤖 AI Analysis Summary")
+                
+                # Generate AI summary based on rating components
+                technical_reason = rating_breakdown.get('Technical Analysis', {}).get('reason', 'Technical analysis unavailable')
+                fundamental_reason = rating_breakdown.get('Fundamental Analysis', {}).get('reason', 'Fundamental analysis unavailable')
+                sentiment_reason = rating_breakdown.get('Market Sentiment', {}).get('reason', 'Sentiment analysis unavailable')
+                
+                if buy_rating >= 7:
+                    summary_intro = f"**{ticker} receives a BUY rating of {buy_rating:.1f}/10.** "
+                elif buy_rating >= 4:
+                    summary_intro = f"**{ticker} receives a HOLD rating of {buy_rating:.1f}/10.** "
+                else:
+                    summary_intro = f"**{ticker} receives a SELL rating of {buy_rating:.1f}/10.** "
+                
+                ai_summary = f"""{summary_intro}The analysis reveals {technical_reason.lower()}, while fundamentally the stock shows {fundamental_reason.lower()}. Market sentiment indicates {sentiment_reason.lower()}. This combined analysis suggests the current rating reflects the stock's balanced risk-reward profile based on technical momentum, fundamental valuation, and market consensus."""
+                
+                st.write(ai_summary)
                 
             except Exception as e:
                 st.error(f"Error analyzing stock: {str(e)}")
