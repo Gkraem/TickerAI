@@ -347,13 +347,13 @@ section[data-testid="stSidebar"] h3 {
     border-radius: 6px !important;
 }
 
-/* Increase font size for all white body text */
-.stMarkdown p, .stMarkdown li, .stMarkdown div {
+/* Increase font size for all white body text but preserve section headers */
+.stMarkdown p, .stMarkdown li {
     font-size: 18px !important;
     line-height: 1.6 !important;
 }
 
-/* Specifically target white text content */
+/* Specifically target white text content but not headers */
 .stApp .stMarkdown p {
     font-size: 18px !important;
     color: white !important;
@@ -363,6 +363,13 @@ section[data-testid="stSidebar"] h3 {
 .stMarkdown ul li {
     font-size: 18px !important;
     margin-bottom: 8px !important;
+}
+
+/* Preserve section header font size */
+.section-header {
+    font-size: 2.5rem !important;
+    font-weight: bold !important;
+    color: #3b82f6 !important;
 }
 
 /* Fix main content area */
