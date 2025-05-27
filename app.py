@@ -1640,14 +1640,37 @@ def main():
         col1, col2 = st.columns([3, 1.5])
         
         with col1:
-            # Single combined dropdown - aligned left
-            selected_option = st.selectbox(
-                "Search stocks by typing",
-                options=[""] + all_options,
-                index=0,
-                key="stock_search",
-                on_change=update_stock_results
+            # Text input for stock search to avoid dropdown overlap issues
+            search_input = st.text_input(
+                "Search stocks by ticker or company name",
+                placeholder="Type ticker (e.g., AAPL) or company name...",
+                key="stock_search_input"
             )
+            
+            # Show matching stocks if search input exists
+            if search_input and len(search_input) >= 1:
+                matching_stocks = []
+                search_lower = search_input.lower()
+                
+                for stock in POPULAR_STOCKS:
+                    if (search_lower in stock['ticker'].lower() or 
+                        search_lower in stock['name'].lower()):
+                        matching_stocks.append(stock)
+                
+                if matching_stocks:
+                    # Limit to top 5 matches to avoid clutter
+                    display_stocks = matching_stocks[:5]
+                    
+                    st.markdown("**Matching stocks:**")
+                    for i, stock in enumerate(display_stocks):
+                        if st.button(
+                            f"{stock['ticker']} - {stock['name']}", 
+                            key=f"stock_btn_{i}",
+                            use_container_width=True
+                        ):
+                            st.session_state.selected_ticker = stock['ticker']
+                            st.session_state.stock_search_input = f"{stock['ticker']} - {stock['name']}"
+                            st.rerun()
         
         with col2:
             # Add spacing to align button with dropdown
@@ -1655,13 +1678,8 @@ def main():
             # Search button
             search_button = st.button("Analyze Stock", type="primary")
         
-        # Extract ticker from selection if available (removed confirmation box)
+        # Extract ticker from selection if available
         ticker = ""
-        if selected_option and " - " in selected_option:
-            ticker = selected_option.split(" - ")[0]
-            st.session_state.selected_ticker = ticker
-        
-        # Use selected ticker if available
         if "selected_ticker" in st.session_state and st.session_state.selected_ticker:
             ticker = st.session_state.selected_ticker
         
