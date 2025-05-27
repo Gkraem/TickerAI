@@ -1920,7 +1920,7 @@ def main():
                             )
                             
                             # Format y-axis to show values in billions/millions
-                            fig.update_yaxis(tickformat='.2s')
+                            fig.update_layout(yaxis_tickformat='.2s')
                             
                             st.plotly_chart(fig, use_container_width=True)
                         else:
