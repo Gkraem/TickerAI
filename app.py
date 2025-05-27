@@ -1794,24 +1794,25 @@ def main():
                 except Exception as e:
                     pass
                 
-                # Try Yahoo Finance news first
-                try:
-                    import yfinance as yf
-                    stock = yf.Ticker(ticker)
-                    news = stock.news
-                    if news and len(news) > 0:
-                        st.write("**Recent News:**")
-                        for article in news[:3]:
-                            title = article.get('title', '')
-                            link = article.get('link', '')
-                            if title and title.strip():
-                                if link:
-                                    st.markdown(f"• [{title}]({link})")
-                                else:
-                                    st.write(f"• {title}")
-                        news_found = True
-                except:
-                    pass
+                # Only use Yahoo Finance as fallback if News API fails - don't show duplicate header
+                if not news_found:
+                    try:
+                        import yfinance as yf
+                        stock = yf.Ticker(ticker)
+                        news = stock.news
+                        if news and len(news) > 0:
+                            st.write("**Recent News:**")
+                            for article in news[:3]:
+                                title = article.get('title', '')
+                                link = article.get('link', '')
+                                if title and title.strip():
+                                    if link:
+                                        st.markdown(f"• [{title}]({link})")
+                                    else:
+                                        st.write(f"• {title}")
+                            news_found = True
+                    except:
+                        pass
                 
                 # Alternative news approach if Yahoo Finance fails
                 if not news_found:
