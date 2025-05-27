@@ -1360,7 +1360,7 @@ def main():
             right: 0;
             z-index: 1000;
             background-color: #000000;
-            padding: 4px 0;
+            padding: 3px 0;
             border-bottom: 1px solid rgba(59, 130, 246, 0.3);
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
         }}
@@ -1374,7 +1374,7 @@ def main():
         .nav-logo {{
             margin: 0;
             color: #3b82f6;
-            font-size: 14px;
+            font-size: 12px;
             font-weight: bold;
         }}
         .nav-menu {{
@@ -1454,6 +1454,7 @@ def main():
             margin: 0 calc(-50vw + 50%);
             padding: 0 2rem;
             position: relative;
+            transform: translateY(-30px);
         }}
         .hero-title {{
             font-size: 4rem;
@@ -1480,9 +1481,10 @@ def main():
             box-shadow: 0 4px 6px rgba(0,0,0,0.3);
             transition: all 0.3s;
             display: inline-block;
+            transform: translateX(-8px);
         }}
         .hero-button:hover {{
-            transform: translateY(-2px);
+            transform: translateX(-8px) translateY(-2px);
             box-shadow: 0 6px 12px rgba(0,0,0,0.4);
             color: white !important;
         }}
