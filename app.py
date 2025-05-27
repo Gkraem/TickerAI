@@ -366,12 +366,40 @@ def main():
             color: #e5e7eb;
             font-size: 20px;
             cursor: pointer;
+            position: relative;
+        }}
+        .nav-dropdown {{
+            display: none;
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background-color: rgba(17, 24, 39, 0.95);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            border-radius: 8px;
+            padding: 10px 0;
+            min-width: 150px;
+            z-index: 1001;
+        }}
+        .nav-dropdown a {{
+            display: block;
+            padding: 10px 20px;
+            color: #e5e7eb;
+            text-decoration: none;
+            font-size: 14px;
+            transition: background-color 0.3s;
+        }}
+        .nav-dropdown a:hover {{
+            background-color: rgba(59, 130, 246, 0.2);
         }}
         @media (max-width: 768px) {{
             .nav-menu {{
                 display: none;
             }}
             .nav-toggle {{
+                display: block;
+            }}
+            .nav-toggle:hover + .nav-dropdown,
+            .nav-dropdown:hover {{
                 display: block;
             }}
         }}
@@ -427,6 +455,8 @@ def main():
             border-top: 1px solid rgba(59, 130, 246, 0.3);
             padding: 20px 0;
             margin-top: 50px;
+            width: 100vw;
+            margin-left: calc(-50vw + 50%);
         }}
         .footer-content {{
             max-width: 1200px;
@@ -469,7 +499,14 @@ def main():
                     <a href="#analyzer">Stock Analyzer</a>
                     <a href="#powerplays">Power Plays</a>
                 </nav>
-                <button class="nav-toggle">☰</button>
+                <div style="position: relative;">
+                    <button class="nav-toggle">☰</button>
+                    <div class="nav-dropdown">
+                        <a href="#howitworks">How It Works</a>
+                        <a href="#analyzer">Stock Analyzer</a>
+                        <a href="#powerplays">Power Plays</a>
+                    </div>
+                </div>
             </div>
         </div>
         """, unsafe_allow_html=True)
@@ -674,9 +711,12 @@ def main():
         # Data Sources section
         st.markdown("### 📊 Data Sources")
         st.markdown("All our financial data comes from trusted, professional sources:")
-        st.markdown("• **Yahoo Finance** - Real-time stock prices, historical data, and company information")
-        st.markdown("• **Financial APIs** - Technical indicators and fundamental analysis metrics")
-        st.markdown("• **Market Data Providers** - News, analyst recommendations, and market sentiment")
+        st.markdown("• **[Yahoo Finance](https://finance.yahoo.com/)** - Real-time stock prices, historical data, and company information")
+        st.markdown("• **[yfinance Python Library](https://pypi.org/project/yfinance/)** - Yahoo Finance API wrapper for data retrieval")
+        st.markdown("• **[Plotly](https://plotly.com/)** - Interactive charting and data visualization")
+        st.markdown("• **[Technical Analysis Algorithms](https://ta-lib.org/)** - RSI, MACD, Bollinger Bands, and moving averages")
+        st.markdown("• **[Financial Statement APIs](https://sec.gov/)** - Income statements, balance sheets, and cash flow data")
+        st.markdown("• **[Market News Aggregators](https://newsapi.org/)** - Recent news articles and market sentiment analysis")
         
         # Logout button
         logout_button()
