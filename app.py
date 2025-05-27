@@ -1698,7 +1698,7 @@ def main():
                 with graph_col1:
                     metric_choice = st.selectbox(
                         "Select Metric",
-                        ["Market Price", "Volume", "Revenue (Annual)"],
+                        ["Market Price", "Gross Sales", "Net Revenue"],
                         key=f"metric_selector_{ticker}"
                     )
                 
@@ -1709,17 +1709,17 @@ def main():
                         key=f"period_selector_{ticker}"
                     )
                 
-                # Get historical data and create chart
-                if metric_choice == "Market Price":
-                    # Map period choice to yfinance format
-                    period_map = {"1 Year": "1y", "3 Years": "3y", "5 Years": "5y"}
-                    period = period_map[period_choice]
+                # Get historical data and create chart based on selected metric
+                try:
+                    import plotly.graph_objects as go
                     
-                    try:
+                    if metric_choice == "Market Price":
+                        # Map period choice to yfinance format
+                        period_map = {"1 Year": "1y", "3 Years": "3y", "5 Years": "5y"}
+                        period = period_map[period_choice]
+                        
                         historical_data = analyzer.get_historical_data(period)
                         if not historical_data.empty:
-                            import plotly.graph_objects as go
-                            
                             fig = go.Figure()
                             fig.add_trace(go.Scatter(
                                 x=historical_data.index,
@@ -1742,10 +1742,92 @@ def main():
                             st.plotly_chart(fig, use_container_width=True)
                         else:
                             st.warning("No historical data available for the selected period")
-                    except Exception as e:
-                        st.error(f"Error loading historical data: {str(e)}")
-                else:
-                    st.info(f"Historical {metric_choice} data visualization coming soon")
+                    
+                    elif metric_choice in ["Gross Sales", "Net Revenue"]:
+                        # Get financial statement data
+                        import yfinance as yf
+                        stock = yf.Ticker(ticker)
+                        
+                        if metric_choice == "Gross Sales":
+                            # Get quarterly and annual revenue data
+                            quarterly_financials = stock.quarterly_financials
+                            annual_financials = stock.financials
+                            
+                            # Use annual data for longer periods
+                            if period_choice in ["3 Years", "5 Years"]:
+                                if not annual_financials.empty and 'Total Revenue' in annual_financials.index:
+                                    revenue_data = annual_financials.loc['Total Revenue'].dropna()
+                                    y_label = 'Revenue ($)'
+                                    title_suffix = 'Annual Gross Sales'
+                                else:
+                                    st.warning("Annual revenue data not available")
+                                    revenue_data = None
+                            else:
+                                # Use quarterly data for 1 year
+                                if not quarterly_financials.empty and 'Total Revenue' in quarterly_financials.index:
+                                    revenue_data = quarterly_financials.loc['Total Revenue'].dropna()
+                                    y_label = 'Revenue ($)'
+                                    title_suffix = 'Quarterly Gross Sales'
+                                else:
+                                    st.warning("Quarterly revenue data not available")
+                                    revenue_data = None
+                        
+                        elif metric_choice == "Net Revenue":
+                            # Get net income data
+                            quarterly_financials = stock.quarterly_financials
+                            annual_financials = stock.financials
+                            
+                            if period_choice in ["3 Years", "5 Years"]:
+                                if not annual_financials.empty and 'Net Income' in annual_financials.index:
+                                    revenue_data = annual_financials.loc['Net Income'].dropna()
+                                    y_label = 'Net Income ($)'
+                                    title_suffix = 'Annual Net Revenue'
+                                else:
+                                    st.warning("Annual net income data not available")
+                                    revenue_data = None
+                            else:
+                                if not quarterly_financials.empty and 'Net Income' in quarterly_financials.index:
+                                    revenue_data = quarterly_financials.loc['Net Income'].dropna()
+                                    y_label = 'Net Income ($)'
+                                    title_suffix = 'Quarterly Net Revenue'
+                                else:
+                                    st.warning("Quarterly net income data not available")
+                                    revenue_data = None
+                        
+                        # Create chart if data is available
+                        if revenue_data is not None and len(revenue_data) > 0:
+                            # Sort by date (most recent first in yfinance, so reverse for chronological order)
+                            revenue_data = revenue_data.sort_index()
+                            
+                            fig = go.Figure()
+                            fig.add_trace(go.Scatter(
+                                x=revenue_data.index,
+                                y=revenue_data.values,
+                                mode='lines+markers',
+                                name=metric_choice,
+                                line=dict(color='#10B981', width=3),
+                                marker=dict(size=8)
+                            ))
+                            
+                            fig.update_layout(
+                                title=f'{ticker} - {title_suffix}',
+                                xaxis_title='Date',
+                                yaxis_title=y_label,
+                                template='plotly_dark',
+                                plot_bgcolor='rgba(0,0,0,0)',
+                                paper_bgcolor='rgba(0,0,0,0)',
+                                font=dict(color='white')
+                            )
+                            
+                            # Format y-axis to show values in billions/millions
+                            fig.update_yaxis(tickformat='.2s')
+                            
+                            st.plotly_chart(fig, use_container_width=True)
+                        else:
+                            st.info(f"No {metric_choice.lower()} data available for this stock")
+                
+                except Exception as e:
+                    st.error(f"Error loading {metric_choice.lower()} data: {str(e)}")
                 
                 # Add vertical spacing
                 st.markdown("<br><br>", unsafe_allow_html=True)
