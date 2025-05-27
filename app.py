@@ -1487,35 +1487,37 @@ def main():
                     # Calculate angle for needle (0-180 degrees, left to right)
                     angle = (buy_rating / 10) * 180
                     
-                    # Create a simpler, more reliable rating display
-                    rating_display = f"""
-                    <div style="display: flex; flex-direction: column; align-items: center; margin: 30px 0;">
-                        <!-- Progress bar style meter -->
-                        <div style="width: 300px; height: 30px; background: linear-gradient(to right, #EF4444 0%, #EF4444 33%, #F59E0B 33%, #F59E0B 66%, #10B981 66%, #10B981 100%); 
-                                   border-radius: 15px; position: relative; border: 2px solid #374151;">
-                            <div style="position: absolute; left: {(buy_rating/10)*100}%; top: -5px; transform: translateX(-50%); 
-                                       width: 6px; height: 40px; background: white; border-radius: 3px; box-shadow: 0 2px 4px rgba(0,0,0,0.3);"></div>
-                        </div>
+                    # Use Streamlit's progress bar and native components
+                    st.markdown("<br>", unsafe_allow_html=True)
+                    
+                    # Display the rating prominently with native Streamlit styling
+                    rating_col1, rating_col2, rating_col3 = st.columns([1, 2, 1])
+                    with rating_col2:
+                        # Create a visual progress bar
+                        progress_value = buy_rating / 10
+                        st.progress(progress_value)
                         
-                        <!-- Labels -->
-                        <div style="width: 300px; display: flex; justify-content: space-between; margin-top: 10px; font-size: 12px; color: #9CA3AF;">
-                            <span>SELL</span>
-                            <span>NEUTRAL</span>
-                            <span>BUY</span>
-                        </div>
+                        # Labels for the scale
+                        label_col1, label_col2, label_col3 = st.columns(3)
+                        with label_col1:
+                            st.markdown("**SELL**", unsafe_allow_html=True)
+                        with label_col2:
+                            st.markdown("<center><strong>NEUTRAL</strong></center>", unsafe_allow_html=True)
+                        with label_col3:
+                            st.markdown("<div style='text-align: right;'><strong>BUY</strong></div>", unsafe_allow_html=True)
                         
-                        <!-- Rating display -->
-                        <div style="text-align: center; margin-top: 20px;">
-                            <div style="font-size: 48px; font-weight: bold; color: {color}; margin-bottom: 5px;">
+                        # Large rating display
+                        st.markdown(f"""
+                        <div style="text-align: center; margin: 20px 0;">
+                            <div style="font-size: 48px; font-weight: bold; color: {color}; margin-bottom: 10px;">
                                 {buy_rating:.1f}/10
                             </div>
-                            <div style="font-size: 24px; font-weight: bold; color: {color};">
+                            <div style="font-size: 24px; font-weight: bold; color: {color}; background: rgba(255,255,255,0.1); 
+                                       padding: 8px 16px; border-radius: 20px; display: inline-block;">
                                 {recommendation}
                             </div>
                         </div>
-                    </div>
-                    """
-                    st.markdown(rating_display, unsafe_allow_html=True)
+                        """, unsafe_allow_html=True)
                 
                 # === 2. FINANCIALS SECTION ===
                 st.markdown("### 💰 Key Financials")
