@@ -2057,13 +2057,13 @@ def main():
                                         estimate_val = float(eps_estimate)
                                         beat_status = "Beat" if actual_val > estimate_val else "Missed"
                                         beat_icon = "🟢" if beat_status == "Beat" else "🔴"
-                                        st.write(f"• {quarter_str}: ${actual_val:.2f} vs ${estimate_val:.2f} est. {beat_icon} {beat_status}")
+                                        st.markdown(f"• {quarter_str}: ${actual_val:.2f} vs ${estimate_val:.2f} est. {beat_icon} {beat_status}")
                                         earnings_displayed = True
                                     except ValueError:
-                                        st.write(f"• {quarter_str}: ${str(eps_actual)} vs ${str(eps_estimate)} est.")
+                                        st.markdown(f"• {quarter_str}: ${str(eps_actual)} vs ${str(eps_estimate)} est.")
                                         earnings_displayed = True
                                 else:
-                                    st.write(f"• {quarter_str}: Earnings data available")
+                                    st.markdown(f"• {quarter_str}: Earnings data available")
                                     earnings_displayed = True
                     except:
                         pass
@@ -2327,12 +2327,12 @@ def main():
         # Data Sources section
         st.markdown('<div class="section-header">Data Sources<span class="section-emoji">📊</span></div>', unsafe_allow_html=True)
         st.markdown("All our financial data comes from trusted, professional sources:")
-        st.markdown("• **[Yahoo Finance](https://finance.yahoo.com/)** - Real-time stock prices, historical data, and company information")
-        st.markdown("• **[yfinance Python Library](https://pypi.org/project/yfinance/)** - Yahoo Finance API wrapper for data retrieval")
-        st.markdown("• **[Plotly](https://plotly.com/)** - Interactive charting and data visualization")
-        st.markdown("• **[Technical Analysis Algorithms](https://ta-lib.org/)** - RSI, MACD, Bollinger Bands, and moving averages")
-        st.markdown("• **[Financial Statement APIs](https://sec.gov/)** - Income statements, balance sheets, and cash flow data")
-        st.markdown("• **[Market News Aggregators](https://newsapi.org/)** - Recent news articles and market sentiment analysis")
+        st.markdown("• **[Yahoo Finance](https://finance.yahoo.com/)** - Real-time stock prices, historical data, earnings, and company information")
+        st.markdown("• **[Bloomberg](https://www.bloomberg.com/)** - Professional financial data and market analysis")
+        st.markdown("• **[MarketWatch](https://www.marketwatch.com/)** - Financial news and market insights")
+        st.markdown("• **[CNBC](https://www.cnbc.com/)** - Business news and financial reporting")
+        st.markdown("• **[SEC EDGAR Database](https://sec.gov/)** - Official company filings and financial statements")
+        st.markdown("• **[Morningstar](https://www.morningstar.com/)** - Investment research and financial data")
         
         # Logout button
         logout_button()

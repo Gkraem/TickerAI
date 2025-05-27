@@ -103,8 +103,23 @@ def auth_page():
     </style>
     """, unsafe_allow_html=True)
     
-    # Add padding for vertical centering
-    st.markdown("<div style='padding-top: 20vh;'></div>", unsafe_allow_html=True)
+    # Add responsive padding for vertical centering
+    st.markdown("""
+    <style>
+    @media (max-width: 768px) {
+        .block-container {
+            padding-top: 15vh !important;
+            padding-bottom: 5vh !important;
+        }
+    }
+    @media (min-width: 769px) {
+        .block-container {
+            padding-top: 20vh !important;
+        }
+    }
+    </style>
+    <div style='padding-top: 20vh;'></div>
+    """, unsafe_allow_html=True)
     
     # Use container and columns for proper centering
     with st.container():
