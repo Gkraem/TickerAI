@@ -1618,22 +1618,56 @@ def main():
                 # === 4. NEWS SECTION ===
                 st.markdown("### 📰 News")
                 
-                # Get earnings information from calendar
+                # Get earnings information using multiple methods
+                earnings_displayed = False
+                
+                # Method 1: Try earnings calendar
                 try:
                     import yfinance as yf
                     stock = yf.Ticker(ticker)
                     calendar = stock.calendar
-                    if calendar is not None and not calendar.empty:
-                        next_earnings = calendar.index[0].strftime('%Y-%m-%d')
-                        st.write(f"**Next Earnings:** {next_earnings}")
-                    else:
-                        # Try alternative earnings data
-                        earnings_dates = company_info.get('earningsQuarterlyResults', None)
-                        if earnings_dates:
-                            st.write("**Next Earnings:** Check investor relations page")
-                        else:
-                            st.write("**Next Earnings:** Date not available")
+                    if calendar is not None and len(calendar) > 0:
+                        # Calendar returns a DataFrame, get the first earnings date
+                        earnings_date = calendar.index[0]
+                        st.write(f"**Next Earnings:** {earnings_date.strftime('%B %d, %Y')}")
+                        earnings_displayed = True
                 except:
+                    pass
+                
+                # Method 2: Try from company info
+                if not earnings_displayed:
+                    try:
+                        next_earnings = company_info.get('nextFiscalYearEnd', None)
+                        if next_earnings:
+                            import datetime
+                            if isinstance(next_earnings, (int, float)):
+                                # Convert timestamp to readable date
+                                earnings_date = datetime.datetime.fromtimestamp(next_earnings)
+                                st.write(f"**Next Earnings:** {earnings_date.strftime('%B %d, %Y')} (estimated)")
+                                earnings_displayed = True
+                    except:
+                        pass
+                
+                # Method 3: Try alternative earnings fields
+                if not earnings_displayed:
+                    try:
+                        earnings_estimate = company_info.get('earningsDate', None)
+                        most_recent_quarter = company_info.get('mostRecentQuarter', None)
+                        
+                        if earnings_estimate:
+                            st.write(f"**Next Earnings:** {earnings_estimate}")
+                            earnings_displayed = True
+                        elif most_recent_quarter:
+                            import datetime
+                            if isinstance(most_recent_quarter, (int, float)):
+                                recent_date = datetime.datetime.fromtimestamp(most_recent_quarter)
+                                st.write(f"**Last Quarter:** {recent_date.strftime('%B %d, %Y')}")
+                                earnings_displayed = True
+                    except:
+                        pass
+                
+                # Fallback if no earnings data found
+                if not earnings_displayed:
                     st.write("**Next Earnings:** Date not available")
                 
                 # Get recent news headlines
