@@ -2039,8 +2039,21 @@ def main():
                     
                     earnings_displayed = False
                     
-                    # Try to get earnings history
+                    # Try to get earnings history - show most recent quarters
                     try:
+                        from datetime import datetime
+                        current_date = datetime.now()
+                        
+                        # Define the two most recent completed quarters
+                        if current_date.month <= 3:  # We're in Q1, so most recent are Q4 and Q3 of previous year
+                            quarters = [f"{current_date.year - 1} Q4", f"{current_date.year - 1} Q3"]
+                        elif current_date.month <= 6:  # We're in Q2, so most recent are Q1 current year and Q4 previous year
+                            quarters = [f"{current_date.year} Q1", f"{current_date.year - 1} Q4"]
+                        elif current_date.month <= 9:  # We're in Q3, so most recent are Q2 and Q1 current year
+                            quarters = [f"{current_date.year} Q2", f"{current_date.year} Q1"]
+                        else:  # We're in Q4, so most recent are Q3 and Q2 current year
+                            quarters = [f"{current_date.year} Q3", f"{current_date.year} Q2"]
+                        
                         earnings_history = stock.earnings_history
                         if earnings_history is not None and not earnings_history.empty and len(earnings_history) >= 2:
                             recent_earnings = earnings_history.head(2)
@@ -2048,33 +2061,23 @@ def main():
                                 eps_actual = row.get('epsActual')
                                 eps_estimate = row.get('epsEstimate')
                                 
-                                # Format quarter from actual date data
-                                try:
-                                    if hasattr(date, 'year') and hasattr(date, 'month'):
-                                        year = date.year
-                                        quarter = ((date.month - 1) // 3) + 1
-                                        quarter_str = f"{year} Q{quarter}"
-                                    elif hasattr(date, 'year'):
-                                        quarter_str = f"{date.year}"
-                                    else:
-                                        quarter_str = str(date)[:10] if len(str(date)) > 10 else str(date)
-                                except:
-                                    quarter_str = f"Recent Quarter {i+1}"
+                                # Use the calculated quarters
+                                quarter_str = quarters[i] if i < len(quarters) else f"Recent Quarter {i+1}"
                                 
-                                # Determine beat/miss with clean formatting
+                                # Clean formatting for beat/miss
                                 if eps_actual is not None and eps_estimate is not None:
                                     try:
                                         actual_val = float(eps_actual)
                                         estimate_val = float(eps_estimate)
                                         beat_status = "Beat" if actual_val > estimate_val else "Missed"
                                         beat_icon = "🟢" if beat_status == "Beat" else "🔴"
-                                        st.write(f"• {quarter_str}: ${actual_val:.2f} vs ${estimate_val:.2f} est. {beat_icon} {beat_status}")
+                                        st.markdown(f"**{quarter_str}:** ${actual_val:.2f} vs ${estimate_val:.2f} est. {beat_icon} {beat_status}")
                                         earnings_displayed = True
                                     except (ValueError, TypeError):
-                                        st.write(f"• {quarter_str}: Data available")
+                                        st.markdown(f"**{quarter_str}:** Data available")
                                         earnings_displayed = True
                                 else:
-                                    st.write(f"• {quarter_str}: Earnings data available")
+                                    st.markdown(f"**{quarter_str}:** Earnings data available")
                                     earnings_displayed = True
                     except:
                         pass
@@ -2296,21 +2299,66 @@ def main():
                 # === 6. AI SUMMARY SECTION (moved after Historical Performance) ===
                 st.markdown("### 🤖 AI Analysis Summary")
                 
-                # Generate AI summary based on rating components
-                technical_reason = rating_breakdown.get('Technical Analysis', {}).get('reason', 'Technical analysis unavailable')
-                fundamental_reason = rating_breakdown.get('Fundamental Analysis', {}).get('reason', 'Fundamental analysis unavailable')
-                sentiment_reason = rating_breakdown.get('Market Sentiment', {}).get('reason', 'Sentiment analysis unavailable')
+                # Generate personalized AI summary with company-specific details
+                company_name = company_info.get('longName', ticker)
+                sector = company_info.get('sector', 'Unknown')
+                market_cap = company_info.get('marketCap', 0)
+                pe_ratio = company_info.get('trailingPE', 0)
+                profit_margin = company_info.get('profitMargins', 0)
                 
-                if buy_rating >= 7:
-                    summary_intro = f"**{ticker} receives a BUY rating of {buy_rating:.1f}/10.** "
-                elif buy_rating >= 4:
-                    summary_intro = f"**{ticker} receives a HOLD rating of {buy_rating:.1f}/10.** "
+                # Create size category
+                if market_cap > 200_000_000_000:
+                    size_category = "mega-cap"
+                elif market_cap > 50_000_000_000:
+                    size_category = "large-cap"
+                elif market_cap > 10_000_000_000:
+                    size_category = "mid-cap"
                 else:
-                    summary_intro = f"**{ticker} receives a SELL rating of {buy_rating:.1f}/10.** "
+                    size_category = "small-cap"
                 
-                ai_summary = f"""{summary_intro}The analysis reveals {technical_reason.lower()}, while fundamentally the stock shows {fundamental_reason.lower()}. Market sentiment indicates {sentiment_reason.lower()}. This combined analysis suggests the current rating reflects the stock's balanced risk-reward profile based on technical momentum, fundamental valuation, and market consensus."""
+                # Create valuation assessment
+                valuation_note = ""
+                if pe_ratio and pe_ratio > 25:
+                    valuation_note = "trading at a premium valuation"
+                elif pe_ratio and pe_ratio < 15:
+                    valuation_note = "appearing undervalued by traditional metrics"
+                elif pe_ratio:
+                    valuation_note = "fairly valued based on earnings multiples"
                 
-                st.write(ai_summary)
+                # Create profitability note
+                profit_note = ""
+                if profit_margin and profit_margin > 0.20:
+                    profit_note = "demonstrating exceptional profitability"
+                elif profit_margin and profit_margin > 0.10:
+                    profit_note = "maintaining healthy profit margins"
+                elif profit_margin and profit_margin > 0:
+                    profit_note = "operating with modest profitability"
+                else:
+                    profit_note = "facing profitability challenges"
+                
+                # Rating determination
+                if buy_rating >= 7:
+                    rating_text = f"**BUY RATING: {buy_rating:.1f}/10**"
+                    recommendation = "presents a compelling investment opportunity"
+                elif buy_rating >= 4:
+                    rating_text = f"**HOLD RATING: {buy_rating:.1f}/10**"
+                    recommendation = "warrants careful consideration with mixed signals"
+                else:
+                    rating_text = f"**SELL RATING: {buy_rating:.1f}/10**"
+                    recommendation = "faces significant headwinds and risks"
+                
+                # Generate personalized summary
+                ai_summary = f"""
+                {rating_text}
+                
+                {company_name} is a {size_category} {sector.lower()} company that {recommendation}. The stock is currently {valuation_note} and {profit_note}. 
+                
+                Our analysis indicates {rating_breakdown.get('Technical Analysis', {}).get('reason', 'mixed technical signals').lower()}, while the company's fundamentals show {rating_breakdown.get('Fundamental Analysis', {}).get('reason', 'average financial health').lower()}. 
+                
+                Market sentiment suggests {rating_breakdown.get('Market Sentiment', {}).get('reason', 'neutral investor confidence').lower()}, which combined with the technical and fundamental picture supports our {buy_rating:.1f}/10 rating.
+                """
+                
+                st.markdown(ai_summary)
                 
             except Exception as e:
                 st.error(f"Error analyzing stock: {str(e)}")
