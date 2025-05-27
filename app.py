@@ -1490,34 +1490,31 @@ def main():
                     # Use Streamlit's progress bar and native components
                     st.markdown("<br>", unsafe_allow_html=True)
                     
-                    # Display the rating prominently with native Streamlit styling
-                    rating_col1, rating_col2, rating_col3 = st.columns([1, 2, 1])
-                    with rating_col2:
-                        # Create a visual progress bar
-                        progress_value = buy_rating / 10
-                        st.progress(progress_value)
-                        
-                        # Labels for the scale
-                        label_col1, label_col2, label_col3 = st.columns(3)
-                        with label_col1:
-                            st.markdown("**SELL**", unsafe_allow_html=True)
-                        with label_col2:
-                            st.markdown("<center><strong>NEUTRAL</strong></center>", unsafe_allow_html=True)
-                        with label_col3:
-                            st.markdown("<div style='text-align: right;'><strong>BUY</strong></div>", unsafe_allow_html=True)
-                        
-                        # Large rating display
-                        st.markdown(f"""
-                        <div style="text-align: center; margin: 20px 0;">
-                            <div style="font-size: 48px; font-weight: bold; color: {color}; margin-bottom: 10px;">
-                                {buy_rating:.1f}/10
-                            </div>
-                            <div style="font-size: 24px; font-weight: bold; color: {color}; background: rgba(255,255,255,0.1); 
-                                       padding: 8px 16px; border-radius: 20px; display: inline-block;">
-                                {recommendation}
-                            </div>
+                    # Create a visual progress bar
+                    progress_value = buy_rating / 10
+                    st.progress(progress_value)
+                    
+                    # Labels for the scale
+                    col_sell, col_neutral, col_buy = st.columns(3)
+                    with col_sell:
+                        st.markdown("**SELL**")
+                    with col_neutral:
+                        st.markdown("<center><strong>NEUTRAL</strong></center>", unsafe_allow_html=True)
+                    with col_buy:
+                        st.markdown("<div style='text-align: right;'><strong>BUY</strong></div>", unsafe_allow_html=True)
+                    
+                    # Large rating display
+                    st.markdown(f"""
+                    <div style="text-align: center; margin: 20px 0;">
+                        <div style="font-size: 48px; font-weight: bold; color: {color}; margin-bottom: 10px;">
+                            {buy_rating:.1f}/10
                         </div>
-                        """, unsafe_allow_html=True)
+                        <div style="font-size: 24px; font-weight: bold; color: {color}; background: rgba(255,255,255,0.1); 
+                                   padding: 8px 16px; border-radius: 20px; display: inline-block;">
+                            {recommendation}
+                        </div>
+                    </div>
+                    """, unsafe_allow_html=True)
                 
                 # === 2. FINANCIALS SECTION ===
                 st.markdown("### 💰 Key Financials")
