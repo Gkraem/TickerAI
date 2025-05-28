@@ -12,53 +12,97 @@ import requests
 
 def get_authentic_index_tickers(index_name):
     """
-    Get authentic ticker lists from Financial Modeling Prep API
-    This is a reliable financial data provider with accurate index constituents
+    Get authentic ticker lists from Wikipedia - reliable and always current
     """
     import requests
+    from bs4 import BeautifulSoup
     
     try:
         if index_name == "NASDAQ 100":
-            # Use Financial Modeling Prep API for NASDAQ 100
-            # This API provides real-time authentic index constituents
-            url = "https://financialmodelingprep.com/api/v3/nasdaq_constituent?apikey=demo"
-            response = requests.get(url)
+            # Get NASDAQ 100 from Wikipedia
+            url = "https://en.wikipedia.org/wiki/NASDAQ-100"
+            headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'}
+            response = requests.get(url, headers=headers)
+            soup = BeautifulSoup(response.content, 'html.parser')
             
-            if response.status_code == 200:
-                data = response.json()
-                tickers = [item['symbol'] for item in data if 'symbol' in item]
-                st.success(f"✓ Authentic NASDAQ 100 data: {len(tickers)} companies")
+            tickers = []
+            # Find the main table with NASDAQ 100 companies
+            tables = soup.find_all('table', class_='wikitable')
+            
+            for table in tables:
+                if table and 'Symbol' in str(table):
+                    rows = table.find_all('tr')[1:]  # Skip header
+                    for row in rows:
+                        cells = row.find_all('td')
+                        if len(cells) >= 2:
+                            # Symbol is usually in the 2nd column
+                            ticker = cells[1].get_text().strip()
+                            if ticker and len(ticker) <= 5:  # Valid ticker format
+                                tickers.append(ticker)
+                    break
+            
+            if tickers:
+                st.success(f"✓ Authentic NASDAQ 100 from Wikipedia: {len(tickers)} companies")
                 return tickers[:100]
             else:
-                st.error("Financial Modeling Prep API access needed for authentic NASDAQ 100 data")
+                st.error("Could not parse NASDAQ 100 data from Wikipedia")
                 return []
                 
         elif index_name == "S&P 500":
-            # Use Financial Modeling Prep API for S&P 500
-            url = "https://financialmodelingprep.com/api/v3/sp500_constituent?apikey=demo"
-            response = requests.get(url)
+            # Get S&P 500 from Wikipedia  
+            url = "https://en.wikipedia.org/wiki/List_of_S%26P_500_companies"
+            headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'}
+            response = requests.get(url, headers=headers)
+            soup = BeautifulSoup(response.content, 'html.parser')
             
-            if response.status_code == 200:
-                data = response.json()
-                tickers = [item['symbol'] for item in data if 'symbol' in item]
-                st.success(f"✓ Authentic S&P 500 data: {len(tickers)} companies")
+            tickers = []
+            # Find the constituents table
+            table = soup.find('table', {'id': 'constituents'})
+            
+            if table:
+                rows = table.find_all('tr')[1:]  # Skip header
+                for row in rows:
+                    cells = row.find_all('td')
+                    if len(cells) >= 1:
+                        ticker = cells[0].get_text().strip()
+                        if ticker:
+                            tickers.append(ticker)
+            
+            if tickers:
+                st.success(f"✓ Authentic S&P 500 from Wikipedia: {len(tickers)} companies")
                 return tickers[:500]
             else:
-                st.error("Financial Modeling Prep API access needed for authentic S&P 500 data")
+                st.error("Could not parse S&P 500 data from Wikipedia")
                 return []
                 
         elif index_name == "Dow Jones":
-            # Use Financial Modeling Prep API for Dow Jones
-            url = "https://financialmodelingprep.com/api/v3/dowjones_constituent?apikey=demo"
-            response = requests.get(url)
+            # Get Dow Jones from Wikipedia
+            url = "https://en.wikipedia.org/wiki/Dow_Jones_Industrial_Average"
+            headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'}
+            response = requests.get(url, headers=headers)
+            soup = BeautifulSoup(response.content, 'html.parser')
             
-            if response.status_code == 200:
-                data = response.json()
-                tickers = [item['symbol'] for item in data if 'symbol' in item]
-                st.success(f"✓ Authentic Dow Jones data: {len(tickers)} companies")
+            tickers = []
+            # Find the components table
+            tables = soup.find_all('table', class_='wikitable')
+            
+            for table in tables:
+                if table and 'Symbol' in str(table):
+                    rows = table.find_all('tr')[1:]  # Skip header
+                    for row in rows:
+                        cells = row.find_all('td')
+                        if len(cells) >= 2:
+                            # Symbol is usually in the 2nd column
+                            ticker = cells[1].get_text().strip()
+                            if ticker and len(ticker) <= 5:
+                                tickers.append(ticker)
+                    break
+            
+            if tickers:
+                st.success(f"✓ Authentic Dow Jones from Wikipedia: {len(tickers)} companies")
                 return tickers[:30]
             else:
-                st.error("Financial Modeling Prep API access needed for authentic Dow Jones data")
+                st.error("Could not parse Dow Jones data from Wikipedia")
                 return []
                 
         elif index_name == "Fortune 500":
