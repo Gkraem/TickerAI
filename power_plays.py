@@ -349,6 +349,67 @@ def generate_analysis(ticker, buy_rating, technical_score, fundamental_score, se
     
     return full_analysis
 
+def map_company_to_ticker(company_name):
+    """
+    Map Fortune 500 company names to stock tickers
+    """
+    # Common company name mappings
+    company_mappings = {
+        "Walmart": "WMT",
+        "Amazon.com": "AMZN", 
+        "Apple": "AAPL",
+        "UnitedHealth Group": "UNH",
+        "Berkshire Hathaway": "BRK-B",
+        "Google": "GOOGL",
+        "Alphabet": "GOOGL",
+        "McKesson": "MCK",
+        "CVS Health": "CVS",
+        "Exxon Mobil": "XOM",
+        "AT&T": "T",
+        "Microsoft": "MSFT",
+        "Costco Wholesale": "COST",
+        "Cigna": "CI",
+        "Cardinal Health": "CAH",
+        "Chevron": "CVX",
+        "Home Depot": "HD",
+        "Walgreens Boots Alliance": "WBA",
+        "Marathon Petroleum": "MPC",
+        "Elevance Health": "ELV",
+        "Phillips 66": "PSX",
+        "Valero Energy": "VLO",
+        "General Motors": "GM",
+        "Ford Motor": "F",
+        "JPMorgan Chase": "JPM",
+        "Verizon Communications": "VZ",
+        "General Electric": "GE",
+        "Tesla": "TSLA",
+        "Meta Platforms": "META",
+        "Humana": "HUM",
+        "Johnson & Johnson": "JNJ",
+        "Bank of America": "BAC",
+        "Procter & Gamble": "PG",
+        "Wells Fargo": "WFC",
+        "Pfizer": "PFE",
+        "Comcast": "CMCSA",
+        "UPS": "UPS",
+        "Kroger": "KR",
+        "Netflix": "NFLX",
+        "Target": "TGT",
+        "Intel": "INTC",
+        "Coca-Cola": "KO",
+        "Merck": "MRK",
+        "Walt Disney": "DIS",
+        "Nike": "NKE",
+        "Starbucks": "SBUX",
+        "McDonald's": "MCD"
+    }
+    
+    for name, ticker in company_mappings.items():
+        if name.lower() in company_name.lower():
+            return ticker
+    
+    return None
+
 def get_authentic_index_tickers(index_name):
     """
     Get authentic ticker lists from reliable financial data sources
@@ -359,65 +420,94 @@ def get_authentic_index_tickers(index_name):
     
     try:
         if index_name == "NASDAQ 100":
-            # Get NASDAQ 100 constituents from official source
-            url = "https://en.wikipedia.org/wiki/NASDAQ-100"
-            response = requests.get(url)
+            # Get NASDAQ 100 constituents from SlickCharts (accurate and simple)
+            url = "https://www.slickcharts.com/nasdaq100"
+            headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'}
+            response = requests.get(url, headers=headers)
             soup = BeautifulSoup(response.content, 'html.parser')
             
-            # Find the table with NASDAQ 100 companies
-            table = soup.find('table', {'class': 'wikitable'})
             tickers = []
+            # Find the table with stock data
+            table = soup.find('table', {'class': 'table'})
             
             if table:
                 rows = table.find_all('tr')[1:]  # Skip header
                 for row in rows:
                     cells = row.find_all('td')
-                    if len(cells) >= 2:
+                    if len(cells) >= 3:  # Company, Symbol, Weight columns
                         ticker = cells[1].text.strip()
-                        if ticker and ticker != '—':
+                        if ticker:
                             tickers.append(ticker)
             
             return tickers[:100]  # Ensure exactly 100
             
         elif index_name == "S&P 500":
-            # Get S&P 500 constituents
-            url = "https://en.wikipedia.org/wiki/List_of_S%26P_500_companies"
-            response = requests.get(url)
+            # Get S&P 500 constituents from SlickCharts
+            url = "https://www.slickcharts.com/sp500"
+            headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'}
+            response = requests.get(url, headers=headers)
             soup = BeautifulSoup(response.content, 'html.parser')
             
-            table = soup.find('table', {'id': 'constituents'})
             tickers = []
+            table = soup.find('table', {'class': 'table'})
             
             if table:
                 rows = table.find_all('tr')[1:]  # Skip header
                 for row in rows:
                     cells = row.find_all('td')
-                    if len(cells) >= 1:
-                        ticker = cells[0].text.strip()
+                    if len(cells) >= 3:
+                        ticker = cells[1].text.strip()
                         if ticker:
                             tickers.append(ticker)
             
             return tickers[:500]  # Ensure exactly 500
             
         elif index_name == "Dow Jones":
-            # Get Dow Jones 30 constituents
-            url = "https://en.wikipedia.org/wiki/Dow_Jones_Industrial_Average"
-            response = requests.get(url)
+            # Get Dow Jones 30 constituents from SlickCharts
+            url = "https://www.slickcharts.com/dowjones"
+            headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'}
+            response = requests.get(url, headers=headers)
             soup = BeautifulSoup(response.content, 'html.parser')
             
-            table = soup.find('table', {'class': 'wikitable'})
             tickers = []
+            table = soup.find('table', {'class': 'table'})
             
             if table:
                 rows = table.find_all('tr')[1:]  # Skip header
                 for row in rows:
                     cells = row.find_all('td')
-                    if len(cells) >= 2:
+                    if len(cells) >= 3:
                         ticker = cells[1].text.strip()
                         if ticker:
                             tickers.append(ticker)
             
             return tickers[:30]  # Ensure exactly 30
+            
+        elif index_name == "Fortune 500":
+            # Get Fortune 500 from Wikipedia (2024 list)
+            url = "https://en.wikipedia.org/wiki/Fortune_500"
+            headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'}
+            response = requests.get(url, headers=headers)
+            soup = BeautifulSoup(response.content, 'html.parser')
+            
+            tickers = []
+            # Look for the most recent Fortune 500 table
+            tables = soup.find_all('table', {'class': 'wikitable'})
+            
+            for table in tables:
+                if table and 'Company' in str(table):
+                    rows = table.find_all('tr')[1:]  # Skip header
+                    for row in rows:
+                        cells = row.find_all('td')
+                        if len(cells) >= 2:
+                            company_name = cells[1].text.strip()
+                            # Try to map company names to tickers (this is approximate)
+                            ticker = map_company_to_ticker(company_name)
+                            if ticker:
+                                tickers.append(ticker)
+                    break
+            
+            return tickers[:500]  # Return up to 500
             
         elif index_name == "Entire Ticker AI Database":
             # Import the actual complete stock database from app.py
