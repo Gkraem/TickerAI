@@ -349,6 +349,85 @@ def generate_analysis(ticker, buy_rating, technical_score, fundamental_score, se
     
     return full_analysis
 
+def get_authentic_index_tickers(index_name):
+    """
+    Get authentic ticker lists from reliable financial data sources
+    """
+    import yfinance as yf
+    import requests
+    from bs4 import BeautifulSoup
+    
+    try:
+        if index_name == "NASDAQ 100":
+            # Get NASDAQ 100 constituents from official source
+            url = "https://en.wikipedia.org/wiki/NASDAQ-100"
+            response = requests.get(url)
+            soup = BeautifulSoup(response.content, 'html.parser')
+            
+            # Find the table with NASDAQ 100 companies
+            table = soup.find('table', {'class': 'wikitable'})
+            tickers = []
+            
+            if table:
+                rows = table.find_all('tr')[1:]  # Skip header
+                for row in rows:
+                    cells = row.find_all('td')
+                    if len(cells) >= 2:
+                        ticker = cells[1].text.strip()
+                        if ticker and ticker != '—':
+                            tickers.append(ticker)
+            
+            return tickers[:100]  # Ensure exactly 100
+            
+        elif index_name == "S&P 500":
+            # Get S&P 500 constituents
+            url = "https://en.wikipedia.org/wiki/List_of_S%26P_500_companies"
+            response = requests.get(url)
+            soup = BeautifulSoup(response.content, 'html.parser')
+            
+            table = soup.find('table', {'id': 'constituents'})
+            tickers = []
+            
+            if table:
+                rows = table.find_all('tr')[1:]  # Skip header
+                for row in rows:
+                    cells = row.find_all('td')
+                    if len(cells) >= 1:
+                        ticker = cells[0].text.strip()
+                        if ticker:
+                            tickers.append(ticker)
+            
+            return tickers[:500]  # Ensure exactly 500
+            
+        elif index_name == "Dow Jones":
+            # Get Dow Jones 30 constituents
+            url = "https://en.wikipedia.org/wiki/Dow_Jones_Industrial_Average"
+            response = requests.get(url)
+            soup = BeautifulSoup(response.content, 'html.parser')
+            
+            table = soup.find('table', {'class': 'wikitable'})
+            tickers = []
+            
+            if table:
+                rows = table.find_all('tr')[1:]  # Skip header
+                for row in rows:
+                    cells = row.find_all('td')
+                    if len(cells) >= 2:
+                        ticker = cells[1].text.strip()
+                        if ticker:
+                            tickers.append(ticker)
+            
+            return tickers[:30]  # Ensure exactly 30
+            
+        else:
+            # For other indices, use the existing hardcoded lists as fallback
+            return STOCK_INDICES.get(index_name, STOCK_INDICES["Fortune 500"])
+            
+    except Exception as e:
+        st.error(f"Error fetching authentic {index_name} data: {str(e)}")
+        # Fallback to existing lists
+        return STOCK_INDICES.get(index_name, STOCK_INDICES["Fortune 500"])
+
 def get_top_stocks(max_stocks=5, max_tickers=500, progress_callback=None, index_name="Fortune 500"):
     """
     Analyze stocks from the selected index and return the top stocks with highest buy ratings
@@ -371,8 +450,8 @@ def get_top_stocks(max_stocks=5, max_tickers=500, progress_callback=None, index_
     """
 
     
-    # Get tickers for the selected index (fallback to Fortune 500 if the index doesn't exist)
-    tickers_to_analyze = STOCK_INDICES.get(index_name, STOCK_INDICES["Fortune 500"])
+    # Get authentic tickers for the selected index
+    tickers_to_analyze = get_authentic_index_tickers(index_name)
     
     # Show a progress bar
     progress_container = st.empty()
