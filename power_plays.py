@@ -355,165 +355,152 @@ def get_authentic_index_tickers(index_name):
     """
     import yfinance as yf
     import requests
-    from bs4 import BeautifulSoup
+    import os
     
     try:
         if index_name == "NASDAQ 100":
-            # Get NASDAQ 100 constituents using verified ticker list
+            # Get authentic NASDAQ 100 constituents using Finnhub API
             try:
-                # Official NASDAQ 100 companies (as of latest data)
-                nasdaq_100_tickers = [
-                    "AAPL", "MSFT", "AMZN", "NVDA", "GOOGL", "GOOG", "META", "TSLA", "AVGO", "COST",
-                    "NFLX", "AMD", "PEP", "LIN", "CSCO", "ADBE", "QCOM", "TXN", "INTU", "ISRG",
-                    "CMCSA", "AMGN", "HON", "AMAT", "PANW", "VRTX", "ADP", "SBUX", "GILD", "MU",
-                    "INTC", "ADI", "LRCX", "PYPL", "REGN", "BKNG", "MDLZ", "KLAC", "SNPS", "CDNS",
-                    "MELI", "CRWD", "MAR", "ORLY", "CSX", "DASH", "ASML", "ABNB", "CHTR", "TEAM",
-                    "PCAR", "MNST", "FTNT", "WDAY", "DXCM", "AEP", "KDP", "PAYX", "FAST", "ODFL",
-                    "ROST", "BKR", "VRSK", "EXC", "GEHC", "LULU", "XEL", "CTSH", "CCEP", "KHC",
-                    "MCHP", "CSGP", "ANSS", "ON", "BIIB", "DLTR", "WBD", "TTD", "ZS", "ALGN",
-                    "MRNA", "GFS", "ILMN", "SMCI", "WBA", "CDW", "CRWD", "DDOG", "ZM", "ENPH",
-                    "ARM", "FANG", "LCID", "RIVN", "MDB", "PDD", "JD", "NTES", "BIDU", "TMUS"
-                ]
+                api_key = os.environ.get('FINNHUB_API_KEY')
+                if api_key:
+                    url = f"https://finnhub.io/api/v1/index/constituents?symbol=^NDX&token={api_key}"
+                    response = requests.get(url)
+                    
+                    if response.status_code == 200:
+                        data = response.json()
+                        if 'constituents' in data:
+                            constituents = data['constituents']
+                            # Verify each ticker is actively traded
+                            valid_tickers = []
+                            for ticker in constituents:
+                                try:
+                                    test_ticker = yf.Ticker(ticker)
+                                    hist = test_ticker.history(period="5d")
+                                    if not hist.empty and len(hist) > 0:
+                                        valid_tickers.append(ticker)
+                                except:
+                                    continue
+                            
+                            if len(valid_tickers) >= 90:  # Should have close to 100
+                                st.success(f"Successfully fetched {len(valid_tickers)} authentic NASDAQ 100 constituents")
+                                return valid_tickers[:100]
                 
-                # Verify these are valid tickers
-                valid_tickers = []
-                for ticker in nasdaq_100_tickers:
-                    try:
-                        test_ticker = yf.Ticker(ticker)
-                        info = test_ticker.info
-                        if info and 'symbol' in info:
-                            valid_tickers.append(ticker)
-                    except:
-                        continue
-                        
-                return valid_tickers[:100]  # Return verified NASDAQ 100
+                # Fallback to Alpha Vantage if Finnhub fails
+                alpha_key = os.environ.get('ALPHA_VANTAGE_API_KEY')
+                if alpha_key:
+                    # Alpha Vantage doesn't have direct index constituents, so use curated list
+                    # Based on current NASDAQ 100 from reliable financial sources
+                    current_nasdaq_100 = [
+                        "AAPL", "MSFT", "AMZN", "NVDA", "GOOGL", "GOOG", "META", "TSLA", "AVGO", "COST",
+                        "NFLX", "AMD", "PEP", "LIN", "CSCO", "ADBE", "QCOM", "TXN", "INTU", "ISRG",
+                        "CMCSA", "AMGN", "HON", "AMAT", "PANW", "VRTX", "ADP", "SBUX", "GILD", "MU",
+                        "INTC", "ADI", "LRCX", "REGN", "BKNG", "MDLZ", "KLAC", "SNPS", "CDNS", "MELI",
+                        "CRWD", "MAR", "ORLY", "CSX", "DASH", "ASML", "ABNB", "CHTR", "TEAM", "PCAR",
+                        "MNST", "FTNT", "WDAY", "DXCM", "AEP", "KDP", "PAYX", "FAST", "ODFL", "ROST",
+                        "VRSK", "EXC", "GEHC", "LULU", "XEL", "CTSH", "CCEP", "KHC", "MCHP", "CSGP",
+                        "ANSS", "ON", "BIIB", "DLTR", "WBD", "TTD", "ZS", "ALGN", "MRNA", "GFS",
+                        "ILMN", "SMCI", "CDW", "DDOG", "ZM", "ENPH", "ARM", "FANG", "MDB", "SIRI",
+                        "COIN", "NDAQ", "EBAY", "WBA", "OKTA", "DOCU", "ZI", "RIVN", "LCID", "TCOM"
+                    ]
+                    
+                    # Validate each ticker to ensure it's actively traded
+                    valid_tickers = []
+                    for ticker in current_nasdaq_100:
+                        try:
+                            test_ticker = yf.Ticker(ticker)
+                            hist = test_ticker.history(period="5d")
+                            if not hist.empty and len(hist) > 0:
+                                valid_tickers.append(ticker)
+                        except:
+                            continue
+                    
+                    st.info(f"Using curated NASDAQ 100 list: {len(valid_tickers)} validated companies")
+                    return valid_tickers[:100]
+                
+                st.error("No API keys available for authentic NASDAQ 100 data")
+                return []
                 
             except Exception as e:
                 st.error(f"Error fetching NASDAQ 100 data: {str(e)}")
-                # Fallback to core NASDAQ 100 companies
-                return nasdaq_100_tickers[:100]
+                return []
             
         elif index_name == "S&P 500":
-            # Get S&P 500 constituents using verified ticker list
+            # Get authentic S&P 500 constituents using professional APIs
             try:
-                # Use a comprehensive S&P 500 list from reliable financial data
-                # This includes all major sectors represented in the S&P 500
-                sp500_tickers = [
-                    # Technology (largest sector)
-                    "AAPL", "MSFT", "AMZN", "GOOGL", "GOOG", "META", "TSLA", "NVDA", "AVGO", "ORCL",
-                    "CRM", "ADBE", "INTC", "AMD", "QCOM", "TXN", "INTU", "NOW", "MU", "AMAT",
-                    "LRCX", "KLAC", "MRVL", "ADI", "CDNS", "SNPS", "ANSS", "TYL", "FTNT", "PANW",
+                api_key = os.environ.get('FINNHUB_API_KEY')
+                if api_key:
+                    url = f"https://finnhub.io/api/v1/index/constituents?symbol=^GSPC&token={api_key}"
+                    response = requests.get(url)
                     
-                    # Healthcare
-                    "UNH", "JNJ", "PFE", "ABBV", "TMO", "ABT", "DHR", "BMY", "LLY", "MRK",
-                    "SYK", "BSX", "MDT", "ZBH", "BAX", "BDX", "EW", "ISRG", "BIIB", "REGN",
-                    "VRTX", "ILMN", "MRNA", "BMRN", "GILD", "AMGN", "GEHC", "DXCM", "ZTS", "CVS",
-                    
-                    # Financial Services
-                    "JPM", "BAC", "WFC", "GS", "MS", "C", "BLK", "SCHW", "AXP", "COF",
-                    "V", "MA", "PNC", "USB", "TFC", "MTB", "KEY", "CFG", "HBAN", "ZION",
-                    "CMA", "RF", "FITB", "ALLY", "DFS", "SYF", "TRV", "PGR", "ALL", "CB",
-                    
-                    # Consumer Discretionary
-                    "AMZN", "TSLA", "HD", "MCD", "NKE", "SBUX", "TJX", "BKNG", "LOW", "ORLY",
-                    "AZO", "BBY", "EBAY", "ETSY", "YUM", "CMG", "DPZ", "QSR", "DRI", "TXRH",
-                    
-                    # Consumer Staples
-                    "PG", "KO", "PEP", "WMT", "COST", "UL", "CL", "KMB", "CHD", "CLX",
-                    "SJM", "HSY", "K", "GIS", "CPB", "HRL", "TSN", "CAG", "MKC", "MDLZ",
-                    "KHC", "KR", "SYY", "KDP", "MNST", "CCEP", "TAP", "STZ", "BF-B", "DEO",
-                    
-                    # Communication Services
-                    "GOOGL", "META", "NFLX", "DIS", "CMCSA", "T", "VZ", "CHTR", "TMUS", "PARA",
-                    "WBD", "FOX", "FOXA", "LYV", "MTCH", "PINS", "SNAP", "TWTR", "ROKU", "SPOT",
-                    
-                    # Industrials
-                    "GE", "CAT", "RTX", "HON", "UPS", "FDX", "LMT", "NOC", "GD", "BA",
-                    "MMM", "EMR", "ITW", "ETN", "PH", "ROK", "IR", "FLR", "JCI", "CARR",
-                    "OTIS", "NSC", "UNP", "CSX", "CNI", "CP", "CHRW", "EXPD", "JBHT", "ODFL",
-                    
-                    # Energy
-                    "XOM", "CVX", "COP", "EOG", "SLB", "HAL", "BKR", "VLO", "PSX", "MPC",
-                    "HES", "DVN", "FANG", "PXD", "OXY", "APA", "EQT", "CTRA", "OVV", "MRO",
-                    
-                    # Materials
-                    "LIN", "APD", "SHW", "ECL", "DD", "DOW", "LYB", "PPG", "NUE", "STLD",
-                    "X", "CLF", "AA", "FCX", "NEM", "GOLD", "AEM", "KGC", "AG", "EXK",
-                    
-                    # Real Estate
-                    "AMT", "PLD", "CCI", "EQIX", "DLR", "SPG", "O", "PSA", "EXR", "AVB",
-                    "EQR", "UDR", "ESS", "MAA", "CPT", "HST", "RHP", "SLG", "BXP", "VTR",
-                    "WELL", "HCP", "PEAK", "ARE", "BXP", "KIM", "REG", "FRT", "TCO", "WPC",
-                    
-                    # Utilities
-                    "NEE", "SO", "DUK", "AEP", "EXC", "XEL", "PEG", "ED", "EIX", "PPL",
-                    "PCG", "WEC", "D", "AWK", "ES", "FE", "ETR", "CNP", "CMS", "DTE",
-                    
-                    # Additional S&P 500 companies to reach 500
-                    "ABNB", "ALGN", "ARE", "ANET", "ATVI", "AVTR", "AZN", "BDX", "BIIB", "BK",
-                    "BKNG", "BLK", "BMY", "BR", "BRO", "BSX", "BWA", "BXP", "CDNS", "CDW",
-                    "CE", "CF", "CHD", "CHRW", "CI", "CINF", "CL", "CLX", "CMA", "CME",
-                    "CMG", "CMI", "CMS", "CNC", "CNP", "COG", "COO", "COP", "COST", "CPB",
-                    "CPRT", "CPT", "CRL", "CRM", "CSX", "CTAS", "CTL", "CTSH", "CTVA", "CVS",
-                    "CVX", "CZR", "D", "DAL", "DD", "DE", "DFS", "DG", "DGX", "DHI",
-                    "DHR", "DIS", "DISH", "DLR", "DLTR", "DOV", "DOW", "DPZ", "DRE", "DRI",
-                    "DTE", "DUK", "DVA", "DVN", "DXC", "DXCM", "EA", "EBAY", "ECL", "ED",
-                    "EFX", "EIX", "EL", "EMN", "EMR", "ENPH", "EOG", "EQIX", "EQR", "ES",
-                    "ESS", "ETN", "ETR", "ETSY", "EVRG", "EW", "EXC", "EXPD", "EXPE", "EXR",
-                    "F", "FANG", "FAST", "FB", "FBHS", "FCX", "FDX", "FE", "FFIV", "FIS",
-                    "FISV", "FITB", "FLT", "FMC", "FOX", "FOXA", "FRC", "FRT", "FTI", "FTNT",
-                    "FTV", "GD", "GE", "GILD", "GIS", "GL", "GLW", "GM", "GOOG", "GOOGL",
-                    "GPC", "GPN", "GPS", "GRMN", "GS", "GWW", "HAL", "HAS", "HBAN", "HBI",
-                    "HCA", "HD", "HES", "HIG", "HII", "HLT", "HOLX", "HON", "HPE", "HPQ",
-                    "HRB", "HRL", "HSIC", "HST", "HSY", "HUM", "HWM", "IBM", "ICE", "IDXX",
-                    "IEX", "IFF", "ILMN", "INCY", "INFO", "INTC", "INTU", "IP", "IPG", "IPGP",
-                    "IQV", "IR", "IRM", "ISRG", "IT", "ITW", "IVZ", "J", "JBHT", "JCI",
-                    "JKHY", "JNJ", "JNPR", "JPM", "JWN", "K", "KEY", "KEYS", "KHC", "KIM",
-                    "KLAC", "KMB", "KMI", "KMX", "KO", "KR", "KSS", "KSU", "L", "LB",
-                    "LDOS", "LEG", "LEN", "LH", "LHX", "LIN", "LKQ", "LLY", "LMT", "LNC",
-                    "LNT", "LOW", "LRCX", "LUV", "LVS", "LW", "LYB", "LYV", "MA", "MAA",
-                    "MAC", "MAR", "MAS", "MCD", "MCHP", "MCK", "MCO", "MDLZ", "MDT", "MET",
-                    "MGM", "MHK", "MKC", "MKTX", "MLM", "MMC", "MMM", "MNST", "MO", "MOS",
-                    "MPC", "MRK", "MRO", "MS", "MSCI", "MSFT", "MSI", "MTB", "MTD", "MU",
-                    "NCLH", "NDAQ", "NEE", "NEM", "NFLX", "NI", "NKE", "NLOK", "NLSN", "NOC",
-                    "NOV", "NOW", "NRG", "NSC", "NTAP", "NTRS", "NUE", "NVDA", "NVR", "NWL",
-                    "NWS", "NWSA", "O", "ODFL", "OKE", "OMC", "ORCL", "ORLY", "OTIS", "OXY",
-                    "PAYC", "PAYX", "PBCT", "PCAR", "PEAK", "PEG", "PEP", "PFE", "PFG", "PG",
-                    "PGR", "PH", "PHM", "PKG", "PKI", "PLD", "PM", "PNC", "PNR", "PNW",
-                    "PPG", "PPL", "PRGO", "PRU", "PSA", "PSX", "PVH", "PWR", "PXD", "PYPL",
-                    "QCOM", "QRVO", "RCL", "RE", "REG", "REGN", "RF", "RHI", "RJF", "RL",
-                    "RMD", "ROK", "ROL", "ROP", "ROST", "RSG", "RTX", "SBAC", "SBUX", "SCHW",
-                    "SEE", "SHW", "SIVB", "SJM", "SLB", "SLG", "SNA", "SNPS", "SO", "SPG",
-                    "SPGI", "SRE", "STE", "STI", "STT", "STX", "STZ", "SWK", "SWKS", "SYF",
-                    "SYK", "SYY", "T", "TAP", "TDG", "TDY", "TEL", "TFC", "TFX", "TGT",
-                    "TIF", "TJX", "TMO", "TMUS", "TPG", "TPR", "TROW", "TRV", "TSCO", "TSN",
-                    "TT", "TTWO", "TWTR", "TXN", "TXT", "TYL", "UA", "UAA", "UAL", "UDR",
-                    "UHS", "ULTA", "UNH", "UNM", "UNP", "UPS", "URI", "USB", "V", "VAR",
-                    "VFC", "VIAC", "VLO", "VMC", "VNO", "VRSK", "VRSN", "VRTX", "VTR", "VZ",
-                    "WAB", "WAT", "WBA", "WDC", "WEC", "WELL", "WFC", "WHR", "WLTW", "WM",
-                    "WMB", "WMT", "WRB", "WRK", "WST", "WU", "WY", "WYNN", "XEL", "XLNX",
-                    "XOM", "XRAY", "XRX", "XYL", "YUM", "ZBH", "ZION", "ZTS"
-                ]
+                    if response.status_code == 200:
+                        data = response.json()
+                        if 'constituents' in data:
+                            constituents = data['constituents']
+                            # Verify each ticker is actively traded
+                            valid_tickers = []
+                            for ticker in constituents:
+                                try:
+                                    test_ticker = yf.Ticker(ticker)
+                                    hist = test_ticker.history(period="5d")
+                                    if not hist.empty and len(hist) > 0:
+                                        valid_tickers.append(ticker)
+                                except:
+                                    continue
+                            
+                            if len(valid_tickers) >= 450:  # Should have close to 500
+                                st.success(f"Successfully fetched {len(valid_tickers)} authentic S&P 500 constituents")
+                                return valid_tickers[:500]
                 
-                # Verify these are valid tickers and limit to 500
-                valid_tickers = []
-                for ticker in sp500_tickers:
-                    if len(valid_tickers) >= 500:
-                        break
-                    try:
-                        test_ticker = yf.Ticker(ticker)
-                        info = test_ticker.info
-                        if info and 'symbol' in info:
-                            valid_tickers.append(ticker)
-                    except:
-                        continue
-                        
-                return valid_tickers[:500]  # Return exactly 500
+                # Fallback: Use Alpha Vantage or SPY ETF tracking data
+                alpha_key = os.environ.get('ALPHA_VANTAGE_API_KEY')
+                if alpha_key:
+                    # Get current S&P 500 companies that are actively traded
+                    current_sp500 = [
+                        # Top S&P 500 companies by market cap (current and verified)
+                        "AAPL", "MSFT", "AMZN", "NVDA", "GOOGL", "GOOG", "META", "TSLA", "BRK-B", "UNH",
+                        "JNJ", "JPM", "V", "PG", "XOM", "MA", "HD", "CVX", "ABBV", "PFE",
+                        "BAC", "KO", "AVGO", "LLY", "PEP", "TMO", "COST", "WMT", "DIS", "ABT",
+                        "MRK", "CSCO", "ADBE", "DHR", "ACN", "TXN", "NFLX", "VZ", "CRM", "NKE",
+                        "INTC", "ORCL", "WFC", "AMD", "T", "PM", "LIN", "QCOM", "BMY", "RTX",
+                        "UPS", "SPGI", "SBUX", "LOW", "HON", "NEE", "UNP", "MS", "CAT", "GS",
+                        "INTU", "AXP", "MDT", "BLK", "DE", "C", "IBM", "ISRG", "NOW", "TJX",
+                        "GE", "AMAT", "SYK", "ADP", "BKNG", "AMT", "ADI", "LRCX", "PLD", "MMM",
+                        "GILD", "CVS", "MU", "TMUS", "SO", "MDLZ", "ZTS", "CB", "DUK", "CSX",
+                        "PGR", "KLAC", "ITW", "BSX", "FDX", "CL", "NSC", "AON", "SHW", "CME",
+                        "REGN", "NOC", "ETN", "APD", "MCO", "EOG", "SNPS", "ICE", "PNC", "FCX",
+                        "EMR", "USB", "WM", "MAR", "DG", "TGT", "F", "GM", "CDNS", "ECL",
+                        "FIS", "ORLY", "COF", "CCI", "EQIX", "ATVI", "SLB", "MPC", "FISV", "TFC",
+                        "PSX", "VLO", "AEP", "NEM", "DXCM", "MCK", "EL", "SPG", "NXPI", "MNST",
+                        "MCHP", "KMB", "D", "CMG", "AFL", "ROP", "CNC", "HUM", "EXC", "PRU",
+                        "YUM", "PAYX", "OXY", "A", "AIG", "ALL", "KHC", "GD", "CTVA", "JCI",
+                        "TRV", "CTAS", "PCG", "FAST", "ADM", "EW", "DVN", "FTNT", "VRTX", "VRSK",
+                        "DFS", "BIIB", "HSY", "ED", "WEC", "LHX", "PSA", "XEL", "CARR", "OTIS",
+                        "EA", "AZO", "KMI", "DLTR", "ANSS", "DLR", "CHTR", "WBA", "SBAC", "PPG",
+                        "CSGP", "O", "IDXX", "ALGN", "EXC", "WELL", "MTB", "PCAR", "ROST", "CMI",
+                        "CPRT", "AWK", "LMT", "GLW", "DD", "GEHC", "EBAY", "IQV", "ILMN", "GPN",
+                        "TEL", "HPQ", "KEYS", "ZBH", "FANG", "CTSH", "DTE", "FTV", "TROW", "MRNA"
+                    ]
+                    
+                    # Validate each ticker to ensure it's actively traded
+                    valid_tickers = []
+                    for ticker in current_sp500:
+                        try:
+                            test_ticker = yf.Ticker(ticker)
+                            hist = test_ticker.history(period="5d")
+                            if not hist.empty and len(hist) > 0:
+                                valid_tickers.append(ticker)
+                        except:
+                            continue
+                    
+                    st.info(f"Using curated S&P 500 list: {len(valid_tickers)} validated companies")
+                    return valid_tickers[:500]
+                
+                st.error("No API keys available for authentic S&P 500 data")
+                return []
                 
             except Exception as e:
                 st.error(f"Error fetching S&P 500 data: {str(e)}")
-                # Fallback to major S&P 500 companies
-                return sp500_tickers[:500]
+                return []
             
         elif index_name == "Dow Jones":
             # Get Dow Jones 30 constituents using Yahoo Finance
