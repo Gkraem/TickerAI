@@ -127,7 +127,7 @@ STOCK_INDICES = {
         "MNST", "GEHC", "WDAY", "PAYX", "DASH", "ORLY", "BIIB", "MELI", "CEG",  
         "MTCH", "ANSS", "ALGN", "FAST", "CCEP", "RYAAY", "EA", "XEL", "OKTA", 
         "DOCU", "SWKS", "NTES", "ZS", "IDXX", "ZM", "ON", 
-        "ADP", "BMRN", "CSX", "VRSK", "AMAT", "ABNB", "LCID", "DDOG", "MELI", "CTAS"
+        "ADP", "BMRN", "CSX", "VRSK", "AMAT", "ABNB", "LCID", "DDOG", "MELI", "CTAS", "WELL"
     ]
 }
 
@@ -413,15 +413,29 @@ def get_top_stocks(max_stocks=5, max_tickers=500, progress_callback=None, index_
     # Sort by buy rating
     sorted_stocks = sorted(analyzed_stocks, key=lambda x: x['buy_rating'], reverse=True)
     
-    # Get top N unique stocks (prevent duplicates)
+    # Get top N unique stocks (prevent duplicates and same companies)
     top_stocks = []
     seen_tickers = set()
+    seen_companies = set()
+    
+    # Define company groups that should be treated as the same entity
+    company_groups = {
+        'GOOGL': 'ALPHABET',
+        'GOOG': 'ALPHABET',
+        'BRK.A': 'BERKSHIRE',
+        'BRK.B': 'BERKSHIRE',
+    }
     
     for stock in sorted_stocks:
         ticker = stock['ticker']
-        if ticker not in seen_tickers:
+        
+        # Check if this ticker represents a company we've already included
+        company_key = company_groups.get(ticker, ticker)
+        
+        if ticker not in seen_tickers and company_key not in seen_companies:
             top_stocks.append(stock)
             seen_tickers.add(ticker)
+            seen_companies.add(company_key)
             
             # Stop when we have enough unique stocks
             if len(top_stocks) >= max_stocks:
