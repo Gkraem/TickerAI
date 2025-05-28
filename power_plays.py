@@ -26,19 +26,25 @@ def get_authentic_index_tickers(index_name):
             soup = BeautifulSoup(response.content, 'html.parser')
             
             tickers = []
-            # Find the main table with NASDAQ 100 companies
-            tables = soup.find_all('table', class_='wikitable')
+            # Look for any table with ticker symbols
+            tables = soup.find_all('table')
             
             for table in tables:
-                if table and 'Symbol' in str(table):
-                    rows = table.find_all('tr')[1:]  # Skip header
-                    for row in rows:
-                        cells = row.find_all('td')
-                        if len(cells) >= 2:
-                            # Symbol is usually in the 2nd column
-                            ticker = cells[1].get_text().strip()
-                            if ticker and len(ticker) <= 5:  # Valid ticker format
-                                tickers.append(ticker)
+                rows = table.find_all('tr')
+                for row in rows:
+                    cells = row.find_all(['td', 'th'])
+                    for i, cell in enumerate(cells):
+                        text = cell.get_text().strip()
+                        # Look for valid ticker patterns (2-5 letters, all caps)
+                        if text and text.isupper() and 2 <= len(text) <= 5 and text.isalpha():
+                            # Verify it's likely a ticker by checking surrounding context
+                            row_text = ' '.join([c.get_text().strip() for c in cells])
+                            if any(word in row_text.lower() for word in ['inc', 'corp', 'company', 'ltd']):
+                                if text not in tickers:
+                                    tickers.append(text)
+                
+                # If we found some tickers, stop looking
+                if len(tickers) > 50:
                     break
             
             if tickers:
