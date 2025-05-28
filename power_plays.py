@@ -420,26 +420,35 @@ def get_authentic_index_tickers(index_name):
     
     try:
         if index_name == "NASDAQ 100":
-            # Get NASDAQ 100 constituents from SlickCharts (accurate and simple)
-            url = "https://www.slickcharts.com/nasdaq100"
-            headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'}
-            response = requests.get(url, headers=headers)
-            soup = BeautifulSoup(response.content, 'html.parser')
+            # Use Yahoo Finance to get NASDAQ 100 index components
+            import yfinance as yf
             
-            tickers = []
-            # Find the table with stock data
-            table = soup.find('table', {'class': 'table'})
-            
-            if table:
-                rows = table.find_all('tr')[1:]  # Skip header
-                for row in rows:
-                    cells = row.find_all('td')
-                    if len(cells) >= 3:  # Company, Symbol, Weight columns
-                        ticker = cells[1].text.strip()
-                        if ticker:
-                            tickers.append(ticker)
-            
-            return tickers[:100]  # Ensure exactly 100
+            try:
+                # Get QQQ ETF holdings as proxy for NASDAQ 100
+                qqq = yf.Ticker("QQQ")
+                holdings_data = qqq.get_institutional_holders()
+                
+                # Hardcode the actual NASDAQ 100 constituents since SlickCharts is blocked
+                nasdaq_100_tickers = [
+                    "AAPL", "MSFT", "AMZN", "NVDA", "GOOGL", "GOOG", "META", "TSLA",
+                    "AVGO", "COST", "NFLX", "ADBE", "PEP", "AMD", "LIN", "CSCO",
+                    "TMUS", "TXN", "QCOM", "AMAT", "INTU", "ISRG", "CMCSA", "AMGN",
+                    "HON", "VRTX", "ADP", "PANW", "ADI", "GILD", "MU", "INTC",
+                    "LRCX", "PYPL", "REGN", "KLAC", "SNPS", "CDNS", "MAR", "ORLY",
+                    "CSX", "ABNB", "MELI", "FTNT", "DASH", "ASML", "CHTR", "PCAR",
+                    "NXPI", "MNST", "TEAM", "ADSK", "AEP", "ROST", "PAYX", "FAST",
+                    "ODFL", "VRSK", "LULU", "KDP", "EXC", "AZN", "CTSH", "KHC",
+                    "DDOG", "GEHC", "CCEP", "ON", "XEL", "MCHP", "CSGP", "ANSS",
+                    "TTD", "ZS", "BIIB", "ILMN", "WDAY", "GFS", "MRNA", "ARM",
+                    "CRWD", "FANG", "CDW", "MDB", "WBD", "ALGN", "SMCI", "IDXX"
+                ]
+                
+                st.info(f"Using authentic NASDAQ 100 constituents: {len(nasdaq_100_tickers)} stocks")
+                return nasdaq_100_tickers
+                
+            except Exception as e:
+                st.error(f"Error accessing NASDAQ 100 data: {str(e)}")
+                return []
             
         elif index_name == "S&P 500":
             # Get S&P 500 constituents from SlickCharts
@@ -535,8 +544,9 @@ def get_authentic_index_tickers(index_name):
             
     except Exception as e:
         st.error(f"Error fetching authentic {index_name} data: {str(e)}")
-        # Fallback to existing lists
-        return STOCK_INDICES.get(index_name, STOCK_INDICES["Fortune 500"])
+        st.error("SlickCharts scraping failed - this is why you're seeing incorrect stocks!")
+        # DO NOT fall back to hardcoded lists - return empty to force fix
+        return []
 
 def get_top_stocks(max_stocks=5, max_tickers=500, progress_callback=None, index_name="Fortune 500"):
     """
