@@ -487,85 +487,201 @@ def display_power_plays():
         # Add vertical spacing between dropdown and results
         st.markdown("<br>", unsafe_allow_html=True)
         
-        # Display each top stock
+        # Display each top stock with comprehensive analysis matching Stock Analyzer format
         for i, stock in enumerate(top_stocks):
             ticker = stock['ticker']
-            company_name = stock['company_name']
             buy_rating = stock['buy_rating']
-            analysis = stock['analysis']
             
-            # Create rank badge
-            rank_badge = f"""
-            <div style="display: inline-block; background-color: rgba(59, 130, 246, 0.8); 
-                        color: white; border-radius: 50%; width: 30px; height: 30px; 
-                        text-align: center; line-height: 30px; font-weight: bold; margin-right: 10px;">
-                #{i+1}
-            </div>
-            """
+            # Create detailed analysis section like Stock Analyzer
+            st.markdown(f"## #{i+1} - {ticker}")
             
-            # Display ticker and company name separately without HTML
-            col1, col2 = st.columns([1, 11])
-            with col1:
-                st.markdown(rank_badge, unsafe_allow_html=True)
-            with col2:
-                st.markdown(f"**{ticker}**")
-                st.markdown(f"### {company_name}")
-            
-            # Display buy rating
-            color = ""
-            if buy_rating >= 7:
-                color = "green"
-                rating_text = "BUY"
-            elif buy_rating >= 4:
-                color = "orange"
-                rating_text = "HOLD"
-            else:
-                color = "red"
-                rating_text = "SELL"
-            
-            # Rating display
-            st.markdown(f"""
-            <div style="display: flex; justify-content: center; margin: 20px 0;">
-                <div style="display: flex; flex-direction: column; align-items: center; 
-                           background-color: rgba(17, 24, 39, 0.7); border-radius: 12px; 
-                           padding: 20px 30px; box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2); 
-                           border: 3px solid {color}; width: 180px;">
-                    <div style="font-size: 42px; font-weight: bold; margin-bottom: 5px; 
-                               text-shadow: 0 2px 5px rgba(0, 0, 0, 0.3); color: white;">
-                        {buy_rating:.1f}
-                    </div>
-                    <div style="font-size: 14px; color: #e5e7eb; text-transform: uppercase; 
-                               letter-spacing: 1px; margin-bottom: 10px;">
-                        BUY RATING
-                    </div>
-                    <div style="font-size: 22px; font-weight: bold; text-shadow: 0 2px 5px rgba(0, 0, 0, 0.3); 
-                               color: {color};">
-                        {rating_text}
+            try:
+                import yfinance as yf
+                from utils import format_large_number
+                
+                stock_obj = yf.Ticker(ticker)
+                company_info = stock_obj.info
+                
+                # Get individual scores from analyzer
+                from stock_analyzer import StockAnalyzer
+                analyzer = StockAnalyzer(ticker)
+                buy_rating_calc, rating_breakdown = analyzer.calculate_buy_rating()
+                
+                technical_score = rating_breakdown.get('Technical Analysis', {}).get('score', 5)
+                fundamental_score = rating_breakdown.get('Fundamental Analysis', {}).get('score', 5)
+                sentiment_score = rating_breakdown.get('Market Sentiment', {}).get('score', 5)
+                
+                # === 1. BUY RATING METER ===
+                st.markdown("### 🎯 Buy Rating")
+                
+                rating_color = "#00ff00" if buy_rating >= 7 else "#ffff00" if buy_rating >= 4 else "#ff0000"
+                rating_text = "BUY" if buy_rating >= 7 else "HOLD" if buy_rating >= 4 else "SELL"
+                
+                st.markdown(f"""
+                <div style="display: flex; align-items: center; justify-content: center; margin: 20px 0;">
+                    <div style="width: 150px; height: 150px; border-radius: 50%; border: 8px solid {rating_color}; 
+                                display: flex; flex-direction: column; align-items: center; justify-content: center; 
+                                background-color: rgba(0,0,0,0.3);">
+                        <div style="color: {rating_color}; font-size: 36px; font-weight: bold;">{buy_rating:.1f}</div>
+                        <div style="color: white; font-size: 14px;">{rating_text}</div>
                     </div>
                 </div>
-            </div>
-            """, unsafe_allow_html=True)
-            
-            # Split the analysis into rating and detailed analysis
-            if "\n\n" in analysis:
-                rating_part, detailed_part = analysis.split("\n\n", 1)
-                # Display rating part
-                st.markdown(rating_part, unsafe_allow_html=True)
+                """, unsafe_allow_html=True)
                 
-                # Display detailed analysis
-                if detailed_part:
-                    st.markdown("### Financial Details")
-                    detailed_parts = detailed_part.split(". ")
-                    for part in detailed_parts:
-                        if part.strip():  # Only add non-empty parts
-                            st.markdown(f"• {part.strip()}.")
-            else:
-                # Fallback if analysis doesn't have the expected format
-                st.markdown(analysis, unsafe_allow_html=True)
-            
-            # Add horizontal separator except for the last item
-            if i < len(top_stocks) - 1:
-                st.markdown("<hr style='margin-top: 30px; margin-bottom: 30px; border-color: rgba(59, 130, 246, 0.2);'>", unsafe_allow_html=True)
+                # === 2. ANALYSIS SCORES ===
+                st.markdown("### 📊 Analysis Breakdown")
+                
+                col1, col2, col3 = st.columns(3)
+                
+                with col1:
+                    tech_color = "#00ff00" if technical_score >= 7 else "#ffff00" if technical_score >= 4 else "#ff0000"
+                    st.markdown(f"""
+                    <div style="text-align: center; padding: 15px; border: 2px solid {tech_color}; border-radius: 8px; margin: 5px;">
+                        <h3 style="color: {tech_color}; margin: 0;">{technical_score:.1f}/10</h3>
+                        <p style="color: white; margin: 0; font-size: 12px;">Technical Analysis</p>
+                    </div>
+                    """, unsafe_allow_html=True)
+                
+                with col2:
+                    fund_color = "#00ff00" if fundamental_score >= 7 else "#ffff00" if fundamental_score >= 4 else "#ff0000"
+                    st.markdown(f"""
+                    <div style="text-align: center; padding: 15px; border: 2px solid {fund_color}; border-radius: 8px; margin: 5px;">
+                        <h3 style="color: {fund_color}; margin: 0;">{fundamental_score:.1f}/10</h3>
+                        <p style="color: white; margin: 0; font-size: 12px;">Fundamental Analysis</p>
+                    </div>
+                    """, unsafe_allow_html=True)
+                
+                with col3:
+                    sent_color = "#00ff00" if sentiment_score >= 7 else "#ffff00" if sentiment_score >= 4 else "#ff0000"
+                    st.markdown(f"""
+                    <div style="text-align: center; padding: 15px; border: 2px solid {sent_color}; border-radius: 8px; margin: 5px;">
+                        <h3 style="color: {sent_color}; margin: 0;">{sentiment_score:.1f}/10</h3>
+                        <p style="color: white; margin: 0; font-size: 12px;">Market Sentiment</p>
+                    </div>
+                    """, unsafe_allow_html=True)
+                
+                # === 3. KEY FINANCIALS (Same order as Stock Analyzer) ===
+                st.markdown("### 💰 Key Financials")
+                
+                # Get financial data
+                current_price = company_info.get('currentPrice') or company_info.get('regularMarketPrice')
+                target_price = company_info.get('targetMeanPrice')
+                market_cap = company_info.get('marketCap')
+                trailing_pe = company_info.get('trailingPE')
+                forward_pe = company_info.get('forwardPE')
+                profit_margin = company_info.get('profitMargins')
+                total_revenue = company_info.get('totalRevenue')
+                dividend_yield = company_info.get('dividendYield')
+                
+                # Calculate upside potential
+                if current_price and target_price and current_price > 0:
+                    upside_potential = ((target_price / current_price) - 1) * 100
+                    potential_text = f"{upside_potential:+.1f}%" if upside_potential != 0 else "N/A"
+                else:
+                    potential_text = "N/A"
+                
+                fin_col1, fin_col2, fin_col3 = st.columns(3)
+                
+                with fin_col1:
+                    st.write(f"Price: ${current_price:.2f}" if current_price else "Price: N/A")
+                    st.write(f"Analyst's Mean Target Price: ${target_price:.2f}" if target_price else "Target Price: N/A")
+                    st.write(f"Upside: {potential_text}")
+                
+                with fin_col2:
+                    st.write(f"Market Cap: {format_large_number(market_cap)}" if market_cap else "Market Cap: N/A")
+                    st.write(f"P/E: {trailing_pe:.2f}" if trailing_pe else "P/E: N/A")
+                    st.write(f"Forward P/E: {forward_pe:.2f}" if forward_pe else "Forward P/E: N/A")
+                
+                with fin_col3:
+                    st.write(f"Profit Margin: {profit_margin*100:.2f}%" if profit_margin else "Profit Margin: N/A")
+                    st.write(f"Net Revenue: {format_large_number(total_revenue)}" if total_revenue else "Net Revenue: N/A")
+                    st.write(f"Dividend: {dividend_yield:.2f}%" if dividend_yield else "Dividend: N/A")
+                
+                # Add vertical spacing
+                st.markdown("<br>", unsafe_allow_html=True)
+                
+                # === 4. COMPANY OVERVIEW ===
+                st.markdown("### 🏢 Company Overview")
+                
+                company_name = company_info.get('longName', ticker)
+                sector = company_info.get('sector', 'Unknown')
+                industry = company_info.get('industry', 'Unknown')
+                business_summary = company_info.get('longBusinessSummary', '')
+                
+                # Create 4-sentence company overview
+                if business_summary:
+                    sentences = business_summary.split('.')[:4]
+                    overview_text = '. '.join(sentences) + '.'
+                else:
+                    overview_text = f"{company_name} operates in the {sector.lower()} sector, specifically within the {industry.lower()} industry. The company is an established market participant with a focus on core business operations. {company_name} delivers products and services to its target market through strategic business initiatives. The company maintains competitive positioning within its industry segment."
+                
+                st.markdown(overview_text)
+                
+                # === 5. AI ANALYSIS SUMMARY ===
+                st.markdown("### 🤖 AI Analysis Summary")
+                
+                # Generate personalized AI summary (same as Stock Analyzer)
+                market_cap = company_info.get('marketCap', 0)
+                pe_ratio = company_info.get('trailingPE', 0)
+                profit_margin = company_info.get('profitMargins', 0)
+                
+                # Create size category
+                if market_cap > 200_000_000_000:
+                    size_category = "mega-cap"
+                elif market_cap > 50_000_000_000:
+                    size_category = "large-cap"
+                elif market_cap > 10_000_000_000:
+                    size_category = "mid-cap"
+                else:
+                    size_category = "small-cap"
+                
+                # Create valuation assessment
+                valuation_note = ""
+                if pe_ratio and pe_ratio > 25:
+                    valuation_note = "trading at a premium valuation"
+                elif pe_ratio and pe_ratio < 15:
+                    valuation_note = "appearing undervalued by traditional metrics"
+                elif pe_ratio:
+                    valuation_note = "fairly valued based on earnings multiples"
+                
+                # Create profitability note
+                profit_note = ""
+                if profit_margin and profit_margin > 0.20:
+                    profit_note = "demonstrating exceptional profitability"
+                elif profit_margin and profit_margin > 0.10:
+                    profit_note = "maintaining healthy profit margins"
+                elif profit_margin and profit_margin > 0:
+                    profit_note = "operating with modest profitability"
+                else:
+                    profit_note = "facing profitability challenges"
+                
+                # Rating determination
+                if buy_rating >= 7:
+                    rating_text_ai = f"BUY RATING: {buy_rating:.1f}/10"
+                    recommendation = "presents a compelling investment opportunity"
+                elif buy_rating >= 4:
+                    rating_text_ai = f"HOLD RATING: {buy_rating:.1f}/10"
+                    recommendation = "warrants careful consideration with mixed signals"
+                else:
+                    rating_text_ai = f"SELL RATING: {buy_rating:.1f}/10"
+                    recommendation = "faces significant headwinds and risks"
+                
+                # Generate AI summary with same format as Stock Analyzer
+                st.markdown(f"""
+                **{rating_text_ai}**
+                
+                {company_name} is a {size_category} {sector.lower()} company that {recommendation}. The stock is currently {valuation_note} and {profit_note}. Our analysis indicates {rating_breakdown.get('Technical Analysis', {}).get('reason', 'mixed technical signals').lower()}, while the company's fundamentals show {rating_breakdown.get('Fundamental Analysis', {}).get('reason', 'average financial health').lower()}. Market sentiment suggests {rating_breakdown.get('Market Sentiment', {}).get('reason', 'neutral investor confidence').lower()}, which combined with the technical and fundamental picture supports our {buy_rating:.1f}/10 rating.
+                """)
+                
+                # Add separator between stocks
+                if i < len(top_stocks) - 1:
+                    st.markdown("---")
+                    st.markdown("<br><br>", unsafe_allow_html=True)
+                
+            except Exception as e:
+                st.error(f"Error displaying detailed analysis for {ticker}: {str(e)}")
+                if i < len(top_stocks) - 1:
+                    st.markdown("---")
         
         # Add reset search button after results (exactly like Stock Analyzer)
         st.write("")  # Add some spacing
