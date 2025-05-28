@@ -355,184 +355,69 @@ def get_authentic_index_tickers(index_name):
     """
     import yfinance as yf
     import requests
-    import os
+    from bs4 import BeautifulSoup
     
     try:
         if index_name == "NASDAQ 100":
-            # Get authentic NASDAQ 100 constituents using Finnhub API
-            try:
-                api_key = os.environ.get('FINNHUB_API_KEY')
-                if api_key:
-                    url = f"https://finnhub.io/api/v1/index/constituents?symbol=^NDX&token={api_key}"
-                    response = requests.get(url)
-                    
-                    if response.status_code == 200:
-                        data = response.json()
-                        if 'constituents' in data:
-                            constituents = data['constituents']
-                            # Verify each ticker is actively traded
-                            valid_tickers = []
-                            for ticker in constituents:
-                                try:
-                                    test_ticker = yf.Ticker(ticker)
-                                    hist = test_ticker.history(period="5d")
-                                    if not hist.empty and len(hist) > 0:
-                                        valid_tickers.append(ticker)
-                                except:
-                                    continue
-                            
-                            if len(valid_tickers) >= 90:  # Should have close to 100
-                                st.success(f"Successfully fetched {len(valid_tickers)} authentic NASDAQ 100 constituents")
-                                return valid_tickers[:100]
-                
-                # Fallback to Alpha Vantage if Finnhub fails
-                alpha_key = os.environ.get('ALPHA_VANTAGE_API_KEY')
-                if alpha_key:
-                    # Alpha Vantage doesn't have direct index constituents, so use curated list
-                    # Based on current NASDAQ 100 from reliable financial sources
-                    current_nasdaq_100 = [
-                        "AAPL", "MSFT", "AMZN", "NVDA", "GOOGL", "GOOG", "META", "TSLA", "AVGO", "COST",
-                        "NFLX", "AMD", "PEP", "LIN", "CSCO", "ADBE", "QCOM", "TXN", "INTU", "ISRG",
-                        "CMCSA", "AMGN", "HON", "AMAT", "PANW", "VRTX", "ADP", "SBUX", "GILD", "MU",
-                        "INTC", "ADI", "LRCX", "REGN", "BKNG", "MDLZ", "KLAC", "SNPS", "CDNS", "MELI",
-                        "CRWD", "MAR", "ORLY", "CSX", "DASH", "ASML", "ABNB", "CHTR", "TEAM", "PCAR",
-                        "MNST", "FTNT", "WDAY", "DXCM", "AEP", "KDP", "PAYX", "FAST", "ODFL", "ROST",
-                        "VRSK", "EXC", "GEHC", "LULU", "XEL", "CTSH", "CCEP", "KHC", "MCHP", "CSGP",
-                        "ANSS", "ON", "BIIB", "DLTR", "WBD", "TTD", "ZS", "ALGN", "MRNA", "GFS",
-                        "ILMN", "SMCI", "CDW", "DDOG", "ZM", "ENPH", "ARM", "FANG", "MDB", "SIRI",
-                        "COIN", "NDAQ", "EBAY", "WBA", "OKTA", "DOCU", "ZI", "RIVN", "LCID", "TCOM"
-                    ]
-                    
-                    # Validate each ticker to ensure it's actively traded
-                    valid_tickers = []
-                    for ticker in current_nasdaq_100:
-                        try:
-                            test_ticker = yf.Ticker(ticker)
-                            hist = test_ticker.history(period="5d")
-                            if not hist.empty and len(hist) > 0:
-                                valid_tickers.append(ticker)
-                        except:
-                            continue
-                    
-                    st.info(f"Using curated NASDAQ 100 list: {len(valid_tickers)} validated companies")
-                    return valid_tickers[:100]
-                
-                st.error("No API keys available for authentic NASDAQ 100 data")
-                return []
-                
-            except Exception as e:
-                st.error(f"Error fetching NASDAQ 100 data: {str(e)}")
-                return []
+            # Get NASDAQ 100 constituents from official source
+            url = "https://en.wikipedia.org/wiki/NASDAQ-100"
+            response = requests.get(url)
+            soup = BeautifulSoup(response.content, 'html.parser')
+            
+            # Find the table with NASDAQ 100 companies
+            table = soup.find('table', {'class': 'wikitable'})
+            tickers = []
+            
+            if table:
+                rows = table.find_all('tr')[1:]  # Skip header
+                for row in rows:
+                    cells = row.find_all('td')
+                    if len(cells) >= 2:
+                        ticker = cells[1].text.strip()
+                        if ticker and ticker != '—':
+                            tickers.append(ticker)
+            
+            return tickers[:100]  # Ensure exactly 100
             
         elif index_name == "S&P 500":
-            # Get authentic S&P 500 constituents using professional APIs
-            try:
-                api_key = os.environ.get('FINNHUB_API_KEY')
-                if api_key:
-                    url = f"https://finnhub.io/api/v1/index/constituents?symbol=^GSPC&token={api_key}"
-                    response = requests.get(url)
-                    
-                    if response.status_code == 200:
-                        data = response.json()
-                        if 'constituents' in data:
-                            constituents = data['constituents']
-                            # Verify each ticker is actively traded
-                            valid_tickers = []
-                            for ticker in constituents:
-                                try:
-                                    test_ticker = yf.Ticker(ticker)
-                                    hist = test_ticker.history(period="5d")
-                                    if not hist.empty and len(hist) > 0:
-                                        valid_tickers.append(ticker)
-                                except:
-                                    continue
-                            
-                            if len(valid_tickers) >= 450:  # Should have close to 500
-                                st.success(f"Successfully fetched {len(valid_tickers)} authentic S&P 500 constituents")
-                                return valid_tickers[:500]
-                
-                # Fallback: Use Alpha Vantage or SPY ETF tracking data
-                alpha_key = os.environ.get('ALPHA_VANTAGE_API_KEY')
-                if alpha_key:
-                    # Get current S&P 500 companies that are actively traded
-                    current_sp500 = [
-                        # Top S&P 500 companies by market cap (current and verified)
-                        "AAPL", "MSFT", "AMZN", "NVDA", "GOOGL", "GOOG", "META", "TSLA", "BRK-B", "UNH",
-                        "JNJ", "JPM", "V", "PG", "XOM", "MA", "HD", "CVX", "ABBV", "PFE",
-                        "BAC", "KO", "AVGO", "LLY", "PEP", "TMO", "COST", "WMT", "DIS", "ABT",
-                        "MRK", "CSCO", "ADBE", "DHR", "ACN", "TXN", "NFLX", "VZ", "CRM", "NKE",
-                        "INTC", "ORCL", "WFC", "AMD", "T", "PM", "LIN", "QCOM", "BMY", "RTX",
-                        "UPS", "SPGI", "SBUX", "LOW", "HON", "NEE", "UNP", "MS", "CAT", "GS",
-                        "INTU", "AXP", "MDT", "BLK", "DE", "C", "IBM", "ISRG", "NOW", "TJX",
-                        "GE", "AMAT", "SYK", "ADP", "BKNG", "AMT", "ADI", "LRCX", "PLD", "MMM",
-                        "GILD", "CVS", "MU", "TMUS", "SO", "MDLZ", "ZTS", "CB", "DUK", "CSX",
-                        "PGR", "KLAC", "ITW", "BSX", "FDX", "CL", "NSC", "AON", "SHW", "CME",
-                        "REGN", "NOC", "ETN", "APD", "MCO", "EOG", "SNPS", "ICE", "PNC", "FCX",
-                        "EMR", "USB", "WM", "MAR", "DG", "TGT", "F", "GM", "CDNS", "ECL",
-                        "FIS", "ORLY", "COF", "CCI", "EQIX", "ATVI", "SLB", "MPC", "FISV", "TFC",
-                        "PSX", "VLO", "AEP", "NEM", "DXCM", "MCK", "EL", "SPG", "NXPI", "MNST",
-                        "MCHP", "KMB", "D", "CMG", "AFL", "ROP", "CNC", "HUM", "EXC", "PRU",
-                        "YUM", "PAYX", "OXY", "A", "AIG", "ALL", "KHC", "GD", "CTVA", "JCI",
-                        "TRV", "CTAS", "PCG", "FAST", "ADM", "EW", "DVN", "FTNT", "VRTX", "VRSK",
-                        "DFS", "BIIB", "HSY", "ED", "WEC", "LHX", "PSA", "XEL", "CARR", "OTIS",
-                        "EA", "AZO", "KMI", "DLTR", "ANSS", "DLR", "CHTR", "WBA", "SBAC", "PPG",
-                        "CSGP", "O", "IDXX", "ALGN", "EXC", "WELL", "MTB", "PCAR", "ROST", "CMI",
-                        "CPRT", "AWK", "LMT", "GLW", "DD", "GEHC", "EBAY", "IQV", "ILMN", "GPN",
-                        "TEL", "HPQ", "KEYS", "ZBH", "FANG", "CTSH", "DTE", "FTV", "TROW", "MRNA"
-                    ]
-                    
-                    # Validate each ticker to ensure it's actively traded
-                    valid_tickers = []
-                    for ticker in current_sp500:
-                        try:
-                            test_ticker = yf.Ticker(ticker)
-                            hist = test_ticker.history(period="5d")
-                            if not hist.empty and len(hist) > 0:
-                                valid_tickers.append(ticker)
-                        except:
-                            continue
-                    
-                    st.info(f"Using curated S&P 500 list: {len(valid_tickers)} validated companies")
-                    return valid_tickers[:500]
-                
-                st.error("No API keys available for authentic S&P 500 data")
-                return []
-                
-            except Exception as e:
-                st.error(f"Error fetching S&P 500 data: {str(e)}")
-                return []
+            # Get S&P 500 constituents
+            url = "https://en.wikipedia.org/wiki/List_of_S%26P_500_companies"
+            response = requests.get(url)
+            soup = BeautifulSoup(response.content, 'html.parser')
+            
+            table = soup.find('table', {'id': 'constituents'})
+            tickers = []
+            
+            if table:
+                rows = table.find_all('tr')[1:]  # Skip header
+                for row in rows:
+                    cells = row.find_all('td')
+                    if len(cells) >= 1:
+                        ticker = cells[0].text.strip()
+                        if ticker:
+                            tickers.append(ticker)
+            
+            return tickers[:500]  # Ensure exactly 500
             
         elif index_name == "Dow Jones":
-            # Get Dow Jones 30 constituents using Yahoo Finance
-            try:
-                dow_ticker = yf.Ticker("^DJI")
-                # Yahoo Finance doesn't directly provide constituents, so use a reliable financial data source
-                # Get the official Dow 30 from Yahoo Finance sector data
-                dow_30_tickers = [
-                    "AAPL", "AMGN", "AXP", "BA", "CAT", "CRM", "CSCO", "CVX", "DIS", "DOW",
-                    "GS", "HD", "HON", "IBM", "INTC", "JNJ", "JPM", "KO", "MCD", "MMM",
-                    "MRK", "MSFT", "NKE", "PG", "TRV", "UNH", "V", "VZ", "WBA", "WMT"
-                ]
-                
-                # Verify these are valid tickers by checking if they exist
-                valid_tickers = []
-                for ticker in dow_30_tickers:
-                    try:
-                        test_ticker = yf.Ticker(ticker)
-                        info = test_ticker.info
-                        if info and 'symbol' in info:
-                            valid_tickers.append(ticker)
-                    except:
-                        continue
-                        
-                return valid_tickers[:30]  # Return verified Dow 30
-                
-            except Exception as e:
-                st.error(f"Error fetching Dow Jones data: {str(e)}")
-                # Fallback to known Dow 30 list
-                return ["AAPL", "AMGN", "AXP", "BA", "CAT", "CRM", "CSCO", "CVX", "DIS", "DOW",
-                        "GS", "HD", "HON", "IBM", "INTC", "JNJ", "JPM", "KO", "MCD", "MMM",
-                        "MRK", "MSFT", "NKE", "PG", "TRV", "UNH", "V", "VZ", "WBA", "WMT"]
+            # Get Dow Jones 30 constituents
+            url = "https://en.wikipedia.org/wiki/Dow_Jones_Industrial_Average"
+            response = requests.get(url)
+            soup = BeautifulSoup(response.content, 'html.parser')
+            
+            table = soup.find('table', {'class': 'wikitable'})
+            tickers = []
+            
+            if table:
+                rows = table.find_all('tr')[1:]  # Skip header
+                for row in rows:
+                    cells = row.find_all('td')
+                    if len(cells) >= 2:
+                        ticker = cells[1].text.strip()
+                        if ticker:
+                            tickers.append(ticker)
+            
+            return tickers[:30]  # Ensure exactly 30
             
         elif index_name == "Entire Ticker AI Database":
             # Import the actual complete stock database from app.py
@@ -553,105 +438,6 @@ def get_authentic_index_tickers(index_name):
             except ImportError:
                 st.error("Could not access complete stock database")
                 return STOCK_INDICES.get("Fortune 500", [])
-        
-        elif index_name == "Fortune 500":
-            # Get Fortune 500 constituents using verified ticker list
-            try:
-                # Use authentic Fortune 500 companies from reliable financial data
-                # These are the largest US companies by total revenue
-                fortune_500_tickers = [
-                    # Top Fortune 500 companies by revenue
-                    "WMT", "AMZN", "AAPL", "CVX", "UNH", "EXXON", "BRK-A", "GOOGL", "MCK", "ABC",
-                    "COST", "CI", "JPM", "GM", "F", "HD", "ELV", "BAC", "KR", "CAH",
-                    "CAT", "PFE", "GE", "JNJ", "DIS", "WFC", "META", "PG", "VZ", "GS",
-                    "RTX", "CVS", "MSFT", "TSLA", "IBM", "LMT", "HON", "INTC", "UPS", "FDX",
-                    "ORCL", "T", "MS", "LOW", "TGT", "SPGI", "ADP", "INTU", "CRM", "NOW",
-                    "MRK", "ABT", "TMO", "DHR", "LLY", "ABBV", "BMY", "AMGN", "GILD", "BIIB",
-                    "JCI", "MMM", "EMR", "ETN", "ITW", "PH", "ROK", "IR", "CARR", "OTIS",
-                    "XOM", "COP", "EOG", "SLB", "HAL", "BKR", "VLO", "PSX", "MPC", "HES",
-                    "NEE", "SO", "DUK", "AEP", "EXC", "XEL", "PEG", "ED", "EIX", "PPL",
-                    "WMB", "KMI", "OKE", "EPD", "ET", "TRGP", "EQT", "SRE", "CQP", "MPLX",
-                    
-                    # Additional Fortune 500 companies across all sectors
-                    "AMD", "NVDA", "QCOM", "TXN", "AVGO", "MU", "AMAT", "LRCX", "KLAC", "ADI",
-                    "MA", "V", "PYPL", "SQ", "FIS", "FISV", "FLYW", "AXP", "COF", "DFS",
-                    "NFLX", "CMCSA", "CHTR", "TMUS", "VIA", "FOXA", "PARA", "WBD", "LYV", "MTCH",
-                    "NKE", "SBUX", "MCD", "YUM", "CMG", "DPZ", "QSR", "DRI", "TXRH", "WING",
-                    "KO", "PEP", "MDLZ", "GIS", "K", "CPB", "HRL", "TSN", "CAG", "SJM",
-                    "UNP", "CSX", "NSC", "CNI", "CP", "DAL", "AAL", "UAL", "LUV", "JBLU",
-                    "GOOGL", "META", "NFLX", "DIS", "CMCSA", "T", "VZ", "CHTR", "TMUS", "PARA",
-                    "WBA", "CVS", "CI", "UNH", "ANTM", "HUM", "CNC", "MOH", "WLP", "AET",
-                    "BLK", "SCHW", "TROW", "BEN", "IVZ", "AMG", "NTRS", "STT", "PNC", "USB",
-                    "SPG", "PLD", "AMT", "CCI", "EQIX", "DLR", "PSA", "EXR", "AVB", "EQR",
-                    
-                    # Manufacturing & Industrial
-                    "BA", "NOC", "LMT", "GD", "RTX", "HON", "UTX", "MMM", "GE", "CAT",
-                    "DE", "EMR", "ITW", "ETN", "PH", "ROK", "IR", "FLR", "JCI", "CARR",
-                    
-                    # Healthcare & Pharmaceuticals  
-                    "JNJ", "PFE", "UNH", "CVS", "ABBV", "BMY", "MRK", "LLY", "TMO", "ABT",
-                    "DHR", "SYK", "BSX", "MDT", "ZBH", "BAX", "BDX", "EW", "ISRG", "BIIB",
-                    
-                    # Energy & Oil
-                    "XOM", "CVX", "COP", "EOG", "SLB", "HAL", "BKR", "VLO", "PSX", "MPC",
-                    "HES", "DVN", "FANG", "PXD", "OXY", "APA", "EQT", "CTRA", "OVV", "MRO",
-                    
-                    # Consumer Goods & Retail
-                    "WMT", "AMZN", "COST", "HD", "LOW", "TGT", "KR", "SYY", "DG", "DLTR",
-                    "BBY", "EBAY", "ETSY", "BKNG", "EXPE", "TJX", "GPS", "ANF", "AEO", "URBN",
-                    
-                    # Financial Services
-                    "JPM", "BAC", "WFC", "C", "GS", "MS", "BLK", "SCHW", "AXP", "COF",
-                    "USB", "PNC", "TFC", "RF", "KEY", "FITB", "HBAN", "CMA", "ZION", "PBCT",
-                    
-                    # Real Estate & REITs
-                    "AMT", "PLD", "CCI", "EQIX", "DLR", "SPG", "O", "PSA", "EXR", "AVB",
-                    "EQR", "UDR", "ESS", "MAA", "CPT", "HST", "RHP", "SLG", "BXP", "VTR",
-                    
-                    # Materials & Chemicals
-                    "LIN", "APD", "SHW", "ECL", "DD", "DOW", "LYB", "PPG", "NUE", "STLD",
-                    "X", "CLF", "AA", "FCX", "NEM", "GOLD", "AEM", "KGC", "AG", "EXK",
-                    
-                    # Telecommunications
-                    "T", "VZ", "TMUS", "CHTR", "CMCSA", "DISH", "S", "LUMN", "FTR", "WIN",
-                    
-                    # Utilities
-                    "NEE", "SO", "DUK", "AEP", "EXC", "XEL", "PEG", "ED", "EIX", "PPL",
-                    "PCG", "WEC", "D", "AWK", "ES", "FE", "ETR", "CNP", "CMS", "DTE",
-                    
-                    # Additional companies to reach Fortune 500 count
-                    "TRV", "PGR", "ALL", "CB", "AIG", "MET", "PRU", "AFL", "LNC", "UNM",
-                    "BRK-B", "Y", "FNF", "RNR", "RE", "WRB", "CINF", "WTM", "THG", "AIZ",
-                    "HIG", "PFG", "AFG", "EG", "AXS", "STC", "RLI", "KMPR", "MCY", "PRA",
-                    "WELL", "HCP", "PEAK", "ARE", "BXP", "KIM", "REG", "FRT", "TCO", "WPC",
-                    "NNN", "ADC", "VTR", "OHI", "HR", "BRX", "DEI", "MAC", "SKT", "CBL",
-                    "REIT", "IRT", "CPT", "ELS", "UMH", "SUI", "EXR", "CUZ", "LSI", "MSA",
-                    "AMH", "ACC", "UDR", "AVB", "EQR", "ESS", "MAA", "AIV", "BRT", "IRET",
-                    "NXRT", "ROIC", "APTS", "CLDT", "ELME", "GMRE", "UE", "IIPR", "LAND", "FPI",
-                    "SAFE", "CUBE", "REXR", "NSA", "TRNO", "JBGS", "BXS", "CXW", "GEO", "CCI",
-                    "AMT", "SBAC", "LADR", "CIM", "AGNC", "NLY", "ARR", "MFA", "TWO", "IVR",
-                    "MITT", "CYS", "AI", "ORC", "EARN", "CHMI", "NRZ", "PMT", "GPMT", "NYMT"
-                ]
-                
-                # Verify these are valid tickers and limit to 500
-                valid_tickers = []
-                for ticker in fortune_500_tickers:
-                    if len(valid_tickers) >= 500:
-                        break
-                    try:
-                        test_ticker = yf.Ticker(ticker)
-                        info = test_ticker.info
-                        if info and 'symbol' in info:
-                            valid_tickers.append(ticker)
-                    except:
-                        continue
-                        
-                return valid_tickers[:500]  # Return exactly 500
-                
-            except Exception as e:
-                st.error(f"Error fetching Fortune 500 data: {str(e)}")
-                # Fallback to major Fortune 500 companies
-                return fortune_500_tickers[:500]
         
         else:
             # For other indices, use the existing hardcoded lists as fallback
