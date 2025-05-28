@@ -419,6 +419,26 @@ def get_authentic_index_tickers(index_name):
             
             return tickers[:30]  # Ensure exactly 30
             
+        elif index_name == "Entire Ticker AI Database":
+            # Import the actual complete stock database from app.py
+            import sys
+            import os
+            sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+            
+            try:
+                # Import POPULAR_STOCKS from app.py to get ALL available stocks
+                from app import POPULAR_STOCKS
+                
+                # Extract all tickers from the complete database
+                all_tickers = [stock["ticker"] for stock in POPULAR_STOCKS]
+                
+                st.info(f"Scanning complete Ticker AI database: {len(all_tickers)} stocks")
+                return all_tickers
+                
+            except ImportError:
+                st.error("Could not access complete stock database")
+                return STOCK_INDICES.get("Fortune 500", [])
+        
         else:
             # For other indices, use the existing hardcoded lists as fallback
             return STOCK_INDICES.get(index_name, STOCK_INDICES["Fortune 500"])
