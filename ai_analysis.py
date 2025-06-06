@@ -194,7 +194,7 @@ Keep it conversational, data-driven, and actionable. Do not use generic language
                 recommendation = "SELL"
                 reason = f"concerning financial metrics and market position"
             
-            return f"{company_name} shows a {recommendation} rating based on {reason}. Trading at ${current_price:.2f} with a P/E of {pe_ratio:.1f if pe_ratio else 0}, the stock demonstrates {'solid' if buy_rating >= 6 else 'mixed' if buy_rating >= 4 else 'weak'} investment characteristics{upside_text}."
+            return f"{company_name} shows a {recommendation} rating based on {reason}. Trading at ${current_price:.2f} with a P/E of {pe_ratio:.1f}, the stock demonstrates {'solid' if buy_rating >= 6 else 'mixed' if buy_rating >= 4 else 'weak'} investment characteristics{upside_text}."
             
         except:
             return f"Based on the overall rating of {buy_rating:.1f}/10, this stock shows {'strong potential' if buy_rating >= 7 else 'moderate performance' if buy_rating >= 5 else 'weak fundamentals'}."
