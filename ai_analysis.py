@@ -162,8 +162,42 @@ Keep it conversational, data-driven, and actionable. Do not use generic language
         
     except Exception as e:
         print(f"Error generating AI analysis for {ticker}: {str(e)}")
-        # Fallback to basic analysis if AI fails
-        return f"Unable to generate detailed AI analysis at this time. Based on the overall rating of {buy_rating:.1f}/10, this stock shows {'strong potential' if buy_rating >= 7 else 'moderate performance' if buy_rating >= 5 else 'weak fundamentals'}."
+        # Enhanced fallback analysis with actual financial data
+        try:
+            stock = yf.Ticker(ticker)
+            info = stock.info
+            company_name = info.get('longName', ticker)
+            sector = info.get('sector', 'Unknown')
+            
+            current_price = analyzer.get_current_price() if analyzer else 0
+            pe_ratio = analyzer.get_pe_ratio() if analyzer else 0
+            market_cap = analyzer.get_market_cap() if analyzer else 0
+            
+            profit_margin = info.get('profitMargins', 0) * 100 if info.get('profitMargins') else 0
+            revenue_growth = info.get('revenueGrowth', 0) * 100 if info.get('revenueGrowth') else 0
+            target_price = info.get('targetMeanPrice', 0)
+            
+            # Calculate upside if target price exists
+            upside_text = ""
+            if target_price and target_price > 0 and current_price > 0:
+                upside = ((target_price / current_price) - 1) * 100
+                upside_text = f" with analyst targets suggesting {upside:+.1f}% potential"
+            
+            # Determine recommendation
+            if buy_rating >= 7:
+                recommendation = "BUY"
+                reason = f"strong fundamentals including {profit_margin:.1f}% profit margins"
+            elif buy_rating >= 5:
+                recommendation = "HOLD"
+                reason = f"stable performance in the {sector} sector"
+            else:
+                recommendation = "SELL"
+                reason = f"concerning financial metrics and market position"
+            
+            return f"{company_name} shows a {recommendation} rating based on {reason}. Trading at ${current_price:.2f} with a P/E of {pe_ratio:.1f}, the stock demonstrates {'solid' if buy_rating >= 6 else 'mixed' if buy_rating >= 4 else 'weak'} investment characteristics{upside_text}."
+            
+        except:
+            return f"Based on the overall rating of {buy_rating:.1f}/10, this stock shows {'strong potential' if buy_rating >= 7 else 'moderate performance' if buy_rating >= 5 else 'weak fundamentals'}."
 
 
 def get_recommendation_color(buy_rating):
