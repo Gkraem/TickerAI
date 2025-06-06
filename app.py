@@ -272,7 +272,8 @@ def render_stock_analyzer():
                     'market_cap': market_cap,
                     'pe_ratio': pe_ratio,
                     'buy_rating': buy_rating,
-                    'rating_breakdown': rating_breakdown
+                    'rating_breakdown': rating_breakdown,
+                    'analyzer': analyzer
                 }
                 
             except Exception as e:
@@ -283,7 +284,7 @@ def render_stock_analyzer():
         render_analysis_results(st.session_state.analysis_results)
 
 def render_analysis_results(results):
-    """Render analysis results"""
+    """Render comprehensive analysis results"""
     ticker = results['ticker']
     name = results['name']
     current_price = results['current_price']
@@ -292,74 +293,472 @@ def render_analysis_results(results):
     pe_ratio = results['pe_ratio']
     buy_rating = results['buy_rating']
     rating_breakdown = results['rating_breakdown']
+    analyzer = results.get('analyzer')
     
-    st.markdown(f"### Analysis Results: {ticker} - {name}")
+    st.markdown(f"### {name} ({ticker})")
     
-    # Buy Rating Meter
-    rating_color = "#10b981" if buy_rating >= 7 else "#f59e0b" if buy_rating >= 4 else "#ef4444"
+    # AI Buy Rating Section
+    st.markdown("#### 🤖 AI Buy Rating")
     
+    # Determine rating text
+    if buy_rating >= 7.5:
+        rating_text = "Strong Buy"
+        rating_color = "#10b981"
+    elif buy_rating >= 6:
+        rating_text = "Buy"
+        rating_color = "#059669"
+    elif buy_rating >= 4:
+        rating_text = "Hold"
+        rating_color = "#f59e0b"
+    else:
+        rating_text = "Sell"
+        rating_color = "#ef4444"
+    
+    # Create gauge with modern styling
     fig = go.Figure(go.Indicator(
         mode = "gauge+number",
         value = buy_rating,
-        domain = {'x': [0, 1], 'y': [0, 1]},
-        title = {'text': "AI Buy Rating", 'font': {'size': 20}},
+        title = {'text': f"{rating_text}", 'font': {'size': 18, 'color': rating_color}},
+        number = {'font': {'size': 36, 'color': rating_color}},
         gauge = {
-            'axis': {'range': [None, 10], 'tickwidth': 1, 'tickcolor': "darkblue"},
-            'bar': {'color': rating_color},
+            'axis': {'range': [0, 10], 'tickwidth': 1, 'tickcolor': "#64748b"},
+            'bar': {'color': rating_color, 'thickness': 0.8},
             'bgcolor': "white",
             'borderwidth': 2,
-            'bordercolor': "gray",
+            'bordercolor': "#e2e8f0",
             'steps': [
-                {'range': [0, 4], 'color': '#fee2e2'},
-                {'range': [4, 7], 'color': '#fef3c7'},
-                {'range': [7, 10], 'color': '#d1fae5'}
+                {'range': [0, 4], 'color': '#fef2f2'},
+                {'range': [4, 7], 'color': '#fefce8'},
+                {'range': [7, 10], 'color': '#f0fdf4'}
             ],
             'threshold': {
-                'line': {'color': "red", 'width': 4},
-                'thickness': 0.75,
-                'value': 5
+                'line': {'color': rating_color, 'width': 3},
+                'thickness': 0.8,
+                'value': buy_rating
             }
         }
     ))
     
     fig.update_layout(
-        height=300,
-        margin=dict(l=20, r=20, t=40, b=20)
+        height=250,
+        margin=dict(l=20, r=20, t=40, b=20),
+        paper_bgcolor="rgba(0,0,0,0)",
+        plot_bgcolor="rgba(0,0,0,0)"
     )
     
-    col1, col2 = st.columns([1, 2])
+    # Rating components section
+    col1, col2 = st.columns([1, 1.5])
     
     with col1:
         st.plotly_chart(fig, use_container_width=True)
     
     with col2:
-        # Key metrics
-        if price_change and len(price_change) > 1:
-            change_text = f"${price_change[0]:.2f} ({price_change[1]:.2f}%)"
-            change_delta = price_change[1]
-        else:
-            change_text = "N/A"
-            change_delta = 0
+        st.markdown("**Rating Components:**")
         
-        st.metric("Current Price", f"${current_price:.2f}")
-        st.metric("Price Change", change_text, delta=f"{change_delta:.2f}%")
-        st.metric("Market Cap", format_market_cap(market_cap))
-        st.metric("P/E Ratio", f"{pe_ratio:.2f}" if pe_ratio else "N/A")
+        # Technical Analysis
+        tech_score = rating_breakdown.get('technical_score', 0)
+        tech_color = "#10b981" if tech_score >= 7 else "#f59e0b" if tech_score >= 4 else "#ef4444"
+        st.markdown(f"""
+        <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 0;">
+            <span>📊 Technical Analysis</span>
+            <span style="color: {tech_color}; font-weight: 600;">{tech_score:.1f}/10</span>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        # Fundamental Analysis
+        fund_score = rating_breakdown.get('fundamental_score', 0)
+        fund_color = "#10b981" if fund_score >= 7 else "#f59e0b" if fund_score >= 4 else "#ef4444"
+        st.markdown(f"""
+        <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 0;">
+            <span>💰 Fundamental Analysis</span>
+            <span style="color: {fund_color}; font-weight: 600;">{fund_score:.1f}/10</span>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        # Market Sentiment
+        sent_score = rating_breakdown.get('sentiment_score', 0)
+        sent_color = "#10b981" if sent_score >= 7 else "#f59e0b" if sent_score >= 4 else "#ef4444"
+        st.markdown(f"""
+        <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 0;">
+            <span>🏪 Market Sentiment</span>
+            <span style="color: {sent_color}; font-weight: 600;">{sent_score:.1f}/10</span>
+        </div>
+        """, unsafe_allow_html=True)
     
-    # Rating breakdown
-    if rating_breakdown:
-        st.markdown("#### Rating Breakdown")
+    # Key Financials Section
+    st.markdown("#### 💰 Key Financials")
+    
+    try:
+        # Get additional financial data
+        info = analyzer.stock.info if analyzer else {}
         
-        col1, col2, col3 = st.columns(3)
+        # First row of metrics
+        col1, col2, col3, col4 = st.columns(4)
         
         with col1:
-            st.metric("Technical Score", f"{rating_breakdown.get('technical_score', 0):.1f}/10")
+            if price_change and len(price_change) > 1:
+                change_delta = price_change[1]
+            else:
+                change_delta = 0
+            st.metric("Price", f"${current_price:.2f}", delta=f"{change_delta:.2f}%")
         
         with col2:
-            st.metric("Fundamental Score", f"{rating_breakdown.get('fundamental_score', 0):.1f}/10")
+            target_price = info.get('targetMeanPrice')
+            if target_price:
+                upside = ((target_price / current_price) - 1) * 100
+                st.metric("Analyst Target", f"${target_price:.2f}", delta=f"+{upside:.1f}%")
+            else:
+                st.metric("Analyst Target", "N/A")
         
         with col3:
-            st.metric("Sentiment Score", f"{rating_breakdown.get('sentiment_score', 0):.1f}/10")
+            st.metric("Market Cap", format_market_cap(market_cap))
+        
+        with col4:
+            pe_display = f"{pe_ratio:.2f}" if pe_ratio and pe_ratio > 0 else "N/A"
+            st.metric("P/E Ratio", pe_display)
+        
+        # Second row of metrics
+        col1, col2, col3, col4 = st.columns(4)
+        
+        with col1:
+            forward_pe = info.get('forwardPE')
+            if forward_pe:
+                st.metric("Forward P/E", f"{forward_pe:.2f}")
+            else:
+                st.metric("Forward P/E", "N/A")
+        
+        with col2:
+            profit_margin = info.get('profitMargins')
+            if profit_margin:
+                st.metric("Profit Margin", f"{profit_margin * 100:.2f}%")
+            else:
+                st.metric("Profit Margin", "N/A")
+        
+        with col3:
+            revenue = info.get('totalRevenue')
+            if revenue:
+                st.metric("Net Revenue", format_market_cap(revenue))
+            else:
+                st.metric("Net Revenue", "N/A")
+        
+        with col4:
+            dividend_yield = info.get('dividendYield')
+            if dividend_yield:
+                st.metric("Dividend", f"{dividend_yield * 100:.2f}%")
+            else:
+                st.metric("Dividend", "N/A")
+    
+    except Exception as e:
+        st.error(f"Error loading financial data: {str(e)}")
+    
+    # Detailed Analysis Tabs
+    render_detailed_analysis_tabs(ticker, analyzer)
+
+def render_detailed_analysis_tabs(ticker, analyzer):
+    """Render comprehensive analysis tabs"""
+    tab1, tab2, tab3, tab4 = st.tabs(["📊 Sector Analysis", "📈 Historical Performance", "📰 News", "🔍 Upcoming Earnings"])
+    
+    with tab1:
+        render_sector_analysis(ticker, analyzer)
+    
+    with tab2:
+        render_historical_performance(ticker, analyzer)
+    
+    with tab3:
+        render_news_section(ticker)
+    
+    with tab4:
+        render_earnings_section(ticker, analyzer)
+
+def render_sector_analysis(ticker, analyzer):
+    """Render sector analysis section"""
+    try:
+        info = analyzer.stock.info
+        sector = info.get('sector', 'N/A')
+        industry = info.get('industry', 'N/A')
+        
+        st.markdown(f"**Sector:** {sector}")
+        st.markdown(f"**Industry:** {industry}")
+        
+        if sector != 'N/A':
+            st.markdown("#### Sector Comparison")
+            
+            # Get sector peers for comparison
+            sector_peers = get_sector_peers(ticker, sector)
+            
+            if sector_peers:
+                st.markdown("**Similar Companies in Sector:**")
+                
+                for peer in sector_peers[:3]:  # Show top 3 peers
+                    try:
+                        peer_analyzer = StockAnalyzer(peer['ticker'])
+                        peer_info = peer_analyzer.stock.info
+                        peer_price = peer_analyzer.get_current_price()
+                        peer_market_cap = peer_analyzer.get_market_cap()
+                        peer_pe = peer_analyzer.get_pe_ratio()
+                        
+                        with st.container():
+                            st.markdown(f"**{peer['name']} ({peer['ticker']})**")
+                            
+                            col1, col2, col3, col4, col5, col6 = st.columns(6)
+                            
+                            with col1:
+                                st.metric("Price", f"${peer_price:.2f}")
+                            
+                            with col2:
+                                st.metric("Market Cap", format_market_cap(peer_market_cap))
+                            
+                            with col3:
+                                pe_display = f"{peer_pe:.2f}" if peer_pe and peer_pe > 0 else "N/A"
+                                st.metric("P/E", pe_display)
+                            
+                            with col4:
+                                profit_margin = peer_info.get('profitMargins')
+                                if profit_margin:
+                                    st.metric("Profit Margin", f"{profit_margin * 100:.2f}%")
+                                else:
+                                    st.metric("Profit Margin", "N/A")
+                            
+                            with col5:
+                                revenue = peer_info.get('totalRevenue')
+                                if revenue:
+                                    st.metric("Net Revenue", format_market_cap(revenue))
+                                else:
+                                    st.metric("Net Revenue", "N/A")
+                            
+                            with col6:
+                                dividend_yield = peer_info.get('dividendYield')
+                                if dividend_yield:
+                                    st.metric("Dividend", f"{dividend_yield * 100:.2f}%")
+                                else:
+                                    st.metric("Dividend", "N/A")
+                            
+                            st.markdown("---")
+                    
+                    except Exception as e:
+                        st.warning(f"Could not load data for {peer['ticker']}")
+                        continue
+            else:
+                st.info("Sector peer data not available")
+        
+    except Exception as e:
+        st.error(f"Error loading sector analysis: {str(e)}")
+
+def get_sector_peers(ticker, sector):
+    """Get sector peers for comparison"""
+    # Technology sector peers
+    tech_peers = [
+        {"ticker": "AAPL", "name": "Apple Inc."},
+        {"ticker": "MSFT", "name": "Microsoft Corporation"},
+        {"ticker": "GOOGL", "name": "Alphabet Inc."},
+        {"ticker": "META", "name": "Meta Platforms"},
+        {"ticker": "NVDA", "name": "NVIDIA Corporation"},
+        {"ticker": "AMZN", "name": "Amazon.com Inc."},
+        {"ticker": "TSLA", "name": "Tesla Inc."},
+        {"ticker": "NFLX", "name": "Netflix Inc."},
+        {"ticker": "CRM", "name": "Salesforce Inc."},
+        {"ticker": "ORCL", "name": "Oracle Corporation"}
+    ]
+    
+    # Financial sector peers
+    financial_peers = [
+        {"ticker": "JPM", "name": "JPMorgan Chase & Co."},
+        {"ticker": "BAC", "name": "Bank of America Corp"},
+        {"ticker": "WFC", "name": "Wells Fargo & Company"},
+        {"ticker": "GS", "name": "Goldman Sachs Group Inc"},
+        {"ticker": "MS", "name": "Morgan Stanley"},
+        {"ticker": "C", "name": "Citigroup Inc."},
+        {"ticker": "BRK.B", "name": "Berkshire Hathaway Inc."},
+        {"ticker": "V", "name": "Visa Inc."},
+        {"ticker": "MA", "name": "Mastercard Inc."},
+        {"ticker": "AXP", "name": "American Express Company"}
+    ]
+    
+    # Healthcare sector peers
+    healthcare_peers = [
+        {"ticker": "JNJ", "name": "Johnson & Johnson"},
+        {"ticker": "PFE", "name": "Pfizer Inc."},
+        {"ticker": "UNH", "name": "UnitedHealth Group Inc"},
+        {"ticker": "ABBV", "name": "AbbVie Inc."},
+        {"ticker": "LLY", "name": "Eli Lilly and Company"},
+        {"ticker": "MRK", "name": "Merck & Co. Inc."},
+        {"ticker": "BMY", "name": "Bristol-Myers Squibb"},
+        {"ticker": "AMGN", "name": "Amgen Inc."},
+        {"ticker": "GILD", "name": "Gilead Sciences Inc."},
+        {"ticker": "CVS", "name": "CVS Health Corporation"}
+    ]
+    
+    # Return appropriate peers based on sector
+    if 'Technology' in sector:
+        return [peer for peer in tech_peers if peer['ticker'] != ticker]
+    elif 'Financial' in sector or 'Bank' in sector:
+        return [peer for peer in financial_peers if peer['ticker'] != ticker]
+    elif 'Healthcare' in sector or 'Pharmaceutical' in sector:
+        return [peer for peer in healthcare_peers if peer['ticker'] != ticker]
+    else:
+        # Return a mix for other sectors
+        return [peer for peer in tech_peers[:3] + financial_peers[:3] if peer['ticker'] != ticker]
+
+def render_historical_performance(ticker, analyzer):
+    """Render historical performance section"""
+    st.markdown("#### Select Time Period")
+    
+    col1, col2 = st.columns([3, 1])
+    
+    with col1:
+        timeframe = st.selectbox(
+            "Time Period",
+            options=["1mo", "3mo", "6mo", "1y", "2y", "5y"],
+            index=3,  # Default to 1 year
+            key=f"timeframe_{ticker}"
+        )
+    
+    try:
+        # Get historical data
+        hist_data = analyzer.get_historical_data(timeframe)
+        
+        if hist_data is not None and not hist_data.empty:
+            st.markdown(f"#### {ticker} - Market Price ({timeframe.upper()})")
+            
+            # Create interactive price chart
+            fig = go.Figure()
+            
+            # Add price line
+            fig.add_trace(
+                go.Scatter(
+                    x=hist_data.index,
+                    y=hist_data['Close'],
+                    mode='lines',
+                    name='Close Price',
+                    line=dict(color='#3b82f6', width=2),
+                    hovertemplate='<b>Date</b>: %{x}<br><b>Price</b>: $%{y:.2f}<extra></extra>'
+                )
+            )
+            
+            # Update layout for mobile responsiveness
+            fig.update_layout(
+                height=400,
+                margin=dict(l=20, r=20, t=40, b=40),
+                xaxis=dict(
+                    title="Date",
+                    showgrid=True,
+                    gridcolor='rgba(128, 128, 128, 0.2)'
+                ),
+                yaxis=dict(
+                    title="Price ($)",
+                    showgrid=True,
+                    gridcolor='rgba(128, 128, 128, 0.2)'
+                ),
+                plot_bgcolor='rgba(0,0,0,0)',
+                paper_bgcolor='rgba(0,0,0,0)',
+                hovermode='x unified'
+            )
+            
+            st.plotly_chart(fig, use_container_width=True)
+            
+            # Performance metrics
+            st.markdown("#### Performance Metrics")
+            
+            col1, col2, col3, col4 = st.columns(4)
+            
+            # Calculate performance metrics
+            start_price = hist_data['Close'].iloc[0]
+            end_price = hist_data['Close'].iloc[-1]
+            total_return = ((end_price / start_price) - 1) * 100
+            
+            high_price = hist_data['Close'].max()
+            low_price = hist_data['Close'].min()
+            
+            volatility = hist_data['Close'].pct_change().std() * (252 ** 0.5) * 100  # Annualized volatility
+            
+            with col1:
+                st.metric("Total Return", f"{total_return:.2f}%")
+            
+            with col2:
+                st.metric("Period High", f"${high_price:.2f}")
+            
+            with col3:
+                st.metric("Period Low", f"${low_price:.2f}")
+            
+            with col4:
+                st.metric("Volatility", f"{volatility:.2f}%")
+        
+        else:
+            st.warning("Historical data not available for this timeframe")
+    
+    except Exception as e:
+        st.error(f"Error loading historical data: {str(e)}")
+
+def render_news_section(ticker):
+    """Render news section"""
+    st.markdown("#### 📰 Recent News")
+    
+    # Upcoming Quarterly Earnings
+    st.markdown("##### 📅 Upcoming Quarterly Earnings")
+    st.info("Next earnings date information would require real-time financial data API access")
+    
+    # Previous Earnings Results
+    st.markdown("##### 📊 Previous Earnings Results")
+    st.info("Historical earnings data would require financial data API access")
+    
+    # Recent News
+    st.markdown("##### 📰 Recent News")
+    st.info("Recent news headlines would require news API access")
+    
+    # 52-week performance note
+    st.markdown("##### 📈 52-week Performance")
+    try:
+        # This could be enhanced with actual 52-week data
+        st.success("52-week performance: Market data available through stock analysis")
+    except:
+        st.info("52-week performance data requires market data API")
+
+def render_earnings_section(ticker, analyzer):
+    """Render earnings section"""
+    st.markdown("#### Earnings Information")
+    
+    try:
+        info = analyzer.stock.info
+        
+        # Earnings data
+        earnings_date = info.get('earningsDate')
+        if earnings_date:
+            st.markdown(f"**Next Earnings Date:** {earnings_date}")
+        else:
+            st.markdown("**Next Earnings Date:** Not available")
+        
+        # Previous earnings
+        earnings_quarterly = info.get('earningsQuarterlyGrowth')
+        if earnings_quarterly:
+            st.metric("Quarterly Earnings Growth", f"{earnings_quarterly * 100:.2f}%")
+        
+        revenue_quarterly = info.get('revenueQuarterlyGrowth')
+        if revenue_quarterly:
+            st.metric("Quarterly Revenue Growth", f"{revenue_quarterly * 100:.2f}%")
+        
+        # Additional earnings metrics
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            eps_trailing = info.get('trailingEps')
+            if eps_trailing:
+                st.metric("Trailing EPS", f"${eps_trailing:.2f}")
+            
+            eps_forward = info.get('forwardEps')
+            if eps_forward:
+                st.metric("Forward EPS", f"${eps_forward:.2f}")
+        
+        with col2:
+            peg_ratio = info.get('pegRatio')
+            if peg_ratio:
+                st.metric("PEG Ratio", f"{peg_ratio:.2f}")
+            
+            price_to_book = info.get('priceToBook')
+            if price_to_book:
+                st.metric("Price to Book", f"{price_to_book:.2f}")
+    
+    except Exception as e:
+        st.error(f"Error loading earnings data: {str(e)}")
 
 def format_market_cap(market_cap):
     """Format market cap for display"""
