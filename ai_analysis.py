@@ -58,12 +58,6 @@ def generate_ai_buy_analysis(ticker, analyzer, rating_components):
     str
         AI-generated analysis text
     """
-    # Extract rating components at function start to ensure availability in fallback
-    buy_rating = rating_components.get('overall_rating', 5.0)
-    technical_score = rating_components.get('technical_score', 5.0)
-    fundamental_score = rating_components.get('fundamental_score', 5.0)
-    sentiment_score = rating_components.get('sentiment_score', 5.0)
-    
     try:
         # Get comprehensive stock data
         stock = yf.Ticker(ticker)
@@ -163,8 +157,7 @@ Keep it conversational, data-driven, and actionable. Do not use generic language
             temperature=0.3  # Lower temperature for more consistent, factual analysis
         )
         
-        content = response.choices[0].message.content
-        analysis = content.strip() if content else "Analysis not available"
+        analysis = response.choices[0].message.content.strip()
         return analysis
         
     except Exception as e:
@@ -201,7 +194,7 @@ Keep it conversational, data-driven, and actionable. Do not use generic language
                 recommendation = "SELL"
                 reason = f"concerning financial metrics and market position"
             
-            return f"{company_name} shows a {recommendation} rating based on {reason}. Trading at ${current_price:.2f} with a P/E of {pe_ratio:.1f if pe_ratio else 0}, the stock demonstrates {'solid' if buy_rating >= 6 else 'mixed' if buy_rating >= 4 else 'weak'} investment characteristics{upside_text}."
+            return f"{company_name} shows a {recommendation} rating based on {reason}. Trading at ${current_price:.2f} with a P/E of {pe_ratio:.1f}, the stock demonstrates {'solid' if buy_rating >= 6 else 'mixed' if buy_rating >= 4 else 'weak'} investment characteristics{upside_text}."
             
         except:
             return f"Based on the overall rating of {buy_rating:.1f}/10, this stock shows {'strong potential' if buy_rating >= 7 else 'moderate performance' if buy_rating >= 5 else 'weak fundamentals'}."
