@@ -78,7 +78,15 @@ def render_header(is_authenticated=False, user_data=None):
     
     with col2:
         if is_authenticated and user_data:
-            st.write(f"Welcome, {user_data.get('name', 'User')}")
+            # Handle both dictionary and tuple formats
+            if isinstance(user_data, dict):
+                user_name = user_data.get('name', 'User')
+            elif isinstance(user_data, tuple) and len(user_data) > 1:
+                user_name = user_data[1]  # Assuming name is second element
+            else:
+                user_name = 'User'
+            
+            st.write(f"Welcome, {user_name}")
             if st.button("Sign Out"):
                 logout_user()
                 st.rerun()
