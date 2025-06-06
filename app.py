@@ -582,7 +582,7 @@ def render_sector_analysis(ticker, analyzer):
                             with col6:
                                 dividend_yield = peer_info.get('dividendYield')
                                 if dividend_yield:
-                                    st.metric("Dividend", f"{dividend_yield * 100:.2f}%")
+                                    st.metric("Dividend", f"{dividend_yield:.2f}%")
                                 else:
                                     st.metric("Dividend", "N/A")
                             
@@ -915,6 +915,21 @@ def render_power_plays_results(results):
 
 def main():
     """Main application entry point"""
+    
+    # Add global darker background styling
+    st.markdown("""
+    <style>
+    .stApp {
+        background-color: #f1f5f9 !important;
+    }
+    .main > div {
+        background-color: #f1f5f9 !important;
+    }
+    section[data-testid="stSidebar"] {
+        background-color: #e2e8f0 !important;
+    }
+    </style>
+    """, unsafe_allow_html=True)
     
     # Handle logout action
     if st.session_state.get('auth_action') == 'logout':

@@ -175,7 +175,7 @@ Keep it conversational, data-driven, and actionable. Do not use generic language
             
             profit_margin = info.get('profitMargins', 0) * 100 if info.get('profitMargins') else 0
             revenue_growth = info.get('revenueGrowth', 0) * 100 if info.get('revenueGrowth') else 0
-            target_price = info.get('targetMeanPrice', 0)
+            target_price = info.get('targetMeanPrice', 0) or 0
             
             # Calculate upside if target price exists
             upside_text = ""
