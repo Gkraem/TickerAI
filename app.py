@@ -1059,14 +1059,32 @@ def main():
     
     # Route to appropriate interface
     if is_authenticated():
-        # Show main application for authenticated users without header
-        # Main content sections
+        # Get user data for header
+        user_data = get_session_user()
+        user_name = "User"
+        if user_data:
+            if isinstance(user_data, dict):
+                user_name = user_data.get('name', 'User')
+            elif isinstance(user_data, tuple) and len(user_data) > 1:
+                user_name = user_data[1] if user_data[1] else 'User'
+        
+        # Render Finance Tracker header
+        render_header(is_authenticated=True, user_data=user_data)
+        
+        # Render welcome section
+        render_welcome_section(user_name)
+        
+        # Main content sections with clean Finance Tracker styling
+        st.markdown('<div class="analysis-card">', unsafe_allow_html=True)
         render_stock_analyzer()
-        st.markdown("---")
+        st.markdown('</div>', unsafe_allow_html=True)
+        
+        st.markdown('<div class="analysis-card">', unsafe_allow_html=True)
         render_power_plays()
+        st.markdown('</div>', unsafe_allow_html=True)
         
     else:
-        # Show authentication interface for non-authenticated users without header
+        # Show authentication interface for non-authenticated users
         render_auth_page()
 
 if __name__ == "__main__":
