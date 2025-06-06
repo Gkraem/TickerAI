@@ -115,8 +115,8 @@ def render_auth_page():
             
             if login_clicked:
                 if email_or_phone and password:
-                    user_data = authenticate_user(email_or_phone, password)
-                    if user_data:
+                    success, user_data = authenticate_user(email_or_phone, password)
+                    if success:
                         st.session_state.user = user_data
                         st.session_state.authenticated = True
                         st.success("Successfully signed in!")
