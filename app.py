@@ -16,7 +16,6 @@ from utils import format_large_number, get_stock_news
 from data_sources import DATA_SOURCES
 from user_management import is_authenticated, get_session_user 
 from auth_components import auth_page, logout_button
-from modern_auth import modern_auth_page, modern_logout_button
 from admin import is_admin, admin_panel
 from power_plays import display_power_plays
 
