@@ -78,11 +78,11 @@ def render_header(is_authenticated=False, user_data=None):
     
     with col2:
         if is_authenticated and user_data:
-            # Handle both dictionary and tuple formats
+            # Get only the user's name from the data
             if isinstance(user_data, dict):
                 user_name = user_data.get('name', 'User')
             elif isinstance(user_data, tuple) and len(user_data) > 1:
-                user_name = user_data[1]  # Assuming name is second element
+                user_name = user_data[1]
             else:
                 user_name = 'User'
             
@@ -416,10 +416,9 @@ def render_power_plays():
                 progress_bar = st.progress(0)
                 status_text = st.empty()
                 
-                def progress_callback(current, total, ticker):
-                    progress = current / total
-                    progress_bar.progress(progress)
-                    status_text.text(f"Analyzing {ticker}... ({current}/{total})")
+                def progress_callback(progress_percentage):
+                    progress_bar.progress(progress_percentage)
+                    status_text.text(f"Scanning {selected_index}... ({int(progress_percentage * 100)}% complete)")
                 
                 # Get top stocks
                 top_stocks = get_top_stocks(
