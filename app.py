@@ -1337,32 +1337,39 @@ if "view_mode" not in st.session_state:
     st.session_state.view_mode = "main"
 
 def main():
+    # Apply modern theme CSS
+    apply_modern_theme()
+    
     # Check if user is authenticated
     if not is_authenticated():
         auth_page()
         return
     
+    # Render navigation header
+    render_navigation_header()
+    
     # Check view mode to determine what content to display
     if st.session_state.view_mode == "admin" and is_admin():
         # === ADMIN PANEL CONTENT ===
-        st.title("Ticker AI Admin Panel")
+        render_section_header("Admin Panel", "User Management & System Controls", "⚙️")
         
         # Show user info
         user = get_session_user()
         if user and isinstance(user, dict):
             st.markdown(f"**Logged in as:** {user.get('name', 'Unknown')} ({user.get('email', 'No email')})")
         
-        # Add a separator
-        st.markdown("<hr style='margin-top: 0; margin-bottom: 20px;'>", unsafe_allow_html=True)
-        
-        # Display admin panel content
-        admin_panel()
+        # Display admin panel content in modern card
+        admin_content = admin_panel()
+        st.html(render_card_container(str(admin_content), "System Administration"))
         
     else:
         # === MAIN SINGLE PAGE LAYOUT ===
         
-        # Get base64 encoded background image
-        bg_image = get_base64_image("assets/ticker2.jpg")
+        # Render hero section
+        render_hero_section()
+        
+        # Create main container
+        st.html('<div class="container">')
         
         # No admin panel in header navigation
         admin_nav_item = ""
@@ -1600,40 +1607,42 @@ def main():
         """, unsafe_allow_html=True)
         
         # About Section
-        st.markdown('<div id="about" class="section-spacer"></div>', unsafe_allow_html=True)
-        st.markdown('<div class="section-header">About Ticker AI<span class="section-emoji">🤖</span></div>', unsafe_allow_html=True)
-        st.markdown("""
-        A powerful stock analysis platform that combines real-time data with advanced AI to help you make smarter investment decisions. It analyzes price trends, technical indicators, and historical patterns to predict market movements with precision. Ticker AI also monitors breaking news and social media to gauge sentiment shifts, while factoring in key financial metrics like earnings growth, valuations, and insider activity. By tracking market events and seasonal trends, it delivers a complete, up-to-the-minute picture of a stock's potential—summarized in a clear, actionable rating.
-        
-        Ticker AI's buy rating engine is powered by a weighted algorithm that evaluates each stock through a multi-layered scoring system. The model assigns 40% weight to technical indicators—such as RSI, MACD, moving averages, and Bollinger Bands—calculating bullish momentum based on the ratio of confirming signals. Another 40% is dedicated to fundamental analysis, where key financial metrics like P/E ratio, profit margins, revenue growth, and debt-to-equity are benchmarked and scored relative to industry norms. The remaining 20% draws on market sentiment, translating analyst recommendations into a normalized confidence score. Each layer is independently scored on a 10-point scale and then aggregated into a final buy rating, enabling the AI to deliver a clear, data-driven investment outlook.
-        """)
+        render_section_header("About Ticker AI", "Advanced AI-powered investment platform", "🤖")
+        about_content = """
+        <div class="section">
+            <p>A powerful stock analysis platform that combines real-time data with advanced AI to help you make smarter investment decisions. It analyzes price trends, technical indicators, and historical patterns to predict market movements with precision. Ticker AI also monitors breaking news and social media to gauge sentiment shifts, while factoring in key financial metrics like earnings growth, valuations, and insider activity. By tracking market events and seasonal trends, it delivers a complete, up-to-the-minute picture of a stock's potential—summarized in a clear, actionable rating.</p>
+            
+            <p>Ticker AI's buy rating engine is powered by a weighted algorithm that evaluates each stock through a multi-layered scoring system. The model assigns 40% weight to technical indicators—such as RSI, MACD, moving averages, and Bollinger Bands—calculating bullish momentum based on the ratio of confirming signals. Another 40% is dedicated to fundamental analysis, where key financial metrics like P/E ratio, profit margins, revenue growth, and debt-to-equity are benchmarked and scored relative to industry norms. The remaining 20% draws on market sentiment, translating analyst recommendations into a normalized confidence score. Each layer is independently scored on a 10-point scale and then aggregated into a final buy rating, enabling the AI to deliver a clear, data-driven investment outlook.</p>
+        </div>
+        """
+        st.html(render_card_container(about_content, "Platform Overview"))
         
         # How It Works Section
-        st.markdown('<div id="howitworks" class="section-spacer"></div>', unsafe_allow_html=True)
-        st.markdown('<div class="section-header">How It Works<span class="section-emoji">⚡</span></div>', unsafe_allow_html=True)
+        render_section_header("How It Works", "Three simple steps to investment insights", "⚡")
         
-        col1, col2, col3 = st.columns(3)
-        with col1:
-            st.markdown("""
-            ### 1. Search & Analyze
-            Simply type any company name or ticker symbol to find and analyze the stock you want to research.
-            """)
-        
-        with col2:
-            st.markdown("""
-            ### 2. Power Plays
-            Our Power Plays feature scans hundreds of stocks from major indices to identify the top 5 investment opportunities with the highest AI-driven buy ratings.
-            """)
-        
-        with col3:
-            st.markdown("""
-            ### 3. Make Educated Decisions
-            Use our comprehensive analysis, buy/sell ratings, and detailed explanations to make informed investment decisions with confidence.
-            """)
+        how_it_works_content = """
+        <div class="metric-grid">
+            <div class="metric-card">
+                <div class="metric-value">1</div>
+                <div class="metric-label">Search & Analyze</div>
+                <p style="margin-top: 1rem; color: var(--text-secondary); font-size: 0.9rem;">Simply type any company name or ticker symbol to find and analyze the stock you want to research.</p>
+            </div>
+            <div class="metric-card">
+                <div class="metric-value">2</div>
+                <div class="metric-label">Power Plays</div>
+                <p style="margin-top: 1rem; color: var(--text-secondary); font-size: 0.9rem;">Our Power Plays feature scans hundreds of stocks from major indices to identify the top 5 investment opportunities with the highest AI-driven buy ratings.</p>
+            </div>
+            <div class="metric-card">
+                <div class="metric-value">3</div>
+                <div class="metric-label">Make Educated Decisions</div>
+                <p style="margin-top: 1rem; color: var(--text-secondary); font-size: 0.9rem;">Use our comprehensive analysis, buy/sell ratings, and detailed explanations to make informed investment decisions with confidence.</p>
+            </div>
+        </div>
+        """
+        st.html(render_card_container(how_it_works_content, "Process Overview"))
         
         # Stock Analyzer Section
-        st.markdown('<div id="analyzer" class="section-spacer"></div>', unsafe_allow_html=True)
-        st.markdown('<div class="section-header">Stock Analyzer<span class="section-emoji">📊</span></div>', unsafe_allow_html=True)
+        render_section_header("Stock Analyzer", "Analyze individual stocks with AI-powered insights", "📊")
         
         # Initialize session states for stock search
         if "search_query" not in st.session_state:
@@ -1904,7 +1913,7 @@ def main():
                     "Communication Services": ["META", "GOOGL", "NFLX", "DIS", "T", "VZ"],
                     "Energy": ["XOM", "CVX", "COP", "SLB", "EOG", "MPC"],
                     "Consumer Defensive": ["PG", "KO", "PEP", "WMT", "COST", "CL"],
-                    "Industrials": ["BA", "CAT", "GE", "MMM", "UPS", "RTX"]
+                    "Industrials": ["RSG", "WM", "BA", "CAT", "GE", "MMM", "UPS", "RTX"]
                 }
                 
                 # Get peer tickers for this sector
@@ -2377,14 +2386,19 @@ def main():
             st.warning("Please select a stock from the dropdown before analyzing.")
         
         # Power Plays Section
-        st.markdown('<div id="powerplays" class="section-spacer"></div>', unsafe_allow_html=True)
-        st.markdown('<div class="section-header">Power Plays<span class="section-emoji">🚀</span></div>', unsafe_allow_html=True)
+        render_section_header("Power Plays", "Top investment opportunities from major indices", "🚀")
         
         display_power_plays()
         
         # Data Sources section
-        st.markdown('<div class="section-header">Data Sources<span class="section-emoji">📊</span></div>', unsafe_allow_html=True)
-        st.markdown("All our financial data comes from trusted, professional sources: **[Yahoo Finance](https://finance.yahoo.com/)**, **[Bloomberg](https://www.bloomberg.com/)**, **[MarketWatch](https://www.marketwatch.com/)**, **[CNBC](https://www.cnbc.com/)**, **[SEC EDGAR Database](https://sec.gov/)**, and **[Morningstar](https://www.morningstar.com/)**.")
+        render_section_header("Data Sources", "Trusted financial data providers", "📊")
+        data_sources_content = """
+        <p>All our financial data comes from trusted, professional sources: <strong><a href="https://finance.yahoo.com/" target="_blank">Yahoo Finance</a></strong>, <strong><a href="https://www.bloomberg.com/" target="_blank">Bloomberg</a></strong>, <strong><a href="https://www.marketwatch.com/" target="_blank">MarketWatch</a></strong>, <strong><a href="https://www.cnbc.com/" target="_blank">CNBC</a></strong>, <strong><a href="https://sec.gov/" target="_blank">SEC EDGAR Database</a></strong>, and <strong><a href="https://www.morningstar.com/" target="_blank">Morningstar</a></strong>.</p>
+        """
+        st.html(render_card_container(data_sources_content, "Source Verification"))
+        
+        # Close main container
+        st.html('</div>')
         
         # Logout button
         logout_button()
