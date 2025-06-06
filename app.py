@@ -75,7 +75,7 @@ def render_header(is_authenticated=False, user_data=None):
     col1, col2 = st.columns([2, 1])
     
     with col1:
-        st.markdown("# Ticker AI")
+        st.markdown("# 📈 TICKER AI")
     
     with col2:
         if is_authenticated and user_data:
@@ -88,7 +88,7 @@ def render_header(is_authenticated=False, user_data=None):
                 user_name = 'User'
             
             st.write(f"Welcome, {user_name}")
-            if st.button("Sign Out", key="header_signout"):
+            if st.button("Sign Out"):
                 logout_user()
                 st.rerun()
 
@@ -939,17 +939,14 @@ def main():
     
     # Route to appropriate interface
     if is_authenticated():
-        # Show main application for authenticated users
-        user_data = get_session_user()
-        render_header(is_authenticated=True, user_data=user_data)
-        
+        # Show main application for authenticated users without header
         # Main content sections
         render_stock_analyzer()
         st.markdown("---")
         render_power_plays()
         
     else:
-        # Show authentication interface for non-authenticated users
+        # Show authentication interface for non-authenticated users without header
         render_auth_page()
 
 if __name__ == "__main__":
