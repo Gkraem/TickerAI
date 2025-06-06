@@ -29,8 +29,8 @@ from modern_auth import modern_auth_page, modern_logout_button
 from admin import is_admin, admin_panel
 from power_plays import display_power_plays
 
-# Import stock database from main app
-from app import POPULAR_STOCKS, search_stocks
+# Import stock database from standalone module
+from stock_data import POPULAR_STOCKS, search_stocks
 
 def load_modern_css():
     """Load modern CSS framework"""
