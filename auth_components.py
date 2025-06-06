@@ -1,7 +1,6 @@
 import streamlit as st
 import base64
 from user_management import register_user, authenticate_user, logout_user, get_total_user_count
-from components import apply_modern_theme, render_auth_container
 
 def render_svg(svg_file):
     with open(svg_file, "r") as f:
