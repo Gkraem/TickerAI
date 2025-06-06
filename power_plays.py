@@ -165,8 +165,9 @@ def analyze_ticker(ticker):
         
         return {
             'ticker': ticker,
-            'company_name': company_name,
+            'name': company_name,
             'buy_rating': buy_rating,
+            'current_price': current_price,
             'rating_components': rating_components,
             'analysis': analysis,
             'metrics': formatted_metrics

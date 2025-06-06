@@ -355,33 +355,54 @@ def render_analysis_results(results):
     with col2:
         st.markdown("**Rating Components:**")
         
+        # Get correct scores from rating breakdown
+        tech_score = 0
+        fund_score = 0
+        sent_score = 0
+        
+        if isinstance(rating_breakdown, dict):
+            # Try different possible keys for the scores
+            for key, value in rating_breakdown.items():
+                if 'technical' in key.lower():
+                    if isinstance(value, dict) and 'score' in value:
+                        tech_score = value['score']
+                    elif isinstance(value, (int, float)):
+                        tech_score = value
+                elif 'fundamental' in key.lower():
+                    if isinstance(value, dict) and 'score' in value:
+                        fund_score = value['score']
+                    elif isinstance(value, (int, float)):
+                        fund_score = value
+                elif 'sentiment' in key.lower():
+                    if isinstance(value, dict) and 'score' in value:
+                        sent_score = value['score']
+                    elif isinstance(value, (int, float)):
+                        sent_score = value
+        
         # Technical Analysis
-        tech_score = rating_breakdown.get('technical_score', 0)
         tech_color = "#10b981" if tech_score >= 7 else "#f59e0b" if tech_score >= 4 else "#ef4444"
         st.markdown(f"""
-        <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 0;">
-            <span>📊 Technical Analysis</span>
-            <span style="color: {tech_color}; font-weight: 600;">{tech_score:.1f}/10</span>
+        <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 0; font-size: 16px;">
+            <span style="font-weight: 500;">📊 Technical Analysis</span>
+            <span style="color: {tech_color}; font-weight: 700; font-size: 18px;">{tech_score:.1f}/10</span>
         </div>
         """, unsafe_allow_html=True)
         
         # Fundamental Analysis
-        fund_score = rating_breakdown.get('fundamental_score', 0)
         fund_color = "#10b981" if fund_score >= 7 else "#f59e0b" if fund_score >= 4 else "#ef4444"
         st.markdown(f"""
-        <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 0;">
-            <span>💰 Fundamental Analysis</span>
-            <span style="color: {fund_color}; font-weight: 600;">{fund_score:.1f}/10</span>
+        <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 0; font-size: 16px;">
+            <span style="font-weight: 500;">💰 Fundamental Analysis</span>
+            <span style="color: {fund_color}; font-weight: 700; font-size: 18px;">{fund_score:.1f}/10</span>
         </div>
         """, unsafe_allow_html=True)
         
         # Market Sentiment
-        sent_score = rating_breakdown.get('sentiment_score', 0)
         sent_color = "#10b981" if sent_score >= 7 else "#f59e0b" if sent_score >= 4 else "#ef4444"
         st.markdown(f"""
-        <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 0;">
-            <span>🏪 Market Sentiment</span>
-            <span style="color: {sent_color}; font-weight: 600;">{sent_score:.1f}/10</span>
+        <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 0; font-size: 16px;">
+            <span style="font-weight: 500;">🏪 Market Sentiment</span>
+            <span style="color: {sent_color}; font-weight: 700; font-size: 18px;">{sent_score:.1f}/10</span>
         </div>
         """, unsafe_allow_html=True)
     
@@ -404,9 +425,10 @@ def render_analysis_results(results):
         
         with col2:
             target_price = info.get('targetMeanPrice')
-            if target_price:
+            if target_price and target_price > 0:
                 upside = ((target_price / current_price) - 1) * 100
-                st.metric("Analyst Target", f"${target_price:.2f}", delta=f"+{upside:.1f}%")
+                upside_text = f"+{upside:.1f}%" if upside > 0 else f"{upside:.1f}%"
+                st.metric("Analyst Target", f"${target_price:.2f}", delta=upside_text)
             else:
                 st.metric("Analyst Target", "N/A")
         
@@ -444,7 +466,7 @@ def render_analysis_results(results):
         with col4:
             dividend_yield = info.get('dividendYield')
             if dividend_yield:
-                st.metric("Dividend", f"{dividend_yield * 100:.2f}%")
+                st.metric("Dividend", f"{dividend_yield:.2f}%")
             else:
                 st.metric("Dividend", "N/A")
     
@@ -456,7 +478,7 @@ def render_analysis_results(results):
 
 def render_detailed_analysis_tabs(ticker, analyzer):
     """Render comprehensive analysis tabs"""
-    tab1, tab2, tab3, tab4 = st.tabs(["📊 Sector Analysis", "📈 Historical Performance", "📰 News", "🔍 Upcoming Earnings"])
+    tab1, tab2, tab3 = st.tabs(["📊 Sector Analysis", "📈 Historical Performance", "🔍 Upcoming Earnings"])
     
     with tab1:
         render_sector_analysis(ticker, analyzer)
@@ -465,9 +487,6 @@ def render_detailed_analysis_tabs(ticker, analyzer):
         render_historical_performance(ticker, analyzer)
     
     with tab3:
-        render_news_section(ticker)
-    
-    with tab4:
         render_earnings_section(ticker, analyzer)
 
 def render_sector_analysis(ticker, analyzer):
@@ -689,29 +708,7 @@ def render_historical_performance(ticker, analyzer):
     except Exception as e:
         st.error(f"Error loading historical data: {str(e)}")
 
-def render_news_section(ticker):
-    """Render news section"""
-    st.markdown("#### 📰 Recent News")
-    
-    # Upcoming Quarterly Earnings
-    st.markdown("##### 📅 Upcoming Quarterly Earnings")
-    st.info("Next earnings date information would require real-time financial data API access")
-    
-    # Previous Earnings Results
-    st.markdown("##### 📊 Previous Earnings Results")
-    st.info("Historical earnings data would require financial data API access")
-    
-    # Recent News
-    st.markdown("##### 📰 Recent News")
-    st.info("Recent news headlines would require news API access")
-    
-    # 52-week performance note
-    st.markdown("##### 📈 52-week Performance")
-    try:
-        # This could be enhanced with actual 52-week data
-        st.success("52-week performance: Market data available through stock analysis")
-    except:
-        st.info("52-week performance data requires market data API")
+
 
 def render_earnings_section(ticker, analyzer):
     """Render earnings section"""
