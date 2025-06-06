@@ -18,143 +18,73 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# Dynamic CSS based on theme
-dark_mode = st.session_state.get('dark_mode', False)
-
-if dark_mode:
-    st.markdown("""
-    <style>
-        .stApp {
-            background-color: #0f172a;
-            color: #e2e8f0;
-        }
-        
-        .main .block-container {
-            padding-top: 2rem;
-            padding-bottom: 2rem;
-            background-color: #0f172a;
-        }
-        
-        .stButton > button {
-            background-color: #3b82f6;
-            color: white;
-            border: none;
-            border-radius: 0.5rem;
-            padding: 0.5rem 1rem;
-            font-weight: 500;
-        }
-        
-        .stButton > button:hover {
-            background-color: #2563eb;
-        }
-        
-        .feature-card {
-            background: #1e293b;
-            border: 1px solid #334155;
-            border-radius: 1rem;
-            padding: 2rem;
-            text-align: center;
-            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.3);
-            margin-bottom: 1rem;
-            color: #e2e8f0;
-        }
-        
-        .feature-card h3 {
-            color: #f1f5f9;
-        }
-        
-        .feature-card p {
-            color: #cbd5e1;
-        }
-        
-        .stTextInput > div > div > input {
-            background-color: #1e293b;
-            border: 1px solid #334155;
-            color: #e2e8f0;
-        }
-        
-        .stSelectbox > div > div > div {
-            background-color: #1e293b;
-            border: 1px solid #334155;
-            color: #e2e8f0;
-        }
-        
-        .stTab {
-            background-color: #1e293b;
-        }
-        
-        h1, h2, h3, h4, h5, h6 {
-            color: #f1f5f9 !important;
-        }
-        
-        p, div, span {
-            color: #e2e8f0;
-        }
-    </style>
-    """, unsafe_allow_html=True)
-else:
-    st.markdown("""
-    <style>
-        .main .block-container {
-            padding-top: 2rem;
-            padding-bottom: 2rem;
-        }
-        
-        .stButton > button {
-            background-color: #3b82f6;
-            color: white;
-            border: none;
-            border-radius: 0.5rem;
-            padding: 0.5rem 1rem;
-            font-weight: 500;
-        }
-        
-        .stButton > button:hover {
-            background-color: #2563eb;
-        }
-        
-        .feature-card {
-            background: white;
-            border: 1px solid #e2e8f0;
-            border-radius: 1rem;
-            padding: 2rem;
-            text-align: center;
-            box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-            margin-bottom: 1rem;
-        }
-    </style>
-    """, unsafe_allow_html=True)
+# Custom CSS for clean styling
+st.markdown("""
+<style>
+    .main .block-container {
+        padding-top: 2rem;
+        padding-bottom: 2rem;
+    }
+    
+    .stButton > button {
+        background-color: #3b82f6;
+        color: white;
+        border: none;
+        border-radius: 0.5rem;
+        padding: 0.5rem 1rem;
+        font-weight: 500;
+    }
+    
+    .stButton > button:hover {
+        background-color: #2563eb;
+    }
+    
+    .metric-card {
+        background: white;
+        border: 1px solid #e2e8f0;
+        border-radius: 0.75rem;
+        padding: 1.5rem;
+        text-align: center;
+        box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    }
+    
+    .feature-card {
+        background: white;
+        border: 1px solid #e2e8f0;
+        border-radius: 1rem;
+        padding: 2rem;
+        text-align: center;
+        box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+        margin-bottom: 1rem;
+    }
+    
+    .analysis-container {
+        background: white;
+        border: 1px solid #e2e8f0;
+        border-radius: 1rem;
+        padding: 2rem;
+        box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+        margin-top: 2rem;
+    }
+</style>
+""", unsafe_allow_html=True)
 
 def render_header(is_authenticated=False, user_data=None):
     """Render simple header"""
-    col1, col2, col3 = st.columns([2, 1, 1])
+    col1, col2 = st.columns([2, 1])
     
     with col1:
         st.markdown("# 📈 TICKER AI")
     
     with col2:
-        # Dark mode toggle
-        if 'dark_mode' not in st.session_state:
-            st.session_state.dark_mode = False
-        
-        if st.button("🌙 Dark" if not st.session_state.dark_mode else "☀️ Light"):
-            st.session_state.dark_mode = not st.session_state.dark_mode
-            st.rerun()
-    
-    with col3:
         if is_authenticated and user_data:
-            # Extract just the name from user data
-            user_name = "Grant Kraemer"  # Default to your name
-            
-            # Try to parse the user data properly
+            # Handle both dictionary and tuple formats
             if isinstance(user_data, dict):
-                user_name = user_data.get('name', 'Grant Kraemer')
+                user_name = user_data.get('name', 'User')
             elif isinstance(user_data, tuple) and len(user_data) > 1:
-                user_name = user_data[1] if user_data[1] else 'Grant Kraemer'
-            elif isinstance(user_data, str):
-                # If it's a string representation of a dict, try to extract name
-                if 'Grant Kraemer' in str(user_data):
-                    user_name = 'Grant Kraemer'
+                user_name = user_data[1]  # Assuming name is second element
+            else:
+                user_name = 'User'
             
             st.write(f"Welcome, {user_name}")
             if st.button("Sign Out"):
@@ -491,10 +421,9 @@ def render_power_plays():
                     progress_bar.progress(progress)
                     status_text.text(f"Analyzing {ticker}... ({current}/{total})")
                 
-                # Get top stocks - pass the callback correctly
+                # Get top stocks
                 top_stocks = get_top_stocks(
                     max_stocks=5,
-                    max_tickers=500,
                     progress_callback=progress_callback,
                     index_name=selected_index
                 )
