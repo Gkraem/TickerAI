@@ -8,6 +8,7 @@ from user_management import is_authenticated, register_user, authenticate_user, 
 from stock_analyzer import StockAnalyzer
 from power_plays import get_top_stocks
 from search_utils import search_stocks
+from ai_analysis import generate_ai_buy_analysis, get_recommendation_color, get_recommendation_text
 import plotly.graph_objects as go
 
 # Page configuration
@@ -405,6 +406,39 @@ def render_analysis_results(results):
             <span style="color: {sent_color}; font-weight: 700; font-size: 18px;">{sent_score:.1f}/10</span>
         </div>
         """, unsafe_allow_html=True)
+    
+    # AI Buy Analysis Section
+    st.markdown("#### 🤖 AI Buy Analysis")
+    
+    try:
+        # Generate AI analysis using the rating components
+        rating_components = {
+            'overall_rating': buy_rating,
+            'technical_score': tech_score,
+            'fundamental_score': fund_score,
+            'sentiment_score': sent_score
+        }
+        
+        with st.spinner("Generating AI analysis..."):
+            ai_analysis = generate_ai_buy_analysis(ticker, analyzer, rating_components)
+        
+        # Get recommendation details
+        recommendation = get_recommendation_text(buy_rating)
+        rec_color = get_recommendation_color(buy_rating)
+        
+        # Display recommendation badge and analysis
+        st.markdown(f"""
+        <div style="padding: 20px; background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%); border-radius: 12px; border-left: 4px solid {'#10b981' if recommendation == 'BUY' else '#f59e0b' if recommendation == 'HOLD' else '#ef4444'}; margin: 16px 0;">
+            <div style="display: flex; align-items: center; margin-bottom: 12px;">
+                <span style="font-size: 20px; margin-right: 8px;">{rec_color}</span>
+                <span style="font-size: 18px; font-weight: 700; color: {'#10b981' if recommendation == 'BUY' else '#f59e0b' if recommendation == 'HOLD' else '#ef4444'};">{recommendation}</span>
+            </div>
+            <p style="margin: 0; font-size: 16px; line-height: 1.6; color: #374151;">{ai_analysis}</p>
+        </div>
+        """, unsafe_allow_html=True)
+        
+    except Exception as e:
+        st.error(f"Unable to generate AI analysis. Please check your OpenAI API key configuration.")
     
     # Key Financials Section
     st.markdown("#### 💰 Key Financials")
