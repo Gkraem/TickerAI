@@ -244,7 +244,7 @@ def render_stock_analyzer():
     
     with col2:
         analyze_clicked = st.button("Analyze Stock", type="primary", use_container_width=True)
-        if st.session_state.analysis_results and st.button("Reset Search", use_container_width=True):
+        if st.button("Reset Search", use_container_width=True):
             st.session_state.selected_ticker = None
             st.session_state.selected_stock_name = None
             st.session_state.analysis_results = None
@@ -427,8 +427,8 @@ def render_analysis_results(results):
             target_price = info.get('targetMeanPrice')
             if target_price and target_price > 0:
                 upside = ((target_price / current_price) - 1) * 100
-                upside_text = f"+{upside:.1f}%" if upside > 0 else f"{upside:.1f}%"
-                st.metric("Analyst Target", f"${target_price:.2f}", delta=upside_text)
+                upside_text = f"({upside:+.1f}% upside)" if upside > 0 else f"({upside:.1f}% downside)"
+                st.metric("Analyst Target", f"${target_price:.2f} {upside_text}")
             else:
                 st.metric("Analyst Target", "N/A")
         
@@ -800,7 +800,7 @@ def render_power_plays():
     
     with col2:
         scan_clicked = st.button("Scan Index", type="primary", use_container_width=True)
-        if st.session_state.power_plays_results and st.button("Reset", use_container_width=True):
+        if st.button("Reset", use_container_width=True):
             st.session_state.power_plays_results = None
             st.rerun()
     
