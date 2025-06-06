@@ -75,7 +75,7 @@ def render_header(is_authenticated=False, user_data=None):
     col1, col2 = st.columns([2, 1])
     
     with col1:
-        st.markdown("# 📈 TICKER AI")
+        st.markdown("# Ticker AI")
     
     with col2:
         if is_authenticated and user_data:
@@ -88,7 +88,7 @@ def render_header(is_authenticated=False, user_data=None):
                 user_name = 'User'
             
             st.write(f"Welcome, {user_name}")
-            if st.button("Sign Out"):
+            if st.button("Sign Out", key="header_signout"):
                 logout_user()
                 st.rerun()
 
