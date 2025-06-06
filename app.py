@@ -18,6 +18,7 @@ from user_management import is_authenticated, get_session_user
 from auth_components import auth_page, logout_button
 from admin import is_admin, admin_panel
 from power_plays import display_power_plays
+from components import apply_modern_theme, render_navigation_header, render_hero_section, render_section_header, render_buy_rating_modern, render_card_container
 
 # Comprehensive stock database with major companies from all indices
 POPULAR_STOCKS = [
@@ -299,6 +300,23 @@ POPULAR_STOCKS = [
     {"ticker": "FLR", "name": "Fluor Corporation"},
     {"ticker": "JCI", "name": "Johnson Controls International"},
     {"ticker": "TYL", "name": "Tyler Technologies Inc."},
+    
+    # Industrials Sector
+    {"ticker": "RSG", "name": "Republic Services Inc."},
+    {"ticker": "WM", "name": "Waste Management Inc."},
+    {"ticker": "WCN", "name": "Waste Connections Inc."},
+    {"ticker": "ROP", "name": "Roper Technologies Inc."},
+    {"ticker": "ITW", "name": "Illinois Tool Works Inc."},
+    {"ticker": "DHI", "name": "D.R. Horton Inc."},
+    {"ticker": "LEN", "name": "Lennar Corporation"},
+    {"ticker": "PHM", "name": "PulteGroup Inc."},
+    {"ticker": "NVR", "name": "NVR Inc."},
+    {"ticker": "TOL", "name": "Toll Brothers Inc."},
+    {"ticker": "BLD", "name": "TopBuild Corp."},
+    {"ticker": "PWR", "name": "Quanta Services Inc."},
+    {"ticker": "EME", "name": "EMCOR Group Inc."},
+    {"ticker": "MLM", "name": "Martin Marietta Materials Inc."},
+    {"ticker": "VMC", "name": "Vulcan Materials Company"},
     
     # Financial Services Expansion
     {"ticker": "AXP", "name": "American Express Company"},
