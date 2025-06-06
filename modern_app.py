@@ -9,7 +9,7 @@ from modern_auth import render_modern_header, load_modern_css
 from user_management import is_authenticated, get_session_user, logout_user
 from stock_analyzer import StockAnalyzer
 from power_plays import get_top_stocks
-from app import search_stocks
+from app_old_backup import search_stocks
 
 def render_modern_stock_analyzer():
     """Render modern Stock Analyzer section"""
